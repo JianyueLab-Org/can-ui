@@ -38,7 +38,8 @@ change of import path. Migrating a site is:
 1. delete its `src/components/ui/` and its `src/components/icons.ts`;
 2. replace its `src/styles/globals.css` with `@import "@jianyuelab-org/can-ui/styles";` plus whatever is genuinely
    local (can-radar's Leaflet block, a page-specific rule);
-3. rewrite the imports — `@/components/ui/BaseButton.vue` → `can-ui`, dropping the `Base` prefix.
+3. rewrite the imports — `@/components/ui/BaseButton.vue` → `@jianyuelab-org/can-ui`, dropping
+   the `Base` prefix.
 
 Nothing else should have to change. If something does, that is a bug in this repo.
 
@@ -51,7 +52,7 @@ src/
   composables/ useOverlay · usePress · usePreferences · useTheme · haptics
   components/  31 Vue components + ThemeScript.astro
   assets/logo/ the identity — 12 official files + 6 generated adaptive ones
-  icons.ts     the union of all six sites' icon tables — 62 glyphs
+  icons.ts     the union of all six sites' icon tables, plus what the chrome needed
   i18n.ts      createTranslator + the chrome's own string keys
   nav.ts       NavItem / NavSecondary / Workspace — the shell's data shapes
   demo/        the gallery's islands (not exported)

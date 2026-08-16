@@ -13,8 +13,7 @@ bun run dev      # the gallery on http://localhost:4327
 ```
 
 The gallery **is** the documentation: `/` is every component, `/motion` is the spring engine with
-its two parameters on sliders, `/tokens` is the palette, the type scale, the materials and all 62
-icons.
+its two parameters on sliders, `/tokens` is the palette, the type scale, the materials and every icon.
 
 ## Using it
 
