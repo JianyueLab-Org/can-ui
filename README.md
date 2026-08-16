@@ -18,17 +18,31 @@ icons.
 
 ## Using it
 
-```bash
-bun add can-ui@github:JianyueLab-Org/can-ui
+The package lives on **GitHub Packages**, whose npm registry requires a token
+**even for a public package** — that is GitHub's rule, not ours, and it is the one
+sharp edge of this distribution choice. Each consuming site needs an `.npmrc`:
+
+```ini
+# .npmrc — commit this; it names a registry, not a credential.
+@jianyuelab-org:registry=https://npm.pkg.github.com
+//npm.pkg.github.com/:_authToken=${GITHUB_TOKEN}
 ```
 
-Three lines in the consuming site.
+`${GITHUB_TOKEN}` is read from the environment at install time, so the file itself
+carries no secret. Locally that is a personal token with `read:packages`; in CI it is
+the workflow's own `secrets.GITHUB_TOKEN`, which already has it.
+
+```bash
+bun add @jianyuelab-org/can-ui
+```
+
+Then four lines in the consuming site.
 
 **1. The stylesheet**, once, replacing the site's own `globals.css`:
 
 ```css
 /* src/styles/globals.css */
-@import "can-ui/styles";
+@import "@jianyuelab-org/can-ui/styles";
 
 /* anything genuinely local goes after — can-radar's Leaflet block, a page rule */
 ```
@@ -38,7 +52,7 @@ Three lines in the consuming site.
 ```js
 // astro.config.mjs
 export default defineConfig({
-  vite: { ssr: { noExternal: ["can-ui"] } },
+  vite: { ssr: { noExternal: ["@jianyuelab-org/can-ui"] } },
 });
 ```
 
@@ -48,7 +62,7 @@ Without it, SSR tries to `require` a `.vue` file and the first render 500s.
 
 ```astro
 ---
-import ThemeScript from "can-ui/components/ThemeScript.astro";
+import ThemeScript from "@jianyuelab-org/can-ui/components/ThemeScript.astro";
 ---
 
 <head>
@@ -60,7 +74,7 @@ Then:
 
 ```vue
 <script setup lang="ts">
-import { Button, Card, Sheet, StatCard } from "can-ui";
+import { Button, Card, Sheet, StatCard } from "@jianyuelab-org/can-ui";
 </script>
 ```
 
@@ -98,11 +112,13 @@ rewrite rather than a redesign:
 
 1. Delete `src/components/ui/` and `src/components/icons.ts`.
 2. Replace `src/styles/globals.css` with the import above plus whatever is genuinely local.
-3. `@/components/ui/BaseButton.vue` → `can-ui`, dropping the `Base` prefix.
-4. Add the `noExternal` line.
+3. `@/components/ui/BaseButton.vue` → `@jianyuelab-org/can-ui`, dropping the `Base` prefix.
+4. Add the `.npmrc` and the `noExternal` line.
 
-`AppShell`, `SidebarNav` and `ThemeLangControls` stay in their sites for now — they are wired to
-per-site nav data and locale dictionaries. See [AGENTS.md](AGENTS.md).
+The chrome goes too. `AppShell` now takes its data as props and emits `@signout` instead of
+calling can-api, so the site keeps the one line it always owned — the sign-out request and where
+to send the member afterwards — and drops the other five hundred. `AppRail` stays in can-efb: it
+exists in one site, so there is nothing to de-duplicate. See [AGENTS.md](AGENTS.md).
 
 ## The design language, in five lines
 

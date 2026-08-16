@@ -36,7 +36,7 @@ a design system nobody adopts, because adopting it becomes a rewrite of every pa
 change of import path. Migrating a site is:
 
 1. delete its `src/components/ui/` and its `src/components/icons.ts`;
-2. replace its `src/styles/globals.css` with `@import "can-ui/styles";` plus whatever is genuinely
+2. replace its `src/styles/globals.css` with `@import "@jianyuelab-org/can-ui/styles";` plus whatever is genuinely
    local (can-radar's Leaflet block, a page-specific rule);
 3. rewrite the imports — `@/components/ui/BaseButton.vue` → `can-ui`, dropping the `Base` prefix.
 
@@ -183,7 +183,7 @@ second compiler in the way. The cost is that Vite must be told not to externalis
 ```js
 // astro.config.mjs in the consuming site
 export default defineConfig({
-  vite: { ssr: { noExternal: ["can-ui"] } },
+  vite: { ssr: { noExternal: ["@jianyuelab-org/can-ui"] } },
 });
 ```
 

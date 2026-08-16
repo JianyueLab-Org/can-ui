@@ -1,0 +1,46 @@
+name: Publish
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+# packages: write 是这份工作流存在的理由。GitHub Packages 的发布权限可以由
+# Actions 自带的 GITHUB_TOKEN 提供，所以没有人需要在本地持有一个带
+# write:packages 的长期令牌 —— 那种令牌一旦泄漏，能改的是整个组织的包。
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      - run: bun install --frozen-lockfile
+
+      # 发之前再跑一遍门。check.yml 已经在 push 上跑过同样的命令，但那是在
+      # 「某个提交」上跑的，而这里发的是「某个 tag」—— 两者可以不是同一个东西
+      # （tag 打错、release 从旧分支切出）。发布是不可撤销的，多花九十秒。
+      - run: bun run lint
+      - run: bun run build
+
+      # 用 npm 而不是 bun 发布：GitHub Packages 的鉴权走的是 .npmrc 里的
+      # _authToken，setup-node 的 registry-url + scope 会把那个文件正确写出来，
+      # 而 bun publish 对这条路径的支持还不稳。发布不是该赌工具链的地方。
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: "@jianyuelab-org"
+
+      # --provenance 需要 id-token: write，而这个包的 scope 与仓库 owner 同名
+      # 已经足够溯源，所以不开 —— 少一个权限就少一个可以被滥用的权限。
+      - run: npm publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
