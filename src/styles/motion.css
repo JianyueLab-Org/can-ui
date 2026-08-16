@@ -38,7 +38,8 @@
    suppress the cross-fade underneath it — otherwise the two run at once and
    the wipe is invisible behind a fade. */
 html.theme-transitioning::view-transition-old(root),
-html.theme-transitioning::view-transition-new(root) {
+html.theme-transitioning::view-transition-new(root),
+html.theme-transitioning::view-transition-group(root) {
   animation: none;
 }
 html.theme-transitioning::view-transition-old(root) {
@@ -59,7 +60,16 @@ html.theme-transitioning::view-transition-new(root) {
    0.5s later the real, correct colours appear in one step. The result is a
    wipe that looks like it did nothing, followed by a pop.
 
-   The transition is not needed here anyway: the wipe *is* the easing. */
+   The transition is not needed here anyway: the wipe *is* the easing.
+
+   `::view-transition-group(root)` is silenced for a different reason. Its
+   default animation morphs the group between the old and new geometry over
+   0.25s; here the two snapshots are the same size, so it animates nothing —
+   but it is still an animation, and a view transition ends when its animations
+   end. Leaving a 0.25s no-op alongside a 0.48s wipe means the transition's
+   lifetime is decided by whichever the engine notices last. Removing it leaves
+   exactly one animation in the tree: ours. */
+html.theme-transitioning,
 html.theme-transitioning body,
 html.theme-transitioning body * {
   transition: none !important;

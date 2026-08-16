@@ -229,6 +229,12 @@ export function setThemeMode(mode: ThemeMode, event?: MouseEvent): boolean {
           duration: 480,
           easing: "cubic-bezier(0.22, 1, 0.36, 1)",
           pseudoElement: "::view-transition-new(root)",
+          // Without `forwards` the clip reverts to its base value the instant
+          // the animation ends, and the pseudo-element is not torn down in the
+          // same frame — so the last frame of a 480ms wipe can flash the
+          // unclipped state. Holding it costs nothing: the element is removed
+          // immediately afterwards.
+          fill: "forwards",
         },
       );
     })

@@ -284,8 +284,26 @@
    Element defaults
    =========================================================================== */
 
+/* The background is declared on BOTH html and body, and that is not
+   redundancy — it is what makes the theme wipe cover the page.
+
+   CSS propagates the body's background to the *canvas* whenever the root
+   element's own background is transparent. The canvas is painted by the
+   viewport, outside the element tree — and a view transition snapshots the
+   root element's *subtree*, so anything that reached the canvas is not in the
+   snapshot. The result is a theme change where the background flips instantly
+   across the whole viewport while only the content reveals in the circle:
+   the wipe appears to cover a fraction of the page, because the largest
+   surface on screen was never part of it.
+
+   Giving html a background stops the propagation. body then paints its own,
+   inside the snapshot, and the whole page wipes together. html's colour still
+   reaches the canvas — that is what shows in the overscroll rubber-band, so it
+   has to match. */
 html {
   scroll-behavior: smooth;
+  background-color: var(--background);
+  transition: background-color var(--duration-slow) var(--ease-out-quint);
 }
 
 /* Tell the browser which way the theme swings so the chrome it paints itself
@@ -300,6 +318,10 @@ html.dark {
 }
 
 body {
+  /* Covers the viewport so the snapshot has a background everywhere. A short
+     page whose body stops halfway would show the canvas below it, and the
+     canvas is the one surface that cannot be part of the wipe. */
+  min-height: 100dvh;
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-sans);
