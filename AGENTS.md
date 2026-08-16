@@ -119,6 +119,46 @@ reads as a light leak.
 Handled in `motion.css` for the static cases and read by `usePreferences` where the decision is
 structural.
 
+### The theme has three modes, and the third one is the default
+
+`light`, `dark`, `system` — and `system` is stored as **the absence of a stored
+value** under the `theme` key. That is not a shortcut; it is the contract, and both
+`ThemeScript.astro` (which runs before first paint, inline, with no access to this
+module) and `useTheme` implement it independently. Anything that is not exactly
+`"light"` or `"dark"` means follow the system, so a stray value fails safe.
+
+A two-state toggle has a trapdoor in it: the first tap writes a preference that can
+never be taken back, and the member is pinned to one appearance while their phone
+goes on switching at sunset around them. Every platform this interface imitates
+offers Light / Dark / Automatic, and offers Automatic because it is what most people
+want. `ThemeToggle` and `ThemeLangControls` therefore **cycle** light → dark →
+system: the explicit choices come first so the common tap still flips the appearance
+at once, and `system` sits where somebody looking for it reaches it by pressing again.
+
+**`mode` and `isDark` are different questions.** `mode` is the member's choice;
+`isDark` is what is on screen, read off the `dark` class. In `system` mode the choice
+does not change at sunset but the rendering does. Render from `isDark` (which logo,
+which icon); show selection from `mode`.
+
+Everything is installed once per document: one MutationObserver on the class, one
+`prefers-color-scheme` listener, one `storage` listener. Before this, every component
+that cared — a Logo, a ThemeToggle, a ThemeLangControls — built its own observer on
+the same attribute.
+
+Two failures that are invisible until you look for them, both fixed here:
+
+- **The wipe used to reveal the old palette.** A view transition snapshots the new
+  state in the same frame as the DOM change, and `body`'s colour transition has not
+  moved at that instant — so the snapshot was painted in the _old_ colours, the wipe
+  showed nothing changing, and the real palette popped in when the pseudo-elements
+  were torn down. `html.theme-transitioning` now suppresses that transition; the wipe
+  _is_ the easing.
+- **Reduced motion used to get a hard flash.** The blanket rule collapses every
+  transition, so with the wipe skipped the whole viewport changed brightness in one
+  frame — which is one of the specific things that preference asks us to stop doing.
+  A colour cross-fade is not vestibular motion, so `body` keeps a 200ms one inside the
+  reduced-motion block.
+
 ### Mobile is a pointer question, not a width question
 
 Every mobile rule in this system is gated on **`pointer: coarse`** — the primary input being a

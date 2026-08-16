@@ -96,8 +96,13 @@ export const CHROME_MESSAGES: Record<string, unknown> = {
     noResults: "Nothing matches that.",
   },
   theme: {
-    toDark: "Switch to dark mode",
-    toLight: "Switch to light mode",
+    label: "Appearance",
+    light: "Light",
+    dark: "Dark",
+    // Named for what it does, not for what it is: "System" is jargon to
+    // somebody who has never opened a settings app, and the whole promise of
+    // the mode is that it follows something.
+    system: "Follow system",
   },
   language: {
     label: "Select language",

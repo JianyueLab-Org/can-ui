@@ -8,6 +8,12 @@
  * brightness jump on every single navigation. That flash is the entire reason
  * this is inline and blocking rather than part of the bundle.
  *
+ * It reads the same three-mode contract as `useTheme`: `light` and `dark` are
+ * explicit choices, and **anything else — including no stored value at all —
+ * means follow the system.** Storing "follow the system" as the absence of a
+ * key is what makes returning to it a `removeItem` rather than a third string
+ * that both this script and the composable would have to agree about.
+ *
  * `color-scheme` is set in the same breath so the chrome the browser paints
  * itself — form controls, the canvas between navigations, scrollbar gutters —
  * swaps with the page rather than a frame later.
@@ -20,7 +26,8 @@
       const stored = localStorage.getItem("theme");
       const dark =
         stored === "dark" ||
-        (!stored && matchMedia("(prefers-color-scheme: dark)").matches);
+        (stored !== "light" &&
+          matchMedia("(prefers-color-scheme: dark)").matches);
       document.documentElement.classList.toggle("dark", dark);
       document.documentElement.style.colorScheme = dark ? "dark" : "light";
     } catch {

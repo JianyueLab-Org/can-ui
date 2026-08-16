@@ -2,6 +2,7 @@
 import GalleryLayout from "../layouts/GalleryLayout.astro";
 import { ICON_NAMES } from "../icons";
 import Icon from "../components/Icon.vue";
+import ThemeDemo from "../demo/ThemeDemo.vue";
 
 const brand = [
   "50",
@@ -51,6 +52,17 @@ const type = [
   </header>
 
   <div class="space-y-14">
+    <section>
+      <h2 class="text-title-2 mb-2 border-b border-subtle pb-3 text-ink">
+        外观
+      </h2>
+      <p class="text-caption mb-6 text-muted">
+        三档，不是两档。两态开关有个暗门：点一次就写死一个再也取不回的偏好——
+        试过一次深色的人从此被钉住，而手机还在日落自己切。
+      </p>
+      <ThemeDemo client:load />
+    </section>
+
     <section>
       <h2 class="text-title-2 mb-5 border-b border-subtle pb-3 text-ink">
         品牌色阶 · airwaysn

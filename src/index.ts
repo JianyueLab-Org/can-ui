@@ -69,12 +69,20 @@ export {
   type LanguageOption,
 } from "./i18n";
 
-/* Theme */
+/* Theme — three modes: light, dark, system (the default). */
 export {
+  useTheme,
   useIsDark,
+  useThemeMode,
+  setThemeMode,
+  cycleTheme,
+  resolveMode,
   applyTheme,
   storeTheme,
   toggleTheme,
+  THEME_MODES,
+  THEME_ICONS,
+  type ThemeMode,
 } from "./composables/useTheme";
 
 /* Motion */

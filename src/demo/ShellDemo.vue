@@ -61,7 +61,12 @@ const messages = {
     placeholder: "跳转到…",
     noResults: "没有匹配的项。",
   },
-  theme: { toDark: "切换到深色", toLight: "切换到浅色" },
+  theme: {
+    label: "外观",
+    light: "浅色",
+    dark: "深色",
+    system: "跟随系统",
+  },
   language: { label: "选择语言" },
 };
 

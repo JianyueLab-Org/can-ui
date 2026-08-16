@@ -48,6 +48,23 @@ html.theme-transitioning::view-transition-new(root) {
   z-index: 9999;
 }
 
+/* `body` carries a colour transition (see base.css) so that a theme change
+   without a wipe eases instead of snapping. During a wipe it has to be off,
+   and the reason is subtle enough to be worth writing down.
+
+   A view transition snapshots the *new* state immediately after the DOM
+   change, in the same frame. A CSS transition has not moved at that instant —
+   its computed value is still the old colour. So the snapshot the wipe reveals
+   is painted in the OLD palette, and when the pseudo-elements are torn down
+   0.5s later the real, correct colours appear in one step. The result is a
+   wipe that looks like it did nothing, followed by a pop.
+
+   The transition is not needed here anyway: the wipe *is* the easing. */
+html.theme-transitioning body,
+html.theme-transitioning body * {
+  transition: none !important;
+}
+
 /* ── Entrances ─────────────────────────────────────────────────────────── */
 
 @keyframes fade-up {
@@ -279,6 +296,21 @@ html.theme-transitioning::view-transition-new(root) {
   ::view-transition-old(*),
   ::view-transition-new(*) {
     animation: none !important;
+  }
+
+  /* …but the theme change is put back, deliberately.
+   *
+   * The blanket rule above collapses every transition to nothing, which for a
+   * light↔dark swap means the whole viewport changes brightness in a single
+   * frame. That is precisely one of the things this preference asks us to stop
+   * doing — the guidance is to *ease* dark↔light changes, not to remove the
+   * easing. And a colour cross-fade is not vestibular motion: nothing moves,
+   * nothing scales, nothing implies travel through space.
+   *
+   * So `body` keeps its colour transition, shortened. The wipe is gone (that
+   * one is spatial and belongs to the preference), the flash is gone with it. */
+  body {
+    transition-duration: 200ms !important;
   }
 }
 

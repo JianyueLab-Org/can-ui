@@ -19,7 +19,7 @@
  */
 import { computed, onBeforeUnmount, onMounted, ref } from "vue";
 import Icon from "./Icon.vue";
-import { useIsDark, toggleTheme } from "../composables/useTheme";
+import { useTheme, THEME_ICONS } from "../composables/useTheme";
 import {
   createTranslator,
   CHROME_MESSAGES,
@@ -69,7 +69,11 @@ const emit = defineEmits<{
 }>();
 
 const t = createTranslator(props.messages, CHROME_MESSAGES);
-const isDark = useIsDark();
+const { mode, cycle } = useTheme();
+
+const themeLabel = computed(
+  () => `${t("theme.label")}: ${t(`theme.${mode.value}`)}`,
+);
 
 const offered = computed(() => props.options ?? LANGUAGES);
 const current = computed(
@@ -80,8 +84,8 @@ const mounted = ref(false);
 const menuOpen = ref(false);
 const root = ref<HTMLElement | null>(null);
 
-function onToggleTheme(event: MouseEvent) {
-  toggleTheme(event, isDark.value);
+function onCycleTheme(event: MouseEvent) {
+  cycle(event);
 }
 
 function changeLanguage(next: string) {
@@ -119,11 +123,7 @@ const buttonClass = "icon-button";
 </script>
 
 <template>
-  <!-- Rendering waits for mount so the theme icon can never disagree with the
-       class the no-flash script already applied — a sun on a dark page for one
-       frame is small and unmistakably wrong.
-
-       `relative` belongs to the inline variant *only*. Listing it
+  <!-- `relative` belongs to the inline variant *only*. Listing it
        unconditionally alongside the floating variant's `fixed` puts both
        position utilities on one element, and Tailwind emits `.relative` after
        `.fixed`, so `relative` wins: the "floating" control lands in normal
@@ -132,7 +132,6 @@ const buttonClass = "icon-button";
        the full-height artwork. Either value establishes a containing block, so
        the menu below still anchors correctly. -->
   <div
-    v-if="mounted"
     ref="root"
     :class="[
       'flex items-center',
@@ -144,13 +143,21 @@ const buttonClass = "icon-button";
     <button
       type="button"
       :class="buttonClass"
-      :aria-label="isDark ? t('theme.toLight') : t('theme.toDark')"
-      :title="isDark ? t('theme.toLight') : t('theme.toDark')"
-      :aria-pressed="isDark"
-      @click="onToggleTheme"
+      :aria-label="themeLabel"
+      :title="themeLabel"
+      @click="onCycleTheme"
     >
-      <Icon :name="isDark ? 'sun' : 'moon'" class="size-5" />
+      <!-- Only the glyph waits for hydration, not the control. The server
+           cannot read localStorage, so any icon it renders is a guess that is
+           wrong for everybody who has chosen anything — but hiding the whole
+           control until mount, which is what this used to do, costs a layout
+           shift in a sticky header instead. The box is a fixed square. -->
+      <Icon v-if="mounted" :name="THEME_ICONS[mode]" class="size-5" />
     </button>
+
+    <span class="sr-only" role="status" aria-live="polite">
+      {{ mounted ? themeLabel : "" }}
+    </span>
 
     <button
       v-if="languages"
