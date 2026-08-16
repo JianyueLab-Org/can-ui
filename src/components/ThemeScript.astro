@@ -1,0 +1,31 @@
+---
+/**
+ * The no-flash theme script.
+ *
+ * Must be rendered in <head>, before any content. It runs synchronously and
+ * sets `.dark` on <html> before the first paint — an async or deferred script
+ * would let the page paint light and then snap to dark, which is a full-screen
+ * brightness jump on every single navigation. That flash is the entire reason
+ * this is inline and blocking rather than part of the bundle.
+ *
+ * `color-scheme` is set in the same breath so the chrome the browser paints
+ * itself — form controls, the canvas between navigations, scrollbar gutters —
+ * swaps with the page rather than a frame later.
+ */
+---
+
+<script is:inline>
+  (() => {
+    try {
+      const stored = localStorage.getItem("theme");
+      const dark =
+        stored === "dark" ||
+        (!stored && matchMedia("(prefers-color-scheme: dark)").matches);
+      document.documentElement.classList.toggle("dark", dark);
+      document.documentElement.style.colorScheme = dark ? "dark" : "light";
+    } catch {
+      // Private mode can throw on localStorage. Light is the safe default —
+      // never let a storage failure take the page down with it.
+    }
+  })();
+</script>

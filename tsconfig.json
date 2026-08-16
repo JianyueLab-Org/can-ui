@@ -1,0 +1,15 @@
+{
+  "extends": "astro/tsconfigs/strict",
+  "include": [".astro/types.d.ts", "**/*"],
+  "exclude": ["dist"],
+  "compilerOptions": {
+    "jsx": "preserve",
+    "jsxImportSource": "vue",
+    // `astro check` reads this config, and it walks src/ — including
+    // src/motion/spring.test.ts, which imports `bun:test`. Both entries are
+    // needed: naming any at all switches off the automatic inclusion of every
+    // @types package, so dropping `node` here would take `process` and friends
+    // out from under the build scripts.
+    "types": ["bun", "node"]
+  }
+}

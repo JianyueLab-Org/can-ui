@@ -1,0 +1,213 @@
+---
+import GalleryLayout from "../layouts/GalleryLayout.astro";
+import { ICON_NAMES } from "../icons";
+import Icon from "../components/Icon.vue";
+
+const brand = [
+  "50",
+  "100",
+  "200",
+  "300",
+  "400",
+  "500",
+  "600",
+  "700",
+  "800",
+  "900",
+];
+
+const surfaces = [
+  ["bg-surface", "--surface", "页面底色"],
+  ["bg-surface-raised", "--surface-raised", "卡片、面板"],
+  ["bg-surface-sunken", "--surface-sunken", "凹陷区、表头"],
+  ["bg-surface-overlay", "--surface-overlay", "浮层实体面"],
+];
+
+const statuses = ["success", "danger", "warning", "info", "neutral"];
+
+const type = [
+  ["text-display", "Display", "clamp 2→3.25rem · 字距 -0.022em · 行高 1.05"],
+  ["text-title-1", "Title 1", "clamp 1.5→1.875rem · -0.018em · 1.15"],
+  ["text-title-2", "Title 2", "1.25rem · -0.012em · 1.3"],
+  ["text-title-3", "Title 3", "1rem · -0.012em · 1.3"],
+  ["text-body", "Body 正文", "0.9375rem · 0em · 1.55"],
+  ["text-caption", "Caption 说明", "0.8125rem · +0.006em · 1.4"],
+];
+---
+
+<GalleryLayout
+  title="令牌"
+  description="can-ui 的颜色、字体、圆角、材质与阴影令牌。"
+>
+  <header class="mb-10">
+    <p class="text-eyebrow mb-2 text-airwaysn">Tokens</p>
+    <h1 class="text-display text-ink">设计令牌</h1>
+    <p class="mt-4 max-w-2xl text-muted">
+      这些名字与 can-web 现有的 <code class="text-ink">globals.css</code> 完全一致。
+      迁移一个站点＝删掉它的 globals.css，改为 <code class="text-ink"
+        >@import "can-ui/styles"</code
+      >。
+    </p>
+  </header>
+
+  <div class="space-y-14">
+    <section>
+      <h2 class="text-title-2 mb-5 border-b border-subtle pb-3 text-ink">
+        品牌色阶 · airwaysn
+      </h2>
+      <div class="grid grid-cols-5 gap-1.5 sm:grid-cols-10 sm:gap-2">
+        {
+          brand.map((step) => (
+            <div>
+              <div
+                class="h-14 rounded-control border border-subtle"
+                style={`background-color: var(--color-airwaysn-${step})`}
+              />
+              <p class="text-caption mt-1.5 text-center text-muted">{step}</p>
+            </div>
+          ))
+        }
+      </div>
+      <p class="text-caption mt-3 text-muted">
+        品牌 UI 一律用这条色阶，不要借 Tailwind 的 blue /
+        indigo——它们是另一个色相， 同页出现时一眼就看得出来。
+      </p>
+    </section>
+
+    <section>
+      <h2 class="text-title-2 mb-5 border-b border-subtle pb-3 text-ink">
+        表面与文字
+      </h2>
+      <div class="grid gap-3 sm:grid-cols-2">
+        {
+          surfaces.map(([cls, token, note]) => (
+            <div class="flex items-center gap-4 rounded-card border border-subtle p-3">
+              <span
+                class={`size-12 shrink-0 rounded-control border border-subtle ${cls}`}
+              />
+              <div class="min-w-0">
+                <p class="font-mono text-xs text-ink">{token}</p>
+                <p class="text-caption text-muted">{note}</p>
+              </div>
+            </div>
+          ))
+        }
+      </div>
+      <div class="mt-4 space-y-1 rounded-card border border-subtle p-4">
+        <p class="text-ink">text-ink — 主要文字</p>
+        <p class="text-muted">text-muted — 次要文字</p>
+        <p class="text-faint">text-faint — 三级文字</p>
+        <p class="text-caption mt-2 text-muted">
+          三者随主题自动互换，不需要写 <code>dark:</code> 变体。
+        </p>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-title-2 mb-5 border-b border-subtle pb-3 text-ink">
+        语义状态
+      </h2>
+      <div class="flex flex-wrap gap-2">
+        {statuses.map((s) => <span class={`badge badge-${s}`}>{s}</span>)}
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-title-2 mb-5 border-b border-subtle pb-3 text-ink">
+        字阶
+      </h2>
+      <p class="text-caption mb-5 text-muted">
+        字距随字号变——大字负字距，小字略正。一个固定的 letter-spacing
+        一定在某一端是错的。
+      </p>
+      <div class="space-y-5">
+        {
+          type.map(([cls, sample, note]) => (
+            <div class="border-b border-subtle pb-4 last:border-0">
+              <p class={`${cls} text-ink`}>{sample}</p>
+              <p class="text-caption mt-1.5 font-mono text-faint">
+                .{cls} — {note}
+              </p>
+            </div>
+          ))
+        }
+        <div>
+          <p class="text-eyebrow text-airwaysn">EYEBROW 小标签</p>
+          <p class="text-caption mt-1.5 font-mono text-faint">
+            .text-eyebrow — 0.6875rem · +0.08em · 大写
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-title-2 mb-5 border-b border-subtle pb-3 text-ink">
+        圆角与阴影
+      </h2>
+      <div class="grid gap-4 sm:grid-cols-4">
+        {
+          [
+            ["rounded-control", "--radius-control", "shadow-card"],
+            ["rounded-card", "--radius-card", "shadow-card"],
+            ["rounded-inset", "--radius-inset", "shadow-card-hover"],
+            ["rounded-sheet", "--radius-sheet", "shadow-sheet"],
+          ].map(([name, token, shadow]) => (
+            <div
+              class="flex h-24 items-center justify-center bg-surface-raised text-center"
+              style={`border-radius: var(${token}); box-shadow: var(--${shadow});`}
+            >
+              <span class="text-caption text-muted">{name}</span>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-title-2 mb-5 border-b border-subtle pb-3 text-ink">
+        材质
+      </h2>
+      <p class="text-caption mb-4 text-muted">
+        分量即层级：重的分隔结构区，轻的托住可交互元素。
+        <strong class="text-ink">绝不要把一层材质叠在另一层材质上</strong
+        >——两次模糊叠起来是一团糊，上面的字就没有底了。
+      </p>
+      <div class="surface-grid rounded-card border border-subtle p-4">
+        <div class="grid gap-3 sm:grid-cols-3">
+          <div class="material-thin material-edge-top rounded-card p-5">
+            <p class="vibrant text-sm">material-thin</p>
+            <p class="vibrant-secondary text-caption">悬浮工具栏、chip</p>
+          </div>
+          <div class="material-regular material-edge-top rounded-card p-5">
+            <p class="vibrant text-sm">material-regular</p>
+            <p class="vibrant-secondary text-caption">popover、菜单</p>
+          </div>
+          <div class="material-thick material-edge-top rounded-card p-5">
+            <p class="vibrant text-sm">material-thick</p>
+            <p class="vibrant-secondary text-caption">sheet、侧栏</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2 class="text-title-2 mb-5 border-b border-subtle pb-3 text-ink">
+        图标 · {ICON_NAMES.length} 个
+      </h2>
+      <div
+        class="grid grid-cols-3 gap-2 sm:grid-cols-6 sm:gap-3 lg:grid-cols-8"
+      >
+        {
+          ICON_NAMES.map((name) => (
+            <div class="flex flex-col items-center gap-1.5 rounded-control border border-subtle p-2.5">
+              <Icon name={name} class="size-5 text-muted" />
+              <span class="w-full truncate text-center text-[0.625rem] text-faint">
+                {name}
+              </span>
+            </div>
+          ))
+        }
+      </div>
+    </section>
+  </div>
+</GalleryLayout>

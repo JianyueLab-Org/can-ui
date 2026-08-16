@@ -1,0 +1,334 @@
+/* ===========================================================================
+   can-ui — motion
+   ---------------------------------------------------------------------------
+   Two kinds of motion live in this system, and the split is not stylistic.
+
+   CSS (this file) is for motion nobody can touch: an entrance, a cross-fade
+   between pages, a colour settling. It is cheap, it needs no JavaScript, and
+   the fact that it cannot be interrupted does not matter, because there is no
+   gesture to interrupt it with.
+
+   Springs (src/motion) are for everything a finger can reach: a sheet, a
+   drawer, a segmented indicator, a drag. A CSS transition cannot be grabbed
+   mid-flight and reversed — it will finish, then start a new animation from
+   wherever it ended, which is exactly the "brick wall" that makes an
+   interface feel like it is arguing with you. Springs animate from the
+   current on-screen value by default, which is what interruption needs.
+
+   If you are reaching for a keyframe to animate something draggable, you want
+   src/motion instead.
+   =========================================================================== */
+
+/* Cross-fade between same-origin navigations. Chromium honours this; Safari
+   and Firefox no-op silently and keep the instant swap they already had. */
+@view-transition {
+  navigation: auto;
+}
+
+/* The browser default for these pseudo-elements is `mix-blend-mode:
+   plus-lighter`, which additively blends the outgoing and incoming snapshots.
+   On a page carrying a full-bleed photo that reads as a blown-out flash for
+   the moment both are on screen. Normal blending gives a plain cross-fade. */
+::view-transition-old(root),
+::view-transition-new(root) {
+  mix-blend-mode: normal;
+}
+
+/* The theme toggle drives its own circular wipe from the pressed button, so
+   suppress the cross-fade underneath it — otherwise the two run at once and
+   the wipe is invisible behind a fade. */
+html.theme-transitioning::view-transition-old(root),
+html.theme-transitioning::view-transition-new(root) {
+  animation: none;
+}
+html.theme-transitioning::view-transition-old(root) {
+  z-index: 1;
+}
+html.theme-transitioning::view-transition-new(root) {
+  z-index: 9999;
+}
+
+/* ── Entrances ─────────────────────────────────────────────────────────── */
+
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+@keyframes fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+@keyframes scale-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+/* `both` matters: it holds the from-state during the delay, so an element
+   never flashes at full opacity before its turn. */
+.animate-fade-up {
+  animation: fade-up var(--duration-slow) var(--ease-out-quint) both;
+}
+.animate-fade-in {
+  animation: fade-in var(--duration-slow) var(--ease-out-quint) both;
+}
+.animate-scale-in {
+  animation: scale-in var(--duration-medium) var(--ease-out-quint) both;
+}
+
+/* Overlay entrances — same keyframes, shorter. A page-level 0.35s reads as
+   considered when a section arrives; on a dialog the member just asked for,
+   the same duration reads as lag. */
+.animate-overlay-in {
+  animation: fade-in var(--duration-fast) var(--ease-out-quint) both;
+}
+.animate-panel-in {
+  animation: scale-in var(--duration-medium) var(--ease-out-quint) both;
+}
+
+/* For a dialog centred by `left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2`.
+
+   This keyframe animates `scale` and NOTHING ELSE. Do not put the centring
+   translate back into it.
+
+   The reasoning that would put it there was right for Tailwind v3, where
+   `-translate-x-1/2` compiled to `transform: translate(…)` and a keyframe's
+   `transform` would have replaced it. v4 compiles the same utility to the
+   independent `translate` property, and the independent properties do not
+   replace `transform` — they compose with it. Carrying the translate in both
+   places moves the dialog by 100% of its own size instead of 50%, and with
+   `both` the end frame sticks, so it stays wrong after the animation ends. */
+@keyframes panel-in-centered {
+  from {
+    opacity: 0;
+    scale: 0.97;
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+  }
+}
+.animate-panel-in-centered {
+  animation: panel-in-centered var(--duration-medium) var(--ease-out-quint) both;
+}
+
+/* Drawers slide in from their own edge rather than scaling. Enter and exit
+   must use the *same* edge: a panel that arrives from the right and leaves
+   downward breaks the spatial story, and the member loses track of where the
+   thing went and therefore how to get it back. */
+@keyframes drawer-in {
+  from {
+    opacity: 0;
+    transform: translateX(-100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+@keyframes drawer-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+.animate-drawer-in {
+  animation: drawer-in var(--duration-medium) var(--ease-out-quint) both;
+}
+.animate-drawer-in-right {
+  animation: drawer-in-right var(--duration-medium) var(--ease-out-quint) both;
+}
+
+/* ── Materialising ─────────────────────────────────────────────────────────
+   A glass surface should not fade in. Fading a blur says "an image of a
+   material became visible"; animating the blur radius and the scale together
+   says "a material arrived", which is what the surface is claiming to be.
+
+   Costs a compositor-unfriendly property (backdrop-filter animates on the
+   main thread in most engines), so it is reserved for one surface at a time —
+   a popover, a sheet — never for a list of them. */
+@keyframes materialize-in {
+  from {
+    opacity: 0;
+    scale: 0.96;
+    backdrop-filter: saturate(100%) blur(0px);
+    -webkit-backdrop-filter: saturate(100%) blur(0px);
+  }
+  to {
+    opacity: 1;
+    scale: 1;
+    backdrop-filter: saturate(var(--material-saturate))
+      blur(var(--material-blur-regular));
+    -webkit-backdrop-filter: saturate(var(--material-saturate))
+      blur(var(--material-blur-regular));
+  }
+}
+.animate-materialize {
+  animation: materialize-in var(--duration-medium) var(--ease-out-quint) both;
+  /* Anchored to whatever opened it — a popover that scales from its own
+     centre has no visible relationship to the button that summoned it. The
+     component sets the custom property from the trigger's position. */
+  transform-origin: var(--origin-x, 50%) var(--origin-y, 50%);
+}
+
+/* ── Stagger ───────────────────────────────────────────────────────────────
+   Cascade the children of a grid or list in. Put it on the *container*; the
+   children need no classes, which is what keeps it usable on a `map()` that
+   renders markup this stylesheet has never seen.
+
+   Capped at the 13th rather than continuing the ramp: past about half a second
+   the cascade stops reading as one movement and starts reading as a slow list,
+   and a roster can be hundreds of rows. */
+.stagger > * {
+  animation: fade-up 0.45s var(--ease-out-quint) both;
+}
+.stagger > *:nth-child(1) {
+  animation-delay: 0ms;
+}
+.stagger > *:nth-child(2) {
+  animation-delay: 40ms;
+}
+.stagger > *:nth-child(3) {
+  animation-delay: 80ms;
+}
+.stagger > *:nth-child(4) {
+  animation-delay: 120ms;
+}
+.stagger > *:nth-child(5) {
+  animation-delay: 160ms;
+}
+.stagger > *:nth-child(6) {
+  animation-delay: 200ms;
+}
+.stagger > *:nth-child(7) {
+  animation-delay: 240ms;
+}
+.stagger > *:nth-child(8) {
+  animation-delay: 280ms;
+}
+.stagger > *:nth-child(9) {
+  animation-delay: 320ms;
+}
+.stagger > *:nth-child(10) {
+  animation-delay: 360ms;
+}
+.stagger > *:nth-child(11) {
+  animation-delay: 400ms;
+}
+.stagger > *:nth-child(12) {
+  animation-delay: 440ms;
+}
+.stagger > *:nth-child(n + 13) {
+  animation-delay: 480ms;
+}
+
+/* ===========================================================================
+   Accessibility preferences
+   ---------------------------------------------------------------------------
+   Three independent signals, three different answers. They are not degraded
+   modes — each is the correct interface for somebody, and the components read
+   all three rather than assuming the defaults.
+   =========================================================================== */
+
+/* Reduced motion does NOT mean no feedback. It means no *vestibular* motion:
+   drop the slides, the springs and the overshoot, keep the opacity and colour
+   changes that tell you something happened. The spring engine reads the same
+   preference and jumps to its target rather than integrating. */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    /* Without this the stagger keeps its cascade and content still trickles
+       in, which is most of what the preference is asking us not to do. */
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+  /* The rule above collapses the shimmer to its end frame rather than stopping
+     it, which parks a bright band across every placeholder. Drop the sweep and
+     leave the flat tint, which still reads as "content is coming". */
+  .skeleton::after {
+    display: none;
+  }
+  /* Scripted animations on the view-transition pseudo-elements escape the
+     rules above, so zero them separately. */
+  ::view-transition-group(*),
+  ::view-transition-old(*),
+  ::view-transition-new(*) {
+    animation: none !important;
+  }
+}
+
+/* Reduced transparency: the material becomes frosted glass rather than clear —
+   raise the opacity to near-solid and drop the blur entirely. Keeping a weak
+   blur is the worst of both, since it still costs the GPU and still leaves
+   text sitting on a moving background. */
+@media (prefers-reduced-transparency: reduce) {
+  .material-thin,
+  .material-regular,
+  .material-thick,
+  .bg-chrome {
+    background-color: var(--surface-overlay);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+  }
+  .material-edge-top,
+  .material-edge-bottom {
+    border-color: var(--border-subtle);
+  }
+  .animate-materialize {
+    animation-name: scale-in;
+  }
+}
+
+/* Increased contrast: solid backgrounds and a defined border on anything that
+   was relying on a tint or a shadow to separate itself. */
+@media (prefers-contrast: more) {
+  .material-thin,
+  .material-regular,
+  .material-thick,
+  .bg-chrome {
+    background-color: var(--surface-overlay);
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    border: 1px solid var(--color-ink);
+  }
+  .card,
+  .list-group,
+  .segmented {
+    border-color: var(--color-muted);
+  }
+  .btn-ghost,
+  .btn-glass {
+    border-color: var(--color-muted);
+  }
+  .input {
+    border-color: var(--color-ink);
+  }
+  .text-faint {
+    color: var(--color-muted);
+  }
+}

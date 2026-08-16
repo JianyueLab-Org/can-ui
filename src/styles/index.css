@@ -1,0 +1,34 @@
+/* ===========================================================================
+   can-ui — the one stylesheet a consumer imports.
+
+       @import "can-ui/styles";
+
+   That single line replaces a site's globals.css. Order matters: Tailwind
+   first so `@theme` and the layers exist, then tokens (which extend the
+   theme), then the base layer, then components, then motion.
+
+   A site that needs something of its own — can-radar's Leaflet block, a
+   one-off page style — puts it *after* this import in its own globals.css.
+   Nothing in here should ever need to be edited downstream; if it does, the
+   token is missing and belongs in tokens.css.
+   =========================================================================== */
+
+@import "tailwindcss";
+
+/* Tailwind v4 auto-detects source files but **deliberately skips
+   node_modules**, and this package is node_modules to everybody except this
+   repo. Without this line every utility that appears only inside a can-ui
+   component — `bg-info-bg` on AlertBox, `size-11` on a large icon button, the
+   whole `sm:` half of DataTable — is absent from the consumer's build, and
+   the components arrive unstyled in ways that look like a handful of random
+   spacing bugs rather than a missing scan path.
+
+   The path is relative to this file, so it resolves to can-ui's own src/
+   wherever the package is installed. An explicit @source overrides the
+   node_modules exclusion, which is the whole reason it works. */
+@source "../";
+
+@import "./tokens.css";
+@import "./base.css";
+@import "./components.css";
+@import "./motion.css";

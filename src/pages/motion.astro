@@ -1,0 +1,47 @@
+---
+import GalleryLayout from "../layouts/GalleryLayout.astro";
+import MotionLab from "../demo/MotionLab.vue";
+---
+
+<GalleryLayout
+  title="动效"
+  description="弹簧、动量投射、橡皮筋边界——可以直接上手玩的实验台。"
+>
+  <header class="mb-10">
+    <p class="text-eyebrow mb-2 text-airwaysn">Motion</p>
+    <h1 class="text-display text-ink">动效实验台</h1>
+    <p class="mt-4 max-w-2xl text-muted">
+      手指够得到的东西一律用弹簧，够不到的用 CSS。差别只有一个，但它是决定性的：
+      弹簧可以在飞行途中被抓住、改向，并且带着当前速度继续；transition 不行。
+    </p>
+  </header>
+
+  <MotionLab client:load />
+
+  <section class="mt-14">
+    <h2 class="text-title-2 mb-4 border-b border-subtle pb-3 text-ink">房规</h2>
+    <div class="prose-sm space-y-4 text-muted">
+      <p>
+        <strong class="text-ink">默认临界阻尼（damping 1.0）。</strong>
+        界面里绝大多数运动本身没有动量——一个刚淡入的面板没有什么可以「冲过头」的，
+        给它加回弹只是界面在自我欣赏。
+      </p>
+      <p>
+        <strong class="text-ink">回弹只留给带动量的手势。</strong>
+        甩、抛、拖拽松手之后的过冲，是物理世界在替成员把动作做完。
+      </p>
+      <p>
+        <strong class="text-ink">永远从当前屏幕值起算。</strong>
+        打断时读元素真实的呈现值，而不是它逻辑上的目标值——后者正是快速连点时那一下可见的跳变。
+      </p>
+      <p>
+        <strong class="text-ink">2D 拆成两个独立弹簧。</strong>
+        用一个弹簧驱动二维距离，X 与 Y 速度不同时就会失同步，把一次纯水平的甩动带出竖直漂移。
+      </p>
+      <p>
+        <strong class="text-ink">reduced-motion 不等于没有反馈。</strong>
+        它要的是没有前庭性运动：弹簧直接落到目标，滑动换成短交叉淡入，颜色与透明度的变化保留。
+      </p>
+    </div>
+  </section>
+</GalleryLayout>

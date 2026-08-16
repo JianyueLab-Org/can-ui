@@ -1,0 +1,51 @@
+---
+import GalleryLayout from "../layouts/GalleryLayout.astro";
+import ControlsDemo from "../demo/ControlsDemo.vue";
+import SurfacesDemo from "../demo/SurfacesDemo.vue";
+import DataDemo from "../demo/DataDemo.vue";
+---
+
+<GalleryLayout
+  title="组件"
+  description="Cerulean Aviation Network 的通用 UI 组件，按 Apple 的界面语言设计。"
+>
+  <header class="mb-12">
+    <p class="text-eyebrow mb-2 text-airwaysn">CAN 设计系统</p>
+    <h1 class="text-display text-ink">通用 UI 组件</h1>
+    <p class="mt-4 max-w-2xl text-muted">
+      一套令牌、一套动效、一套组件，供网络的六个 Web
+      组件共用。这一页本身就是它的样张—— 所有东西都可以按、可以拖、可以打断。
+    </p>
+    <div class="mt-6 flex flex-wrap gap-2">
+      <a href="/motion" class="btn btn-soft btn-sm px-3 py-1.5 text-xs">
+        动效实验台 →
+      </a>
+      <a href="/tokens" class="btn btn-secondary btn-sm px-3 py-1.5 text-xs">
+        设计令牌 →
+      </a>
+    </div>
+  </header>
+
+  <div class="space-y-16">
+    <section>
+      <h2 class="text-title-2 mb-6 border-b border-subtle pb-3 text-ink">
+        控件与表单
+      </h2>
+      <ControlsDemo client:load />
+    </section>
+
+    <section>
+      <h2 class="text-title-2 mb-6 border-b border-subtle pb-3 text-ink">
+        浮层与材质
+      </h2>
+      <SurfacesDemo client:load />
+    </section>
+
+    <section>
+      <h2 class="text-title-2 mb-6 border-b border-subtle pb-3 text-ink">
+        数据与列表
+      </h2>
+      <DataDemo client:load />
+    </section>
+  </div>
+</GalleryLayout>

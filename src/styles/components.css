@@ -1,0 +1,502 @@
+/* ===========================================================================
+   can-ui — component layer
+   ---------------------------------------------------------------------------
+   Thin, token-driven primitives for markup that cannot render a Vue component:
+   .astro pages, MDX, a footer, a server-rendered shell. The Vue components in
+   src/components apply these same classes, so the two layers cannot drift into
+   two different-looking buttons.
+
+   Keep this set small and flat. If a thing needs state, it is a component.
+   =========================================================================== */
+
+@layer components {
+  /* ── Button ────────────────────────────────────────────────────────────
+     The press treatment is the important part. Feedback fires on
+     *pointer-down*, not on click: the moment a control waits for touch-up to
+     acknowledge a press, the interface stops feeling direct — and that is a
+     cliff, not a slope. 100ms is deliberately below the threshold at which a
+     change reads as an animation; it should feel like the button moved under
+     the finger, not like it played something.
+
+     `:active` covers mouse and touch for free. The Vue Button additionally
+     wires cancel-by-drag-away (see usePress), which `:active` does not do. */
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+    border: 1px solid transparent;
+    border-radius: var(--radius-control);
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    line-height: 1.25rem;
+    letter-spacing: -0.006em;
+    white-space: nowrap;
+    cursor: pointer;
+    /* transform is listed first and separately timed: everything else is a
+       colour settling, which can take its time, while the press must not. */
+    transition:
+      transform var(--duration-instant) var(--ease-out-quint),
+      background-color var(--duration-fast) var(--ease-out-quint),
+      border-color var(--duration-fast) var(--ease-out-quint),
+      color var(--duration-fast) var(--ease-out-quint),
+      box-shadow var(--duration-fast) var(--ease-out-quint);
+  }
+  .btn:active:not(:disabled):not([aria-disabled="true"]),
+  .btn[data-pressed="true"]:not(:disabled) {
+    transform: scale(0.97);
+  }
+  .btn:disabled,
+  .btn[aria-disabled="true"] {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+  .btn:focus-visible {
+    outline: none;
+    box-shadow:
+      0 0 0 2px var(--surface),
+      0 0 0 4px var(--ring-brand);
+  }
+
+  .btn-primary {
+    background-color: var(--color-airwaysn);
+    color: #ffffff;
+    box-shadow: var(--shadow-card);
+  }
+  .btn-primary:hover:not(:disabled) {
+    background-color: var(--color-airwaysn-dark);
+    color: #ffffff;
+  }
+
+  .btn-secondary {
+    background-color: var(--surface-raised);
+    color: var(--color-ink);
+    border-color: var(--border-strong);
+  }
+  .btn-secondary:hover:not(:disabled) {
+    background-color: var(--surface-sunken);
+    border-color: var(--color-faint);
+  }
+
+  /* Brand-tinted, lower emphasis than primary — a secondary CTA that still
+     needs to read as the brand action. */
+  .btn-soft {
+    background-color: var(--color-info-bg);
+    color: var(--color-info-fg);
+  }
+  .btn-soft:hover:not(:disabled) {
+    background-color: color-mix(
+      in srgb,
+      var(--color-airwaysn) 18%,
+      transparent
+    );
+  }
+
+  .btn-danger {
+    background-color: var(--color-danger);
+    color: #ffffff;
+  }
+  .btn-danger:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--color-danger) 85%, black);
+    color: #ffffff;
+  }
+
+  .btn-ghost {
+    background-color: transparent;
+    color: var(--color-muted);
+  }
+  .btn-ghost:hover:not(:disabled) {
+    background-color: var(--surface-sunken);
+    color: var(--color-ink);
+  }
+
+  /* Sits on a material — a toolbar button, a sheet's close control. It has no
+     fill of its own because the glass behind it is the fill; giving it one
+     would be stacking a surface on a material for no reason. */
+  .btn-glass {
+    background-color: color-mix(in srgb, var(--color-ink) 6%, transparent);
+    color: var(--color-ink);
+  }
+  .btn-glass:hover:not(:disabled) {
+    background-color: color-mix(in srgb, var(--color-ink) 11%, transparent);
+  }
+
+  /* ── Icon button ───────────────────────────────────────────────────────
+     The square, unlabelled control that appears all over the chrome: the
+     hamburger, the theme switch, the language trigger. It is its own class
+     rather than `.btn btn-ghost` + `size-9` because the same eleven-utility
+     string was being retyped at each of them, and because the touch floor
+     belongs in one place — `base.css` takes it to 44px on a coarse pointer,
+     which a hand-written `size-9` never got. */
+  .icon-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    flex: none;
+    border-radius: var(--radius-control);
+    color: var(--color-muted);
+    cursor: pointer;
+    transition:
+      background-color var(--duration-fast) var(--ease-out-quint),
+      color var(--duration-fast) var(--ease-out-quint),
+      transform var(--duration-instant) var(--ease-out-quint);
+  }
+  .icon-button:hover:not(:disabled) {
+    background-color: var(--surface-sunken);
+    color: var(--color-ink);
+  }
+  .icon-button:active:not(:disabled) {
+    transform: scale(0.94);
+  }
+  .icon-button[aria-expanded="true"] {
+    background-color: var(--surface-sunken);
+    color: var(--color-ink);
+  }
+
+  /* ── Card ──────────────────────────────────────────────────────────── */
+  .card {
+    background-color: var(--surface-raised);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* ── Input ─────────────────────────────────────────────────────────── */
+  .input {
+    display: block;
+    width: 100%;
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius-control);
+    background-color: var(--surface-raised);
+    color: var(--color-ink);
+    padding: 0.5rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5rem;
+    outline: none;
+    transition:
+      border-color var(--duration-fast) var(--ease-out-quint),
+      box-shadow var(--duration-fast) var(--ease-out-quint);
+  }
+  .input::placeholder {
+    color: var(--color-faint);
+  }
+  .input:hover:not(:disabled):not(:focus) {
+    border-color: var(--color-faint);
+  }
+  .input:focus {
+    border-color: var(--color-airwaysn);
+    box-shadow: 0 0 0 3px var(--ring-brand);
+  }
+  .input-error {
+    border-color: var(--color-danger);
+  }
+  .input-error:focus {
+    border-color: var(--color-danger);
+    box-shadow: 0 0 0 3px
+      color-mix(in srgb, var(--color-danger) 22%, transparent);
+  }
+
+  /* ── Badge ─────────────────────────────────────────────────────────── */
+  .badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.3125rem;
+    border-radius: 9999px;
+    padding: 0.125rem 0.625rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    line-height: 1.125rem;
+    white-space: nowrap;
+  }
+  .badge-success {
+    background-color: var(--color-success-bg);
+    color: var(--color-success-fg);
+  }
+  .badge-danger {
+    background-color: var(--color-danger-bg);
+    color: var(--color-danger-fg);
+  }
+  .badge-warning {
+    background-color: var(--color-warning-bg);
+    color: var(--color-warning-fg);
+  }
+  .badge-info {
+    background-color: var(--color-info-bg);
+    color: var(--color-info-fg);
+  }
+  .badge-neutral {
+    background-color: var(--color-neutral-bg);
+    color: var(--color-neutral-fg);
+  }
+
+  /* ── Inset grouped list ────────────────────────────────────────────────
+     The workhorse layout of an Apple settings screen, and the shape most of
+     our panel pages actually want: a titled group of rows, hairline-separated,
+     with the whole group inset in a rounded card. It beats a table for
+     anything that is a list of settings rather than a grid of data — the label
+     sits next to what it controls, which is what makes a control readable
+     without a caption explaining it.
+
+     Rows are laid out by ListRow.vue; these rules are the group frame so the
+     same look is available in .astro markup. */
+  .list-group {
+    border-radius: var(--radius-inset);
+    background-color: var(--surface-raised);
+    border: 1px solid var(--border-subtle);
+    overflow: hidden;
+  }
+  .list-group > * + * {
+    border-top: 1px solid var(--border-subtle);
+  }
+  .list-group-title {
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: var(--tracking-eyebrow);
+    text-transform: uppercase;
+    color: var(--color-faint);
+    padding: 0 0.75rem 0.5rem;
+  }
+
+  /* ── Segmented control ─────────────────────────────────────────────────
+     Two to four mutually exclusive options, all visible. The moving indicator
+     is a real element positioned by a spring (Segmented.vue) rather than a
+     background on the selected item — sliding is what tells you the two
+     options are the same control in two states, and a jump does not. */
+  .segmented {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    padding: 0.1875rem;
+    border-radius: var(--radius-control);
+    background-color: var(--surface-sunken);
+    border: 1px solid var(--border-subtle);
+    /* Four CJK segments do not fit on a 375px phone, and the alternatives are
+       both worse: wrapping turns one control into two rows that no longer read
+       as a single choice, and shrinking makes labels illegible before it makes
+       them fit. Scrolling keeps the control intact and the labels readable —
+       and the component scrolls the selected segment into view, so the state
+       is never the part that is off-screen.
+
+       `max-width: 100%` is what actually arms this: an `inline-flex` element
+       sizes to its content and would simply overflow its parent instead of
+       scrolling. */
+    max-width: 100%;
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    /* A scrollbar inside a 44px control is larger than the thing it scrolls. */
+    scrollbar-width: none;
+  }
+  .segmented::-webkit-scrollbar {
+    display: none;
+  }
+  .segmented-item {
+    position: relative;
+    z-index: 1;
+    flex: 1 1 auto;
+    border-radius: calc(var(--radius-control) - 0.1875rem);
+    padding: 0.3125rem 0.75rem;
+    font-size: 0.8125rem;
+    font-weight: 600;
+    letter-spacing: -0.004em;
+    white-space: nowrap;
+    color: var(--color-muted);
+    cursor: pointer;
+    transition: color var(--duration-fast) var(--ease-out-quint);
+  }
+  .segmented-item[aria-selected="true"],
+  .segmented-item[data-selected="true"] {
+    color: var(--color-ink);
+  }
+  .segmented-item:hover:not([data-selected="true"]) {
+    color: var(--color-ink);
+  }
+  .segmented-indicator {
+    position: absolute;
+    z-index: 0;
+    top: 0.1875rem;
+    bottom: 0.1875rem;
+    border-radius: calc(var(--radius-control) - 0.1875rem);
+    background-color: var(--surface-raised);
+    box-shadow: var(--shadow-card);
+  }
+
+  /* ── Sheet grabber ─────────────────────────────────────────────────────
+     The small bar at the top of a sheet. It is not decoration: it is the
+     affordance that says this surface can be dragged, and it is why a member
+     tries the gesture in the first place. */
+  .sheet-grabber {
+    width: 2.25rem;
+    height: 0.3125rem;
+    border-radius: 9999px;
+    background-color: var(--border-strong);
+  }
+
+  /* ── Link ──────────────────────────────────────────────────────────────
+     Anchors are NOT underlined globally — a blanket rule dashes every button
+     and nav item on hover. Opt in here, or write inside .prose/.doc-content. */
+  .link {
+    color: var(--color-airwaysn-600);
+    text-decoration: underline;
+    text-decoration-style: dashed;
+    text-decoration-color: color-mix(
+      in srgb,
+      var(--color-airwaysn) 55%,
+      transparent
+    );
+    text-underline-offset: 0.25em;
+    transition: color var(--duration-fast) var(--ease-out-quint);
+  }
+  .link:hover {
+    color: var(--color-airwaysn-700);
+    text-decoration-color: currentColor;
+  }
+  .dark .link {
+    color: var(--color-airwaysn-300);
+  }
+  .dark .link:hover {
+    color: var(--color-airwaysn-200);
+  }
+
+  /* ── Skeleton ──────────────────────────────────────────────────────────
+     The sweep is a `transform` on an overlay, not an animated
+     `background-position`. Background position is a paint property: every
+     frame re-rasterises the element on the main thread, and a skeleton screen
+     is not one element — a placeholder table is fifty of them shimmering at
+     once, on the exact frames where the page is also parsing a JSON response.
+     A translated overlay is composited and costs the main thread nothing
+     after the first frame. */
+  .skeleton {
+    position: relative;
+    overflow: hidden;
+    background-color: var(--surface-sunken);
+    border-radius: var(--radius-control);
+  }
+  .skeleton::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    transform: translateX(-100%);
+    background-image: linear-gradient(
+      90deg,
+      transparent,
+      color-mix(in srgb, var(--border-subtle) 85%, transparent),
+      transparent
+    );
+    animation: skeleton-sweep 1.5s ease-in-out infinite;
+  }
+}
+
+/* One keyframe only: the resting `translateX(-100%)` on the element is the
+   implicit start, so the sweep needs no `from`. */
+@keyframes skeleton-sweep {
+  to {
+    transform: translateX(100%);
+  }
+}
+
+/* ---------------------------------------------------------------------------
+   Long-form content — the one place a dashed underline belongs.
+--------------------------------------------------------------------------- */
+.doc-content a,
+.prose a {
+  color: var(--color-airwaysn-600);
+  text-decoration: underline;
+  text-decoration-style: dashed;
+  text-underline-offset: 0.3em;
+}
+.doc-content a:hover,
+.prose a:hover {
+  color: var(--color-airwaysn-700);
+}
+.dark .doc-content a,
+.dark .prose a {
+  color: var(--color-airwaysn-300);
+}
+.dark .doc-content a:hover,
+.dark .prose a:hover {
+  color: var(--color-airwaysn-200);
+}
+
+/* A wide table inside long-form content scrolls the *page* sideways and takes
+   every heading with it. The wrapper is an element rather than `display:
+   block` on the table, because changing a table's display drops its role from
+   the accessibility tree — and in a syllabus or a rules index the grid is the
+   content. `min-width: max-content` is the half that makes the wrapper do
+   anything: the typography plugin sets `width: 100%`, so inside a scroller the
+   table would obediently squash instead of scrolling. */
+.table-scroll {
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+}
+.table-scroll table {
+  min-width: max-content;
+}
+.doc-content,
+.prose {
+  overflow-wrap: break-word;
+}
+
+/* ---------------------------------------------------------------------------
+   DataTable, small screens. A five-column table on a 390px phone is a
+   horizontal-scroll puzzle, so below `sm` each row collapses into a card and
+   every cell grows a label from its `data-label`. The markup is unchanged —
+   one <table> serves both layouts.
+--------------------------------------------------------------------------- */
+@media (max-width: 639px) {
+  .data-table thead {
+    display: none;
+  }
+  .data-table tbody tr {
+    display: block;
+    margin-bottom: 0.625rem;
+    padding: 0.25rem 0.875rem;
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-card);
+    background-color: var(--surface-raised);
+  }
+  .data-table tbody tr:last-child {
+    margin-bottom: 0;
+  }
+  .data-table tbody td {
+    display: flex;
+    width: 100%;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.5rem 0;
+    border-bottom: 1px solid var(--border-subtle);
+    text-align: right;
+    white-space: normal;
+  }
+  .data-table tbody td:last-child {
+    border-bottom: 0;
+  }
+  .data-table tbody td::before {
+    content: attr(data-label);
+    flex: none;
+    color: var(--color-faint);
+    font-size: 0.6875rem;
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-align: left;
+    text-transform: uppercase;
+  }
+  /* Loading / empty rows span every column and get no label. */
+  .data-table tbody tr.dt-row-span {
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: transparent;
+  }
+  .data-table tbody tr.dt-row-span td {
+    display: block;
+    border-bottom: 0;
+    text-align: center;
+  }
+  .data-table tbody tr.dt-row-span td::before {
+    content: none;
+  }
+}

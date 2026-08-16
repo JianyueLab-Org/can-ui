@@ -1,0 +1,31 @@
+---
+import ThemeScript from "../components/ThemeScript.astro";
+import ShellDemo from "../demo/ShellDemo.vue";
+import "../styles/index.css";
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <!-- `interactive-widget=resizes-content` makes the on-screen keyboard
+         shrink the layout viewport instead of sliding over it, so `dvh` and
+         fixed overlays account for it. Chrome honours it; Safari does not,
+         which is why useViewport measures the difference as well. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <title>外壳 · can-ui</title>
+    <meta
+      name="description"
+      content="AppShell — 侧栏、顶栏、快速跳转与账户菜单，跨站点复用的整页框架。"
+    />
+    <ThemeScript />
+  </head>
+  <!-- No GalleryLayout here on purpose: AppShell *is* the page frame, and
+       demonstrating a frame inside another frame demonstrates nothing. -->
+  <body class="bg-surface">
+    <ShellDemo client:load />
+  </body>
+</html>

@@ -1,0 +1,106 @@
+---
+import ThemeScript from "../components/ThemeScript.astro";
+import ThemeToggle from "../components/ThemeToggle.vue";
+import LogoMark from "../components/LogoMark.vue";
+import "../styles/index.css";
+
+interface Props {
+  title: string;
+  description?: string;
+}
+
+const { title, description } = Astro.props;
+
+// The gallery is its own consumer, so it passes a dictionary the same way a
+// site does. Only the keys can-ui's chrome actually renders are needed —
+// anything omitted falls back to CHROME_MESSAGES.
+const messages = {
+  theme: { toDark: "切换到深色", toLight: "切换到浅色" },
+  language: { label: "选择语言" },
+};
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <!-- `interactive-widget=resizes-content` makes the on-screen keyboard
+         shrink the layout viewport instead of sliding over it, so `dvh` and
+         fixed overlays account for it. Chrome honours it; Safari does not,
+         which is why useViewport measures the difference as well. -->
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <title>{title} · can-ui</title>
+    {description && <meta name="description" content={description} />}
+    <ThemeScript />
+  </head>
+  <body class="min-h-dvh bg-surface">
+    <a
+      href="#main"
+      class="btn btn-secondary sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50"
+    >
+      跳到主要内容
+    </a>
+
+    <!--
+      The nav used to be `hidden sm:flex`, which meant a phone got no way at
+      all to reach the other four pages — the gallery was navigable only on a
+      desktop, which for a design system being judged on its mobile behaviour
+      is close to the worst possible bug.
+
+      It scrolls instead of hiding. Two things make that work rather than just
+      overflow: `min-w-0` on the scroller (a flex child refuses to shrink below
+      its content without it, and the whole header would push the page
+      sideways), and the wordmark collapsing to the mark alone below `sm`,
+      which buys back ~60px — enough that the five entries fit outright on a
+      390px screen and only actually scroll on a 320px one.
+    -->
+    <header
+      class="material-thin material-edge-bottom sticky top-0 z-30 flex items-center gap-2 px-4 py-2 sm:gap-4 sm:px-8 sm:py-3"
+    >
+      <a href="/" class="flex shrink-0 items-center gap-2">
+        <LogoMark class="size-8 shrink-0" />
+        <span class="vibrant hidden text-sm font-semibold sm:inline">
+          can-ui
+        </span>
+      </a>
+
+      <nav
+        class="-mx-1 flex min-w-0 flex-1 items-center gap-0.5 overflow-x-auto px-1 [scrollbar-width:none] sm:gap-1 [&::-webkit-scrollbar]:hidden"
+        aria-label="画廊"
+      >
+        {
+          [
+            ["/", "组件"],
+            ["/motion", "动效"],
+            ["/tokens", "令牌"],
+            ["/brand", "标识"],
+            ["/shell", "外壳"],
+          ].map(([href, label]) => (
+            <a
+              href={href}
+              aria-current={Astro.url.pathname === href ? "page" : undefined}
+              class="btn btn-ghost shrink-0 px-2.5 py-1.5 text-xs aria-[current=page]:bg-surface-sunken aria-[current=page]:text-ink sm:px-3"
+            >
+              {label}
+            </a>
+          ))
+        }
+      </nav>
+
+      <ThemeToggle client:load messages={messages} />
+    </header>
+
+    <main id="main" class="mx-auto max-w-5xl px-4 py-10 sm:px-8">
+      <slot />
+    </main>
+
+    <footer class="mx-auto max-w-5xl px-4 pb-16 sm:px-8">
+      <p class="text-caption text-faint">
+        can-ui · Cerulean Aviation Network 设计系统 · 本页即是它的可交互样张
+      </p>
+    </footer>
+  </body>
+</html>

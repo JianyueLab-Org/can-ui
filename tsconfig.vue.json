@@ -1,0 +1,13 @@
+{
+  "extends": "./tsconfig.json",
+  "include": ["src/**/*.vue", "src/**/*.ts"],
+  "exclude": ["dist", ".astro"],
+  "compilerOptions": {
+    "noEmit": true,
+    // `bun` is here for src/motion/spring.test.ts, which imports `bun:test`.
+    // The alternative — excluding test files from the type gate — leaves the
+    // one file that asserts the solver's physics unchecked, which is exactly
+    // backwards.
+    "types": ["node", "bun"]
+  }
+}

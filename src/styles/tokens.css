@@ -1,0 +1,303 @@
+/* ===========================================================================
+   can-ui — design tokens
+   ---------------------------------------------------------------------------
+   Every name in here that already existed in can-web's globals.css keeps its
+   spelling on purpose. Six sites carry a copy of that file and thousands of
+   call sites say `bg-surface`, `text-ink`, `rounded-card`, `.btn-primary`.
+   A design system that renames them is not a design system anybody adopts —
+   so this file is a superset, not a replacement, and migrating a site is
+   deleting its globals.css and importing `can-ui/styles`.
+
+   What is new is the second half: materials, the spring table, and a
+   typography scale whose tracking changes with size. Those are the parts
+   Apple's interface language actually needs and a flat token list cannot
+   express.
+   =========================================================================== */
+
+@theme {
+  /* ── Typography ────────────────────────────────────────────────────────
+     The platform font first, as Apple's own guidance says: it already ships
+     optical sizing, tracking tables and legibility tuning that no webfont we
+     could pick would beat, and it costs zero bytes. The CJK fallbacks matter
+     here — the network renders in three locales and `system-ui` alone leaves
+     Simplified Chinese to whatever the browser guesses. */
+  --font-sans:
+    ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto,
+    "Helvetica Neue", "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei",
+    "Noto Sans CJK SC", "Noto Sans", sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, "SF Mono", "JetBrains Mono", Menlo, Consolas,
+    "Liberation Mono", monospace;
+
+  /* ── Brand ─────────────────────────────────────────────────────────────
+     Brand is `airwaysn`. Do NOT borrow Tailwind blue or indigo for brand UI —
+     they are a different hue and the mix shows instantly on a page carrying
+     both. */
+  --color-airwaysn: #4c92c1;
+  --color-airwaysn-dark: #3a7ba8;
+  --color-green-500: #10b981;
+  --color-red-500: #ef4444;
+  --color-yellow-500: #f59e0b;
+
+  --color-airwaysn-hex: #4c92c1;
+  --color-airwaysn-dark-hex: #3a7ba8;
+
+  --color-airwaysn-50: #f0f6fa;
+  --color-airwaysn-100: #dceaf3;
+  --color-airwaysn-200: #bdd9ea;
+  --color-airwaysn-300: #93c0db;
+  --color-airwaysn-400: #6aa8cd;
+  --color-airwaysn-500: #4c92c1;
+  --color-airwaysn-600: #3a7ba8;
+  --color-airwaysn-700: #2f6488;
+  --color-airwaysn-800: #274f6b;
+  --color-airwaysn-900: #1e3c52;
+
+  /* ── The logo's two blues ──────────────────────────────────────────────
+     These are the colours in the mark itself (src/assets/logo), and they are
+     **not** the same as `--color-airwaysn` above. The UI brand is #4c92c1;
+     the mark is #2C5FA1 and #47B5FA — a deeper blue and a brighter sky blue.
+
+     They are recorded separately rather than reconciled, because reconciling
+     them is a brand decision and not a refactor. One of two things is true and
+     only the people who own the identity can say which: either the mark is the
+     newer artwork and the UI ramp is stale, or the mark is deliberately richer
+     than an interface colour is allowed to be — a logo is seen at 32px against
+     a known background, while `--color-airwaysn` has to carry buttons, focus
+     rings and link text at every size against every surface, in both themes.
+
+     Until that is decided: **use `--color-airwaysn` for UI and these two for
+     the mark only.** Do not "fix" one to match the other in passing. */
+  --color-brand-deep: #2c5fa1;
+  --color-brand-sky: #47b5fa;
+
+  /* ── Elevation ─────────────────────────────────────────────────────────
+     Layered and soft rather than one hard drop, and *scaled with the surface*:
+     a bigger surface reads as thicker, so it casts further. That is why there
+     are four steps rather than one shadow reused at every size — a popover
+     wearing the card shadow reads as pasted onto the page rather than
+     floating above it. */
+  --shadow-card:
+    0 1px 2px 0 rgb(16 24 40 / 0.04), 0 1px 3px 0 rgb(16 24 40 / 0.06);
+  --shadow-card-hover:
+    0 4px 8px -2px rgb(16 24 40 / 0.08), 0 12px 24px -4px rgb(16 24 40 / 0.1);
+  --shadow-popover:
+    0 8px 16px -4px rgb(16 24 40 / 0.1), 0 20px 32px -8px rgb(16 24 40 / 0.14);
+  /* Sheets and dialogs are the largest floating surfaces we draw, and they
+     sit over a dimmed page — the shadow has to survive the scrim. */
+  --shadow-sheet:
+    0 12px 24px -6px rgb(16 24 40 / 0.14),
+    0 32px 64px -12px rgb(16 24 40 / 0.22);
+
+  /* ── Radii ─────────────────────────────────────────────────────────────
+     Four steps, nested consistently: a control inside a card must have a
+     smaller radius than the card, or the corners visibly disagree. */
+  --radius-control: 0.5rem; /* buttons, inputs, list rows */
+  --radius-card: 0.875rem; /* cards, panels, alerts */
+  --radius-sheet: 1.25rem; /* sheets, dialogs, popovers */
+  --radius-inset: 0.75rem; /* inset grouped lists */
+
+  /* ── Text hierarchy ────────────────────────────────────────────────────
+     Three steps, both themes, no `dark:` pair needed at the call site. */
+  --color-ink: #101828;
+  --color-muted: #556070;
+  --color-faint: #8a94a6;
+
+  /* ── Semantic status ───────────────────────────────────────────────────
+     Declared in @theme so the text-, bg- and ring- utilities are generated.
+     Light values here; :root.dark overrides below. */
+  --color-success: #059669;
+  --color-danger: #dc2626;
+  --color-warning: #d97706;
+  --color-info: #3a7ba8;
+
+  --color-success-bg: #ecfdf5;
+  --color-success-fg: #047857;
+  --color-danger-bg: #fef2f2;
+  --color-danger-fg: #b91c1c;
+  --color-warning-bg: #fffbeb;
+  --color-warning-fg: #b45309;
+  --color-info-bg: #f0f6fa;
+  --color-info-fg: #2f6488;
+  --color-neutral-bg: #f2f4f7;
+  --color-neutral-fg: #344054;
+}
+
+/* ===========================================================================
+   Typography scale — tracking and leading are size-specific
+   ---------------------------------------------------------------------------
+   A single `letter-spacing` value is wrong somewhere by definition. Letters
+   read as drifting apart the larger they get, so display sizes want negative
+   tracking; small text wants a touch of positive tracking to stay legible.
+   Leading moves the other way — tight on a headline, generous on body copy.
+
+   These are the numbers behind the `.text-display` / `.text-title-*` classes
+   in base.css. They are exposed as variables so a one-off heading can reach
+   for the right pair instead of inventing one.
+   =========================================================================== */
+:root {
+  --tracking-display: -0.022em;
+  --tracking-title: -0.018em;
+  --tracking-heading: -0.012em;
+  --tracking-body: 0em;
+  --tracking-caption: 0.006em;
+  /* Uppercase eyebrows are the one place a big positive value is right: caps
+     have no ascender/descender variety to separate them. */
+  --tracking-eyebrow: 0.08em;
+
+  --leading-display: 1.05;
+  --leading-title: 1.15;
+  --leading-heading: 1.3;
+  --leading-body: 1.55;
+  --leading-caption: 1.4;
+
+  /* ── Light theme surfaces ────────────────────────────────────────────── */
+  --background: #ffffff;
+  --foreground: #101828;
+
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: #f7f8fa;
+  --surface-overlay: #ffffff;
+  --chrome: rgb(255 255 255 / 0.82);
+  --border-subtle: #e7eaee;
+  --border-strong: #d3d8e0;
+  --ring-brand: color-mix(in srgb, var(--color-airwaysn) 28%, transparent);
+
+  /* ── Materials ─────────────────────────────────────────────────────────
+     Translucency is how hierarchy is expressed without drawing another box.
+     Three weights, and the weight is not decorative: a heavier material
+     separates a structural region (a sidebar, a sheet), a lighter one draws
+     attention to something interactive (a floating toolbar, a chip).
+
+     The rule that keeps this legible: NEVER stack a light material on another
+     material. Two blurs of the same backdrop compound into mud and the text
+     on top loses its ground. A material goes on the page, and solid surfaces
+     go on the material.
+
+     Blur radius scales with the surface, for the same reason the shadow does —
+     a large pane of glass is visibly thicker than a chip of it. */
+  --material-thin: rgb(255 255 255 / 0.62);
+  --material-regular: rgb(255 255 255 / 0.78);
+  --material-thick: rgb(255 255 255 / 0.9);
+  --material-blur-thin: 12px;
+  --material-blur-regular: 20px;
+  --material-blur-thick: 32px;
+  /* The bright hairline along a material's leading edge is light catching its
+     thickness. It is a small thing that does most of the work of making the
+     surface read as glass rather than as a tinted rectangle. */
+  --material-edge: rgb(255 255 255 / 0.5);
+  --material-saturate: 180%;
+
+  /* Scrims. The modal one dims to focus; the sheet one is lighter because a
+     sheet does not take the whole screen and its parent stays in play. */
+  --scrim: rgb(16 24 40 / 0.32);
+  --scrim-heavy: rgb(16 24 40 / 0.45);
+}
+
+:root.dark {
+  --background: #0d1219;
+  --foreground: #f2f5f9;
+
+  --surface: #0d1219;
+  --surface-raised: #151c25;
+  --surface-sunken: #0a0f15;
+  --surface-overlay: #1b232e;
+  --chrome: rgb(13 18 25 / 0.82);
+  --border-subtle: #232c38;
+  --border-strong: #33404f;
+
+  --color-ink: #f2f5f9;
+  --color-muted: #9aa6b6;
+  --color-faint: #6b7889;
+
+  --color-success: #34d399;
+  --color-success-bg: color-mix(in srgb, #10b981 16%, transparent);
+  --color-success-fg: #6ee7b7;
+  --color-danger: #f87171;
+  --color-danger-bg: color-mix(in srgb, #ef4444 16%, transparent);
+  --color-danger-fg: #fca5a5;
+  --color-warning: #fbbf24;
+  --color-warning-bg: color-mix(in srgb, #f59e0b 16%, transparent);
+  --color-warning-fg: #fcd34d;
+  --color-info: #6aa8cd;
+  --color-info-bg: color-mix(in srgb, #4c92c1 16%, transparent);
+  --color-info-fg: #93c0db;
+  --color-neutral-bg: #202936;
+  --color-neutral-fg: #d3dae3;
+
+  /* Dark materials are *darker* than the page, not lighter. A translucent
+     white panel over a dark page reads as a light leak; the glass in a dark
+     interface is smoked, and what shows through is the colour beneath it. */
+  --material-thin: rgb(21 28 37 / 0.62);
+  --material-regular: rgb(21 28 37 / 0.78);
+  --material-thick: rgb(21 28 37 / 0.9);
+  --material-edge: rgb(255 255 255 / 0.08);
+
+  /* Elevation in the dark is carried by the surface stepping lighter, not by
+     a shadow nobody can see against #0d1219 — but the shadow still separates
+     a floating pane from the content directly under it, so it stays, deeper
+     and softer. */
+  --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.4), 0 1px 3px 0 rgb(0 0 0 / 0.3);
+  --shadow-card-hover:
+    0 4px 8px -2px rgb(0 0 0 / 0.45), 0 12px 24px -4px rgb(0 0 0 / 0.4);
+  --shadow-popover:
+    0 8px 16px -4px rgb(0 0 0 / 0.5), 0 20px 32px -8px rgb(0 0 0 / 0.45);
+  --shadow-sheet:
+    0 12px 24px -6px rgb(0 0 0 / 0.55), 0 32px 64px -12px rgb(0 0 0 / 0.5);
+
+  --scrim: rgb(0 0 0 / 0.5);
+  --scrim-heavy: rgb(0 0 0 / 0.65);
+}
+
+/* ===========================================================================
+   Motion — the spring table
+   ---------------------------------------------------------------------------
+   Apple's designers do not think in mass/stiffness/damping. They think in two
+   numbers, and so does this system:
+
+     damping  — overshoot. 1.0 is critically damped: reaches the target and
+                stops, no bounce. Below 1.0 it overshoots and oscillates.
+     response — how quickly it gets there, in seconds. NOT a duration: a
+                spring has no fixed duration, and its settle time falls out of
+                the two parameters together.
+
+   The house default is damping 1.0. Bounce is not a garnish — it is what a
+   thing does when it arrives carrying momentum, so it is only correct after a
+   gesture that *had* momentum: a flick, a throw, a drag release. A menu that
+   merely faded in has no momentum to express, and overshoot on it reads as
+   the interface being pleased with itself.
+
+   These are consumed by src/motion/spring.ts, not by CSS — a CSS transition
+   cannot be grabbed mid-flight and redirected, which is the entire point. The
+   `--ease-*` and `--duration-*` values below are for the things that are
+   genuinely not interactive (a colour change, a fade), where a transition is
+   the cheaper and equally correct tool.
+   =========================================================================== */
+:root {
+  --spring-default-damping: 1;
+  --spring-default-response: 0.35;
+  --spring-snappy-damping: 1;
+  --spring-snappy-response: 0.25;
+  --spring-gentle-damping: 1;
+  --spring-gentle-response: 0.5;
+  /* Momentum interactions only. */
+  --spring-bouncy-damping: 0.8;
+  --spring-bouncy-response: 0.4;
+  --spring-sheet-damping: 0.82;
+  --spring-sheet-response: 0.32;
+
+  /* Non-interactive transitions. `--ease-out-quint` is the house curve: it
+     leaves fast and settles slowly, which is what "responded instantly, then
+     eased into place" looks like as a bezier. The `-in` variant is its
+     mirror, for the return leg of a reversible transition — a path that goes
+     out one way and comes back another reads as two unrelated animations. */
+  --ease-out-quint: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-in-quint: cubic-bezier(0.64, 0, 0.78, 0);
+  --ease-in-out-quint: cubic-bezier(0.83, 0, 0.17, 1);
+
+  --duration-instant: 0.1s; /* press feedback — must not read as animation */
+  --duration-fast: 0.15s; /* hover, colour, focus ring */
+  --duration-medium: 0.22s; /* overlay entrances */
+  --duration-slow: 0.35s; /* page-level entrances */
+}

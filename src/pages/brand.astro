@@ -1,0 +1,238 @@
+---
+import GalleryLayout from "../layouts/GalleryLayout.astro";
+import Logo from "../components/Logo.vue";
+import LogoMark from "../components/LogoMark.vue";
+
+// Every file in the library, by URL. `query: "?url"` because an unqualified
+// .svg import resolves to Astro's ImageMetadata rather than a string.
+const files = import.meta.glob<string>("../assets/logo/**/*.svg", {
+  eager: true,
+  query: "?url",
+  import: "default",
+});
+
+const name = (path: string) => path.split("/").pop() ?? path;
+
+const originals = Object.entries(files)
+  .filter(([p]) => !p.includes("/adaptive/"))
+  .sort(([a], [b]) => a.localeCompare(b));
+
+const adaptive = Object.entries(files)
+  .filter(([p]) => p.includes("/adaptive/"))
+  .sort(([a], [b]) => a.localeCompare(b));
+
+const lockups = [
+  { orientation: "h", wordmark: "zh", label: "横版 · 中文" },
+  { orientation: "h", wordmark: "zh-en", label: "横版 · 中英" },
+  { orientation: "h", wordmark: "en", label: "横版 · 英文" },
+  { orientation: "v", wordmark: "zh", label: "竖版 · 中文" },
+  { orientation: "v", wordmark: "zh-en", label: "竖版 · 中英" },
+  { orientation: "v", wordmark: "en", label: "竖版 · 英文" },
+] as const;
+---
+
+<GalleryLayout
+  title="标识"
+  description="Cerulean Aviation Network 的标识组合、图形标记与品牌色。"
+>
+  <header class="mb-10">
+    <p class="text-eyebrow mb-2 text-airwaysn">Brand</p>
+    <h1 class="text-display text-ink">标识</h1>
+    <p class="mt-4 max-w-2xl text-muted">
+      12 个原始文件、6 个自适应文件、1
+      个内联图形组件。下面每一个组合都在跟随本页主题——
+      右上角切换深浅色，字色会自己换，而图形的两支蓝不变。
+    </p>
+  </header>
+
+  <div class="space-y-14">
+    <!-- ── 组合 ───────────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-title-2 mb-2 border-b border-subtle pb-3 text-ink">
+        组合 · &lt;Logo&gt;
+      </h2>
+      <p class="text-caption mb-6 text-muted">
+        调用方<strong class="font-semibold text-ink">不选黑白</strong
+        >——组件读当前主题自己决定。
+        这是它存在的全部理由：黑白两版只差字色，而任何时刻只有一个是对的。
+      </p>
+      <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        {
+          lockups.map((l) => (
+            <div class="card flex flex-col items-center justify-center gap-4 p-6">
+              <Logo
+                client:load
+                orientation={l.orientation}
+                wordmark={l.wordmark}
+                class={
+                  l.orientation === "h"
+                    ? "h-7 w-auto max-w-full sm:h-9"
+                    : "h-20 w-auto max-w-full sm:h-24"
+                }
+              />
+              <p class="text-caption text-faint">{l.label}</p>
+            </div>
+          ))
+        }
+      </div>
+      <pre
+        class="mt-4 overflow-x-auto rounded-card border border-subtle bg-surface-sunken p-4 text-xs text-muted"><code>{`<Logo orientation="h" wordmark="zh-en" class="h-8 w-auto" />`}</code></pre>
+    </section>
+
+    <!-- ── 图形 ───────────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-title-2 mb-2 border-b border-subtle pb-3 text-ink">
+        图形 · &lt;LogoMark&gt;
+      </h2>
+      <p class="text-caption mb-6 text-muted">
+        只有图形，<strong class="font-semibold text-ink">内联</strong
+        >而非文件——4 条路径、约 1.4 KB。 文字转曲后单条就 5.9–18.7
+        KB，那部分内联进 JS 是把一张「文字的图片」塞进每个页面。
+      </p>
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div class="card flex flex-col items-center gap-3 p-6">
+          <LogoMark client:load class="size-20" />
+          <p class="text-caption text-faint">tone="brand"（默认）</p>
+        </div>
+        <div class="card flex flex-col items-center gap-3 p-6 text-ink">
+          <LogoMark client:load tone="mono" class="size-20" />
+          <p class="text-caption text-faint">tone="mono" · currentColor</p>
+        </div>
+        <div
+          class="card flex flex-col items-center gap-3 bg-surface-sunken p-6"
+        >
+          <div class="flex items-end gap-3">
+            <LogoMark client:load class="size-12" />
+            <LogoMark client:load class="size-8" />
+            <LogoMark client:load class="size-6" />
+            <LogoMark client:load class="size-4" />
+          </div>
+          <p class="text-caption text-faint">48 / 32 / 24 / 16 px</p>
+        </div>
+      </div>
+      <p class="text-caption mt-3 text-muted">
+        16px 处两支蓝会糊成一支，那正是 <code class="text-ink">tone="mono"</code
+        >
+        存在的场合——单色印刷、压印、极小尺寸。别拿它来「让页头干净点」。
+      </p>
+    </section>
+
+    <!-- ── 品牌色 ─────────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-title-2 mb-2 border-b border-subtle pb-3 text-ink">
+        品牌色
+      </h2>
+      <div class="grid gap-4 sm:grid-cols-3">
+        <div class="card overflow-hidden">
+          <div style="background-color: var(--color-brand-deep)" class="h-20">
+          </div>
+          <div class="p-4">
+            <p class="font-mono text-xs text-ink">--color-brand-deep</p>
+            <p class="text-caption text-muted">#2C5FA1 · 标识用</p>
+          </div>
+        </div>
+        <div class="card overflow-hidden">
+          <div style="background-color: var(--color-brand-sky)" class="h-20">
+          </div>
+          <div class="p-4">
+            <p class="font-mono text-xs text-ink">--color-brand-sky</p>
+            <p class="text-caption text-muted">#47B5FA · 标识用</p>
+          </div>
+        </div>
+        <div class="card overflow-hidden">
+          <div class="h-20 bg-airwaysn"></div>
+          <div class="p-4">
+            <p class="font-mono text-xs text-ink">--color-airwaysn</p>
+            <p class="text-caption text-muted">#4C92C1 · 界面用</p>
+          </div>
+        </div>
+      </div>
+      <div
+        class="mt-4 rounded-card bg-warning-bg px-4 py-3 text-sm text-warning-fg"
+      >
+        <p class="font-semibold">这三支蓝不是一回事，而且这是个待决问题。</p>
+        <p class="mt-1 opacity-90">
+          标识用 #2C5FA1 / #47B5FA，界面品牌色是
+          #4C92C1。到底是标识是新稿、界面色阶该跟上，
+          还是标识本就允许比界面色更浓（logo 只在已知背景上以 32px 出现，而
+          <code>--color-airwaysn</code> 要在两种主题、所有尺寸下扛按钮、焦点环和链接文字）——
+          这是品牌决定，不是重构。在有结论之前：<strong
+            >界面用 airwaysn，标识用那两支</strong
+          >， 不要顺手把其中一个改成另一个。
+        </p>
+      </div>
+    </section>
+
+    <!-- ── 文件 ───────────────────────────────────────────────────────── -->
+    <section>
+      <h2 class="text-title-2 mb-2 border-b border-subtle pb-3 text-ink">
+        文件 · {originals.length + adaptive.length} 个
+      </h2>
+      <p class="text-caption mb-6 text-muted">
+        原件逐字节保留在 <code class="text-ink">src/assets/logo/</code
+        >，文件名未改—— 它们是品牌交付物，名字是对外沟通用的。自适应件是从 <code
+          class="text-ink">-B-</code
+        >
+        版生成的，只把字色换成 <code class="text-ink">currentColor</code
+        >，图形的两支蓝原样保留。
+      </p>
+
+      <h3 class="text-eyebrow mb-3 text-faint">原件 · 白底</h3>
+      <div class="grid gap-3 sm:grid-cols-3">
+        {
+          originals
+            .filter(([p]) => name(p).includes("-B-"))
+            .map(([p, url]) => (
+              <figure class="card flex flex-col items-center gap-3 bg-white p-5">
+                <img src={url} alt="" class="h-8 w-auto max-w-full" />
+                <figcaption class="font-mono text-[0.625rem] text-gray-500">
+                  {name(p)}
+                </figcaption>
+              </figure>
+            ))
+        }
+      </div>
+
+      <h3 class="text-eyebrow mb-3 mt-6 text-faint">原件 · 深底</h3>
+      <div class="grid gap-3 sm:grid-cols-3">
+        {
+          originals
+            .filter(([p]) => name(p).includes("-W-"))
+            .map(([p, url]) => (
+              <figure class="card flex flex-col items-center gap-3 bg-[#0d1219] p-5">
+                <img src={url} alt="" class="h-8 w-auto max-w-full" />
+                <figcaption class="font-mono text-[0.625rem] text-gray-400">
+                  {name(p)}
+                </figcaption>
+              </figure>
+            ))
+        }
+      </div>
+
+      <h3 class="text-eyebrow mb-3 mt-6 text-faint">
+        自适应 · currentColor（需内联使用）
+      </h3>
+      <div class="grid gap-3 sm:grid-cols-3">
+        {
+          adaptive.map(([p, url]) => (
+            <figure class="card flex flex-col items-center gap-3 p-5">
+              <img src={url} alt="" class="h-8 w-auto max-w-full opacity-90" />
+              <figcaption class="font-mono text-[0.625rem] text-faint">
+                adaptive/{name(p)}
+              </figcaption>
+            </figure>
+          ))
+        }
+      </div>
+      <p class="text-caption mt-3 text-muted">
+        自适应件在 <code class="text-ink">&lt;img&gt;</code> 里取不到
+        <code class="text-ink">currentColor</code>——外链 SVG
+        拿不到宿主的颜色，所以上面这排
+        只是文件预览，字会落到浏览器默认色。它们是给「整个组合必须染成任意颜色」的场合
+        （压在照片上、单色印刷）内联用的；日常用 <code class="text-ink"
+          >&lt;Logo&gt;</code
+        >。
+      </p>
+    </section>
+  </div>
+</GalleryLayout>
