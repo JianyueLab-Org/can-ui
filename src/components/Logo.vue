@@ -85,9 +85,35 @@ const SOURCES = {
   },
 } as const;
 
+/**
+ * `tone="auto"` ships **both** inks and lets CSS pick.
+ *
+ * Reading the theme in JS is a frame too late. Astro renders this island on
+ * the server, where there is no `.dark` class to read, so SSR always emitted
+ * the black wordmark — and a member on a dark page saw black-on-black until
+ * the island hydrated. That is precisely the flash `ThemeScript.astro` exists
+ * to prevent, reintroduced for the one element that carries the brand.
+ *
+ * Two `<img>` and a `dark:` variant are correct on the *first* paint, because
+ * `.dark` is already on `<html>` before the first byte of body is painted. The
+ * cost is one extra request, and only for the lockup that is not shown — the
+ * browser fetches both, but each is a few KB of SVG and one of them is
+ * `display: none`, so it is not on the critical path either way.
+ *
+ * `<picture>` with `prefers-color-scheme` would be tempting and is wrong: it
+ * follows the *system*, and this theme has three modes where an explicit
+ * light/dark choice must beat the system.
+ *
+ * `isDark` is still read, but only so an explicit `tone` keeps working and so
+ * the ref stays installed for anything else observing it.
+ */
+const blackSrc = computed(
+  () => SOURCES[props.orientation].black[props.wordmark],
+);
+const whiteSrc = computed(
+  () => SOURCES[props.orientation].white[props.wordmark],
+);
 const src = computed(() => {
-  // The black wordmark is for a light page and the white one for a dark page —
-  // the file name describes the ink, not the background.
   const ink =
     props.tone === "auto" ? (isDark.value ? "white" : "black") : props.tone;
   return SOURCES[props.orientation][ink][props.wordmark];
@@ -95,7 +121,29 @@ const src = computed(() => {
 </script>
 
 <template>
+  <!-- One root, so a call site's `class="h-10 w-auto"` still lands somewhere
+       sensible; the images take their height from it. An explicit `tone` keeps
+       the single-image shape, because then there is nothing to choose. -->
+  <span
+    v-if="tone === 'auto'"
+    class="inline-flex h-8 w-auto items-center"
+    :aria-hidden="alt ? undefined : true"
+  >
+    <img
+      :src="blackSrc"
+      :alt="alt"
+      class="h-full w-auto dark:hidden"
+      decoding="async"
+    />
+    <img
+      :src="whiteSrc"
+      :alt="alt"
+      class="hidden h-full w-auto dark:block"
+      decoding="async"
+    />
+  </span>
   <img
+    v-else
     :src="src"
     :alt="alt"
     class="h-8 w-auto"
