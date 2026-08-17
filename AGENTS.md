@@ -43,6 +43,24 @@ change of import path. Migrating a site is:
 
 Nothing else should have to change. If something does, that is a bug in this repo.
 
+### The peer ranges are as wide as the code allows, not as narrow as the gallery
+
+`astro` is `^6.0.0 || ^7.0.0` and `tailwindcss` is `^4.0.0`, and both are deliberately wider than
+what this repo itself builds against — the gallery is on Astro 7 and Tailwind 4.3 because there was
+no reason for it not to be.
+
+A peer range is a claim about what the **exported** surface needs, and this package exports almost
+no Astro at all: `ThemeScript.astro` is an `is:inline` script with no Astro API in it, and
+everything else in the `exports` map is Vue, CSS and TypeScript. The CSS uses `@theme`, `@source`
+and `@custom-variant`, all of which are Tailwind 4.0. Nothing here can tell the difference between
+Astro 6 and 7.
+
+The first cut said `^7.0.0`, which quietly locked out **can-web** — the one site still on Astro 6,
+and the site this whole design system was extracted from. That is the failure mode to watch for: a
+range copied from `devDependencies` describes the gallery's build, not the package's contract, and
+the six consumers do not upgrade in lockstep. Widen when the exported code genuinely does not care;
+narrow only when something in `files` actually breaks on the older major.
+
 ## Layout
 
 ```
