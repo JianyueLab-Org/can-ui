@@ -12,7 +12,7 @@
  * Use Segmented instead when there are two to four options and they should all
  * be visible at once.
  */
-import { computed } from "vue";
+import { computed, useId } from "vue";
 import Icon from "./Icon.vue";
 
 interface Option {
@@ -39,7 +39,20 @@ const props = withDefaults(
 
 defineEmits<{ (e: "update:modelValue", value: string): void }>();
 
-const selectId = computed(() => props.id ?? props.name);
+/**
+ * Fall back to a generated id rather than trusting the call site.
+ *
+ * This was `props.id ?? props.name`, which is `undefined` when neither is
+ * passed — and then `<label for>` points at nothing, clicking the label does
+ * not focus the control, and a screen reader has no name to announce. Every
+ * call site that passes only `label` was in exactly that state, which is most
+ * of them: can-exam's bank editor alone had fifteen.
+ *
+ * `useId()` (Vue 3.5+) is stable across the SSR render and hydration; a random
+ * id would differ between the two and mismatch. Same reasoning as Toggle's.
+ */
+const generatedId = useId();
+const selectId = computed(() => props.id ?? props.name ?? generatedId);
 const describedBy = computed(() => {
   if (!selectId.value) return undefined;
   if (props.error) return `${selectId.value}-error`;
