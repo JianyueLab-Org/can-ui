@@ -24,6 +24,7 @@ import {
   createTranslator,
   CHROME_MESSAGES,
   LANGUAGES,
+  cookieDomainFor,
   type LanguageOption,
 } from "../i18n";
 
@@ -50,6 +51,15 @@ const props = withDefaults(
      * name is how a package quietly stops being reusable.
      */
     cookieName?: string;
+    /**
+     * Domain the locale cookie is written on.
+     *
+     * Left unset it is derived from the current host, which is what makes the
+     * choice follow the member across the network instead of stopping at the
+     * site they happened to change it on. Pass a value only where the guess
+     * cannot work — see `localeCookieDomain`.
+     */
+    cookieDomain?: string;
     messages?: Record<string, unknown>;
   }>(),
   {
@@ -88,15 +98,39 @@ function onCycleTheme(event: MouseEvent) {
   cycle(event);
 }
 
+/**
+ * Where the locale cookie is written. See `cookieDomainFor` for why the parent
+ * domain is the whole point, and when it has to stay host-only.
+ */
+function localeCookieDomain(): string {
+  return props.cookieDomain ?? cookieDomainFor(window.location.hostname);
+}
+
 function changeLanguage(next: string) {
   menuOpen.value = false;
   if (next === props.locale) return;
   emit("language", next);
+
+  const domain = localeCookieDomain();
+  const secure = window.location.protocol === "https:" ? ";secure" : "";
+
+  // Clear the host-only cookie this site may already have written before the
+  // preference was shared. Both would then be sent, and a server reading the
+  // first `NEXT_LOCALE` header it finds gets the stale host-scoped one — so
+  // the switch would look broken for exactly the members who had used it.
+  // Deleting needs the same path and no domain, or it does not match.
+  if (domain) {
+    document.cookie = `${props.cookieName}=;path=/;max-age=0;samesite=lax`;
+  }
+
   // A full reload rather than a client-side swap, because the locale is read
   // server-side: the page's own markup, its `lang` attribute and every
   // server-rendered string come from that cookie, and none of them are Vue's
   // to change.
-  document.cookie = `${props.cookieName}=${next};path=/;max-age=31536000;samesite=lax`;
+  document.cookie =
+    `${props.cookieName}=${next};path=/;max-age=31536000;samesite=lax` +
+    (domain ? `;domain=${domain}` : "") +
+    secure;
   window.location.reload();
 }
 
