@@ -125,3 +125,31 @@ export const LANGUAGES: LanguageOption[] = [
   { code: "en-us", name: "English", short: "EN" },
   { code: "ja-jp", name: "日本語", short: "日" },
 ];
+
+/**
+ * The domain a shared preference cookie should be scoped to, given a hostname.
+ * Returns "" when it must stay host-only.
+ *
+ * Everything below the network's apex — `radar.`, `exam.`, `platform.` — has to
+ * see the same cookie, so it is written on the parent (`.ceruleanavi.net`),
+ * exactly as can-api writes the session. Without a `domain` a cookie is
+ * *host-only*: one set on `ceruleanavi.net` is never sent to
+ * `radar.ceruleanavi.net`, which is why choosing a language on one site did
+ * nothing to the others even though every site reads the same cookie name.
+ *
+ * The last two labels are the registrable domain for this network. That is a
+ * heuristic and it is wrong under a multi-label public suffix like `.co.uk`,
+ * which is why the component taking this also accepts an override.
+ *
+ * An IP address or a single-label host (`localhost`) gets "": a domain-scoped
+ * cookie for either is rejected outright, and silently dropping the preference
+ * in dev is worse than leaving it host-only there.
+ */
+export function cookieDomainFor(hostname: string): string {
+  if (!hostname) return "";
+  if (hostname.includes(":")) return ""; // IPv6 literal
+  if (/^\d+(\.\d+){3}$/.test(hostname)) return ""; // IPv4
+  const labels = hostname.split(".");
+  if (labels.length < 2) return ""; // localhost and friends
+  return "." + labels.slice(-2).join(".");
+}

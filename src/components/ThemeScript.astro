@@ -23,7 +23,15 @@
 <script is:inline>
   (() => {
     try {
-      const stored = localStorage.getItem("theme");
+      // The cookie is the source of truth: it is written on the parent domain
+      // so the appearance follows a member across the network, which
+      // localStorage — scoped to one origin — can never do. localStorage is
+      // read as a fallback so an existing choice is not lost on the first
+      // visit after this shipped.
+      const m = document.cookie.match(/(?:^|;\s*)theme=([^;]*)/);
+      const stored = m
+        ? decodeURIComponent(m[1])
+        : localStorage.getItem("theme");
       const dark =
         stored === "dark" ||
         (stored !== "light" &&

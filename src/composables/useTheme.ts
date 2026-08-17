@@ -1,5 +1,6 @@
 import { readonly, ref, type Ref } from "vue";
 import { prefersReducedMotion } from "../motion/spring";
+import { cookieDomainFor } from "../i18n";
 
 /**
  * The theme: three modes, one source of truth, one set of listeners.
@@ -40,8 +41,29 @@ const isDarkRef = ref(false);
 const modeRef = ref<ThemeMode>("system");
 let installed = false;
 
-/** Read the stored choice. Anything unrecognised means "follow the system". */
+/**
+ * Read the stored choice. Anything unrecognised means "follow the system".
+ *
+ * **The cookie is the source of truth and localStorage is a mirror.**
+ * localStorage is scoped to an *origin*, so a choice made on
+ * `ceruleanavi.net` is invisible to `radar.ceruleanavi.net` — no amount of
+ * care on this side can share it. A cookie on the parent domain is the only
+ * storage the whole network can see, so the appearance now follows a member
+ * between sites instead of being set once per host.
+ *
+ * localStorage is still written, for two reasons worth keeping: it is what
+ * makes the `storage` event fire, which is how other tabs on this origin find
+ * out; and it is what a member's existing choice is already stored in, so
+ * reading it as a fallback migrates them silently on their next visit rather
+ * than resetting everyone to "system" the day this ships.
+ */
 function readMode(): ThemeMode {
+  const fromCookie = readCookie(STORAGE_KEY);
+  if (fromCookie === "dark" || fromCookie === "light") return fromCookie;
+  // Absent from the cookie may mean "explicitly system" or "never seen this
+  // browser". Falling through to localStorage is what carries an existing
+  // choice over; `storeMode` clears both together, so a real "system" cannot
+  // be resurrected from the mirror.
   try {
     const stored = localStorage.getItem(STORAGE_KEY);
     return stored === "dark" || stored === "light" ? stored : "system";
@@ -50,6 +72,14 @@ function readMode(): ThemeMode {
     // fallback: it is what somebody who has expressed no preference wants.
     return "system";
   }
+}
+
+function readCookie(name: string): string | null {
+  if (typeof document === "undefined") return null;
+  const m = document.cookie.match(
+    new RegExp("(?:^|;\\s*)" + name + "=([^;]*)"),
+  );
+  return m ? decodeURIComponent(m[1]) : null;
 }
 
 function systemPrefersDark(): boolean {
@@ -140,7 +170,29 @@ export function useThemeMode(): Readonly<Ref<ThemeMode>> {
 }
 
 function storeMode(mode: ThemeMode) {
+  // The cookie first, because it is the one the rest of the network reads.
+  // `system` is stored as the *absence* of a value — that is the contract this
+  // module and ThemeScript.astro both implement — so it is a delete, not a
+  // third string.
+  if (typeof document !== "undefined") {
+    const domain = cookieDomainFor(window.location.hostname);
+    const scope =
+      `path=/;samesite=lax` +
+      (domain ? `;domain=${domain}` : "") +
+      (window.location.protocol === "https:" ? ";secure" : "");
+    if (mode === "system") {
+      // Clear both scopings: an older build wrote this host-only, and a
+      // host-only cookie shadows the shared one for that host forever.
+      document.cookie = `${STORAGE_KEY}=;path=/;max-age=0;samesite=lax`;
+      document.cookie = `${STORAGE_KEY}=;${scope};max-age=0`;
+    } else {
+      document.cookie = `${STORAGE_KEY}=;path=/;max-age=0;samesite=lax`;
+      document.cookie = `${STORAGE_KEY}=${mode};${scope};max-age=31536000`;
+    }
+  }
   try {
+    // The mirror. Keeps the `storage` event — and therefore other tabs on this
+    // origin — working, since a cookie write fires nothing.
     if (mode === "system") localStorage.removeItem(STORAGE_KEY);
     else localStorage.setItem(STORAGE_KEY, mode);
   } catch {
