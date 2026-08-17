@@ -11,7 +11,7 @@
  * caller supplies only one. Both controlled (v-model) and uncontrolled
  * (FormData via `name`) use are supported.
  */
-import { computed, useSlots } from "vue";
+import { computed, useId, useSlots } from "vue";
 
 const props = withDefaults(
   defineProps<{
@@ -47,7 +47,20 @@ defineEmits<{ (e: "update:modelValue", value: string): void }>();
 
 const slots = useSlots();
 
-const inputId = computed(() => props.id ?? props.name);
+/**
+ * Fall back to a generated id rather than trusting the call site.
+ *
+ * This was `props.id ?? props.name`, which is `undefined` when neither is
+ * passed — and then `<label for>` points at nothing, clicking the label does
+ * not focus the control, and a screen reader has no name to announce. Every
+ * call site that passes only `label` was in exactly that state, which is most
+ * of them: can-exam's bank editor alone had fifteen.
+ *
+ * `useId()` (Vue 3.5+) is stable across the SSR render and hydration; a random
+ * id would differ between the two and mismatch. Same reasoning as Toggle's.
+ */
+const generatedId = useId();
+const inputId = computed(() => props.id ?? props.name ?? generatedId);
 const hasLeading = computed(() => !!slots.leadingIcon);
 const hasTrailing = computed(() => !!slots.trailingIcon);
 const describedBy = computed(() => {
