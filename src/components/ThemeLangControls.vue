@@ -192,7 +192,7 @@ const buttonClass = "icon-button";
         :class="[
           'tap-row flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors',
           language.code === locale
-            ? 'font-semibold text-airwaysn'
+            ? 'font-semibold text-can'
             : 'text-muted hover:bg-surface-sunken hover:text-ink',
         ]"
         @click="changeLanguage(language.code)"

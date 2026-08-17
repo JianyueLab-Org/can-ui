@@ -207,7 +207,7 @@ onBeforeUnmount(() => {
             :class="[
               'tap-row flex flex-1 items-center justify-center truncate rounded-[calc(var(--radius-control)-2px)] px-2 py-1.5 text-center text-xs font-semibold transition-colors',
               workspace.key === activeWorkspace
-                ? 'bg-surface-raised text-airwaysn shadow-card'
+                ? 'bg-surface-raised text-can shadow-card'
                 : 'text-muted hover:text-ink',
             ]"
           >
@@ -256,7 +256,7 @@ onBeforeUnmount(() => {
             :class="[
               'tap-row flex flex-1 items-center justify-center truncate rounded-[calc(var(--radius-control)-2px)] px-2 py-1.5 text-center text-xs font-semibold transition-colors',
               workspace.key === activeWorkspace
-                ? 'bg-surface-raised text-airwaysn shadow-card'
+                ? 'bg-surface-raised text-can shadow-card'
                 : 'text-muted hover:text-ink',
             ]"
           >

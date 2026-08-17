@@ -40,7 +40,7 @@ const sizeClass = computed(
     :aria-label="label || 'Loading'"
   >
     <svg
-      :class="[sizeClass, 'animate-spin text-airwaysn']"
+      :class="[sizeClass, 'animate-spin text-can']"
       viewBox="0 0 24 24"
       fill="none"
       aria-hidden="true"

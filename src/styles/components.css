@@ -60,12 +60,12 @@
   }
 
   .btn-primary {
-    background-color: var(--color-airwaysn);
+    background-color: var(--color-can);
     color: #ffffff;
     box-shadow: var(--shadow-card);
   }
   .btn-primary:hover:not(:disabled) {
-    background-color: var(--color-airwaysn-dark);
+    background-color: var(--color-can-dark);
     color: #ffffff;
   }
 
@@ -86,11 +86,7 @@
     color: var(--color-info-fg);
   }
   .btn-soft:hover:not(:disabled) {
-    background-color: color-mix(
-      in srgb,
-      var(--color-airwaysn) 18%,
-      transparent
-    );
+    background-color: color-mix(in srgb, var(--color-can) 18%, transparent);
   }
 
   .btn-danger {
@@ -187,7 +183,7 @@
     border-color: var(--color-faint);
   }
   .input:focus {
-    border-color: var(--color-airwaysn);
+    border-color: var(--color-can);
     box-shadow: 0 0 0 3px var(--ring-brand);
   }
   .input-error {
@@ -338,26 +334,26 @@
      Anchors are NOT underlined globally — a blanket rule dashes every button
      and nav item on hover. Opt in here, or write inside .prose/.doc-content. */
   .link {
-    color: var(--color-airwaysn-600);
+    color: var(--color-can-600);
     text-decoration: underline;
     text-decoration-style: dashed;
     text-decoration-color: color-mix(
       in srgb,
-      var(--color-airwaysn) 55%,
+      var(--color-can) 55%,
       transparent
     );
     text-underline-offset: 0.25em;
     transition: color var(--duration-fast) var(--ease-out-quint);
   }
   .link:hover {
-    color: var(--color-airwaysn-700);
+    color: var(--color-can-700);
     text-decoration-color: currentColor;
   }
   .dark .link {
-    color: var(--color-airwaysn-300);
+    color: var(--color-can-300);
   }
   .dark .link:hover {
-    color: var(--color-airwaysn-200);
+    color: var(--color-can-200);
   }
 
   /* ── Skeleton ──────────────────────────────────────────────────────────
@@ -402,22 +398,22 @@
 --------------------------------------------------------------------------- */
 .doc-content a,
 .prose a {
-  color: var(--color-airwaysn-600);
+  color: var(--color-can-600);
   text-decoration: underline;
   text-decoration-style: dashed;
   text-underline-offset: 0.3em;
 }
 .doc-content a:hover,
 .prose a:hover {
-  color: var(--color-airwaysn-700);
+  color: var(--color-can-700);
 }
 .dark .doc-content a,
 .dark .prose a {
-  color: var(--color-airwaysn-300);
+  color: var(--color-can-300);
 }
 .dark .doc-content a:hover,
 .dark .prose a:hover {
-  color: var(--color-airwaysn-200);
+  color: var(--color-can-200);
 }
 
 /* A wide table inside long-form content scrolls the *page* sideways and takes

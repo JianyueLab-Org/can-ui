@@ -9,23 +9,23 @@
 
 @layer utilities {
   /* ── Brand ─────────────────────────────────────────────────────────── */
-  .bg-airwaysn {
-    background-color: var(--color-airwaysn);
+  .bg-can {
+    background-color: var(--color-can);
   }
-  .bg-airwaysn-dark {
-    background-color: var(--color-airwaysn-dark);
+  .bg-can-dark {
+    background-color: var(--color-can-dark);
   }
-  .text-airwaysn {
-    color: var(--color-airwaysn);
+  .text-can {
+    color: var(--color-can);
   }
-  .text-airwaysn-dark {
-    color: var(--color-airwaysn-dark);
+  .text-can-dark {
+    color: var(--color-can-dark);
   }
-  .border-airwaysn {
-    border-color: var(--color-airwaysn);
+  .border-can {
+    border-color: var(--color-can);
   }
-  .border-airwaysn-dark {
-    border-color: var(--color-airwaysn-dark);
+  .border-can-dark {
+    border-color: var(--color-can-dark);
   }
 
   /* ── Surfaces & borders ────────────────────────────────────────────────
@@ -353,13 +353,13 @@ h6 {
 }
 
 ::selection {
-  background: color-mix(in srgb, var(--color-airwaysn) 26%, transparent);
+  background: color-mix(in srgb, var(--color-can) 26%, transparent);
 }
 
 /* One keyboard-focus treatment for anything not styled by a component. The
    ring is offset rather than inset so it survives on a filled control. */
 :where(a, button, input, select, textarea, summary, [tabindex]):focus-visible {
-  outline: 2px solid var(--color-airwaysn);
+  outline: 2px solid var(--color-can);
   outline-offset: 2px;
   border-radius: var(--radius-control);
 }

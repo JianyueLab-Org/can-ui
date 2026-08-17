@@ -30,32 +30,32 @@
     "Liberation Mono", monospace;
 
   /* ── Brand ─────────────────────────────────────────────────────────────
-     Brand is `airwaysn`. Do NOT borrow Tailwind blue or indigo for brand UI —
+     Brand is `can`. Do NOT borrow Tailwind blue or indigo for brand UI —
      they are a different hue and the mix shows instantly on a page carrying
      both. */
-  --color-airwaysn: #4c92c1;
-  --color-airwaysn-dark: #3a7ba8;
+  --color-can: #4c92c1;
+  --color-can-dark: #3a7ba8;
   --color-green-500: #10b981;
   --color-red-500: #ef4444;
   --color-yellow-500: #f59e0b;
 
-  --color-airwaysn-hex: #4c92c1;
-  --color-airwaysn-dark-hex: #3a7ba8;
+  --color-can-hex: #4c92c1;
+  --color-can-dark-hex: #3a7ba8;
 
-  --color-airwaysn-50: #f0f6fa;
-  --color-airwaysn-100: #dceaf3;
-  --color-airwaysn-200: #bdd9ea;
-  --color-airwaysn-300: #93c0db;
-  --color-airwaysn-400: #6aa8cd;
-  --color-airwaysn-500: #4c92c1;
-  --color-airwaysn-600: #3a7ba8;
-  --color-airwaysn-700: #2f6488;
-  --color-airwaysn-800: #274f6b;
-  --color-airwaysn-900: #1e3c52;
+  --color-can-50: #f0f6fa;
+  --color-can-100: #dceaf3;
+  --color-can-200: #bdd9ea;
+  --color-can-300: #93c0db;
+  --color-can-400: #6aa8cd;
+  --color-can-500: #4c92c1;
+  --color-can-600: #3a7ba8;
+  --color-can-700: #2f6488;
+  --color-can-800: #274f6b;
+  --color-can-900: #1e3c52;
 
   /* ── The logo's two blues ──────────────────────────────────────────────
      These are the colours in the mark itself (src/assets/logo), and they are
-     **not** the same as `--color-airwaysn` above. The UI brand is #4c92c1;
+     **not** the same as `--color-can` above. The UI brand is #4c92c1;
      the mark is #2C5FA1 and #47B5FA — a deeper blue and a brighter sky blue.
 
      They are recorded separately rather than reconciled, because reconciling
@@ -63,10 +63,10 @@
      only the people who own the identity can say which: either the mark is the
      newer artwork and the UI ramp is stale, or the mark is deliberately richer
      than an interface colour is allowed to be — a logo is seen at 32px against
-     a known background, while `--color-airwaysn` has to carry buttons, focus
+     a known background, while `--color-can` has to carry buttons, focus
      rings and link text at every size against every surface, in both themes.
 
-     Until that is decided: **use `--color-airwaysn` for UI and these two for
+     Until that is decided: **use `--color-can` for UI and these two for
      the mark only.** Do not "fix" one to match the other in passing. */
   --color-brand-deep: #2c5fa1;
   --color-brand-sky: #47b5fa;
@@ -162,7 +162,7 @@
   --chrome: rgb(255 255 255 / 0.82);
   --border-subtle: #e7eaee;
   --border-strong: #d3d8e0;
-  --ring-brand: color-mix(in srgb, var(--color-airwaysn) 28%, transparent);
+  --ring-brand: color-mix(in srgb, var(--color-can) 28%, transparent);
 
   /* ── Materials ─────────────────────────────────────────────────────────
      Translucency is how hierarchy is expressed without drawing another box.

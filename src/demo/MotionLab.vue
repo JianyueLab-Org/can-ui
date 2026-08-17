@@ -132,7 +132,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", measureAll));
     <Card title="两个数字" subtitle="阻尼比与响应时间——不是质量／劲度／阻尼">
       <div ref="track" class="relative h-14 rounded-card bg-surface-sunken">
         <span
-          class="absolute top-2 size-10 rounded-control bg-airwaysn shadow-card"
+          class="absolute top-2 size-10 rounded-control bg-can shadow-card"
           :style="{ transform: `translateX(${knob}px)`, left: '8px' }"
         />
       </div>
@@ -151,7 +151,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", measureAll));
             min="0.3"
             max="1.4"
             step="0.02"
-            class="mt-2 w-full accent-[var(--color-airwaysn)]"
+            class="mt-2 w-full accent-[var(--color-can)]"
           />
           <span class="text-caption text-faint">
             1.00 = 临界阻尼，不过冲。越低越弹。
@@ -171,7 +171,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", measureAll));
             min="0.12"
             max="0.9"
             step="0.01"
-            class="mt-2 w-full accent-[var(--color-airwaysn)]"
+            class="mt-2 w-full accent-[var(--color-can)]"
           />
           <span class="text-caption text-faint">
             不是时长——弹簧没有固定时长。
@@ -224,7 +224,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", measureAll));
           </p>
           <div class="relative h-14 rounded-card bg-surface-sunken">
             <span
-              class="absolute left-2 top-2 size-10 rounded-control bg-airwaysn"
+              class="absolute left-2 top-2 size-10 rounded-control bg-can"
               :style="{ transform: `translateX(${springX}px)` }"
             />
           </div>
@@ -256,7 +256,7 @@ onBeforeUnmount(() => window.removeEventListener("resize", measureAll));
         />
         <span
           ref="puck"
-          class="absolute left-4 top-4 size-12 cursor-grab touch-none select-none rounded-card bg-airwaysn shadow-card-hover active:cursor-grabbing"
+          class="absolute left-4 top-4 size-12 cursor-grab touch-none select-none rounded-card bg-can shadow-card-hover active:cursor-grabbing"
           :style="{ transform: `translateX(${puckX}px)` }"
         />
       </div>
