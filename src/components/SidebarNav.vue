@@ -73,7 +73,7 @@ function toggleSection(name: string) {
 
 const baseItem =
   "group flex w-full items-center gap-x-3 rounded-control px-2.5 py-2 text-sm font-medium transition-colors duration-150";
-const activeItem = "bg-surface-raised text-airwaysn shadow-card";
+const activeItem = "bg-surface-raised text-can shadow-card";
 const idleItem = "text-muted hover:bg-surface-raised hover:text-ink";
 </script>
 
@@ -93,7 +93,7 @@ const idleItem = "text-muted hover:bg-surface-raised hover:text-ink";
             :class="[
               'size-5 shrink-0',
               isCurrentPath(item.href)
-                ? 'text-airwaysn'
+                ? 'text-can'
                 : 'text-faint group-hover:text-muted',
             ]"
           />
@@ -113,7 +113,7 @@ const idleItem = "text-muted hover:bg-surface-raised hover:text-ink";
               :class="[
                 'size-5 shrink-0',
                 sectionActive(item)
-                  ? 'text-airwaysn'
+                  ? 'text-can'
                   : 'text-faint group-hover:text-muted',
               ]"
             />
@@ -160,7 +160,7 @@ const idleItem = "text-muted hover:bg-surface-raised hover:text-ink";
                   :class="[
                     'tap-row ml-4 flex items-center truncate border-l-2 py-1.5 pl-4 pr-2 text-sm transition-colors duration-150',
                     isCurrentPath(subItem.href)
-                      ? 'border-airwaysn font-semibold text-airwaysn'
+                      ? 'border-can font-semibold text-can'
                       : 'border-[var(--border-subtle)] text-muted hover:border-strong hover:text-ink',
                   ]"
                 >
@@ -194,7 +194,7 @@ const idleItem = "text-muted hover:bg-surface-raised hover:text-ink";
               :class="[
                 'size-4 shrink-0',
                 isCurrentPath(item.href)
-                  ? 'text-airwaysn'
+                  ? 'text-can'
                   : 'text-faint group-hover:text-muted',
               ]"
             />

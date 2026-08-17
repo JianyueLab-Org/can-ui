@@ -46,7 +46,7 @@ withDefaults(
         <Icon :name="icon" class="size-6" />
       </span>
       <div class="min-w-0">
-        <p v-if="eyebrow" class="text-eyebrow mb-1.5 text-airwaysn">
+        <p v-if="eyebrow" class="text-eyebrow mb-1.5 text-can">
           {{ eyebrow }}
         </p>
         <h1 class="text-title-1 text-ink">

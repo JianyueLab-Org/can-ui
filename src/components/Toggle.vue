@@ -62,7 +62,7 @@ const trackClass = computed(() => [
   "tap-target relative inline-flex h-6 w-11 shrink-0 rounded-full border-2 border-transparent transition-colors duration-200 ease-[var(--ease-out-quint)]",
   // --border-strong swaps with the theme, so "off" stays legibly off on both
   // a white card and a #151c25 one.
-  props.modelValue ? "bg-airwaysn" : "bg-[var(--border-strong)]",
+  props.modelValue ? "bg-can" : "bg-[var(--border-strong)]",
   props.disabled ? "cursor-not-allowed opacity-50" : "cursor-pointer",
 ]);
 </script>
