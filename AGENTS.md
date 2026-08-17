@@ -22,7 +22,7 @@ had yet edited one.
 
 ## The adoption contract
 
-**Every token name that already existed keeps its spelling.** `--color-airwaysn`, `bg-surface`,
+**Every token name that already existed keeps its spelling.** `--color-can`, `bg-surface`,
 `text-ink`, `text-muted`, `border-subtle`, `rounded-card`, `.btn-primary`, `.badge-info`,
 `.skeleton`, `.data-table` — all unchanged. `src/styles/tokens.css` is a **superset** of can-web's
 `globals.css`, not a replacement for it.
@@ -334,12 +334,12 @@ print — and they only work **inlined**: an external SVG in an `<img>` cannot i
 them from the originals rather than editing them.
 
 > **Open question, deliberately not resolved here.** The mark's blues are `#2C5FA1` and `#47B5FA`
-> (`--color-brand-deep` / `--color-brand-sky`). The UI brand is `--color-airwaysn: #4c92c1`. These
+> (`--color-brand-deep` / `--color-brand-sky`). The UI brand is `--color-can: #4c92c1`. These
 > are genuinely different colours. Either the mark is newer artwork and the ramp is stale, or a
 > logo is allowed to be richer than an interface colour — a logo appears at 32px on a known
-> background, while `--color-airwaysn` carries buttons, focus rings and link text at every size on
+> background, while `--color-can` carries buttons, focus rings and link text at every size on
 > every surface in both themes. That is a brand decision, not a refactor. **Until it is made: UI
-> uses `airwaysn`, the mark uses its own two. Do not change one to match the other in passing.**
+> uses `can`, the mark uses its own two. Do not change one to match the other in passing.**
 
 **A question of naming.** These components dropped the `Base` prefix (`BaseButton` → `Button`).
 Inside a site's own `components/ui/` the prefix disambiguated a design-system button from a page
