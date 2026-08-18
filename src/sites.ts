@@ -167,9 +167,18 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     publicSite: true,
   },
   {
+    // 落在**首页**而不是 `/docs`。两个理由，第二个是硬的：
+    //
+    // 一，这一条名字叫「开发者中心」，那它就该指那个站的门厅 —— 接口文档是它里
+    // 面的一页。和上面主站那一条指首页而不是 `/pilots` 同理。
+    //
+    // 二，**`/docs` 现在要登录**（见 can-dev 的 `PROTECTED`），而这一条是
+    // `publicSite: true`。继续指着 `/docs`，就等于在每个站的菜单里给未登录访客
+    // 画一条必然撞上登录墙的链接 —— 那正是 `minRating` 存在要避免的事。首页是公
+    // 开的：它说明这个站是什么，并且自己带着登录入口和一条去 `/docs` 的链接。
     key: "dev",
     origin: "https://platform.ceruleanavi.net",
-    path: "/docs",
+    path: "/",
     icon: "commandLine",
     section: "network",
     publicSite: true,
