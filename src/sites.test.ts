@@ -80,7 +80,7 @@ const keysOf = (sites: { key: SiteKey }[]) => sites.map((s) => s.key);
 
 test("signed out sees only the public sites", () => {
   const keys = keysOf(visibleSites({ locale: "zh-cn" }));
-  expect(keys).toEqual(["radar", "docs", "dev"]);
+  expect(keys).toEqual(["radar", "web", "docs", "dev"]);
 });
 
 test("a plain member sees everything except the gated two", () => {

@@ -111,13 +111,6 @@ export const RATING_ADMIN = 12;
  */
 export const NETWORK_SITES: readonly NetworkSite[] = [
   {
-    key: "web",
-    origin: "https://ceruleanavi.net",
-    path: "/pilots",
-    icon: "paperAirplane",
-    section: "flight",
-  },
-  {
     key: "efb",
     origin: "https://efb.ceruleanavi.net",
     path: "/",
@@ -155,6 +148,17 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     minRating: RATING_INSTRUCTOR,
   },
   {
+    // 主站是网络的门厅，不是「飞行」那一栏的一件工具 —— 飞行员面板是它里面的一
+    // 页，由分区切换器负责。这里指首页而不是 /pilots，而且**是公开的**：把它写成
+    // 会员专属会让一个登出的访客在卫星站上彻底失去回主站的路。
+    key: "web",
+    origin: "https://ceruleanavi.net",
+    path: "/",
+    icon: "home",
+    section: "network",
+    publicSite: true,
+  },
+  {
     key: "docs",
     origin: "https://docs.ceruleanavi.net",
     path: "/",
@@ -187,12 +191,13 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
  * so the menu is the *complement* of the switcher rather than a second copy of
  * it. Listing a destination twice in one bar does not make it easier to find;
  * it makes the bar longer.
+ *
+ * **`web` is deliberately not in this list.** The switcher's pilot entry goes to
+ * `/pilots` and the menu's entry goes to `/` — the panel and the front door are
+ * different destinations, and dropping the second would leave a signed-out
+ * visitor on a satellite with no way back to the main site at all.
  */
-export const WORKSPACE_SITE_KEYS: readonly SiteKey[] = [
-  "web",
-  "controller",
-  "exam",
-];
+export const WORKSPACE_SITE_KEYS: readonly SiteKey[] = ["controller", "exam"];
 
 /**
  * Where the community actually talks, and where the code is.
@@ -249,7 +254,7 @@ export interface SiteLabel {
 type LabelTable = Readonly<Record<SiteKey, SiteLabel>>;
 
 const ZH_CN: LabelTable = {
-  web: { name: "飞行员面板", tagline: "飞行记录与积分" },
+  web: { name: "主站", tagline: "面板、名册与活动" },
   efb: { name: "电子飞行包", tagline: "飞行计划与气象" },
   radar: { name: "在线雷达", tagline: "实时在线流量" },
   controller: { name: "管制员中心", tagline: "ATIS 与席位预约" },
@@ -261,7 +266,7 @@ const ZH_CN: LabelTable = {
 };
 
 const ZH_TW: LabelTable = {
-  web: { name: "飛行員面板", tagline: "飛行記錄與積分" },
+  web: { name: "主站", tagline: "面板、名冊與活動" },
   efb: { name: "電子飛行包", tagline: "飛行計畫與氣象" },
   radar: { name: "線上雷達", tagline: "即時線上流量" },
   controller: { name: "管制員中心", tagline: "ATIS 與席位預約" },
@@ -273,7 +278,7 @@ const ZH_TW: LabelTable = {
 };
 
 const EN_US: LabelTable = {
-  web: { name: "Pilot Panel", tagline: "Logbook and points" },
+  web: { name: "Main Site", tagline: "Panel, roster and events" },
   efb: { name: "Flight Bag", tagline: "Flight plans and weather" },
   radar: { name: "Live Radar", tagline: "Traffic online now" },
   controller: { name: "Controller Centre", tagline: "ATIS and bookings" },
@@ -285,7 +290,7 @@ const EN_US: LabelTable = {
 };
 
 const JA_JP: LabelTable = {
-  web: { name: "パイロットパネル", tagline: "飛行記録とポイント" },
+  web: { name: "メインサイト", tagline: "パネル・名簿・イベント" },
   efb: { name: "電子フライトバッグ", tagline: "飛行計画と気象" },
   radar: { name: "オンラインレーダー", tagline: "リアルタイム交通" },
   controller: { name: "管制官センター", tagline: "ATIS と席予約" },
