@@ -56,6 +56,25 @@ const headings = computed(() => sectionHeadings(props.locale));
 const community = computed(() => communityLinks(props.locale));
 
 /**
+ * 版权年份 —— `2025` 或 `2025–2026`，不是写死的那个开站年份。
+ *
+ * 从前这一行是 `© {{ since }}`，而 `since` 默认 2025：于是 2026 年整整一年，
+ * 全网每一个站的每一页底部都写着 `© 2025`。这类东西不会有人报 —— 它不报错、不
+ * 变红、不影响任何功能，只是每天都比昨天更旧一点。
+ *
+ * 结束年份取渲染时的当前年，**只在它比 `since` 大的时候才写出来**：开站当年一
+ * 个 `© 2025–2025` 比不写还难看。can-docs 的页脚早就是 `2025–2026` 手写的，这
+ * 里补上之后九个站终于说同一句话。
+ *
+ * 时区用服务端/浏览器本地的那个。跨年那一刻可能有几小时的偏差，那是这一行**唯
+ * 一**能出的错，而它比一个整年都不动的常量小得多。
+ */
+const copyrightYears = computed(() => {
+  const now = new Date().getFullYear();
+  return now > props.since ? `${props.since}–${now}` : `${props.since}`;
+});
+
+/**
  * The current site is dropped rather than marked. In a menu "you are here" is
  * useful; in a footer it is a link that does nothing.
  */
@@ -134,7 +153,8 @@ const columns = computed(() =>
         class="mt-14 flex flex-col gap-2 border-t border-subtle pt-8 sm:flex-row sm:items-center sm:justify-between"
       >
         <p class="text-sm text-faint">
-          &copy; {{ since }} Cerulean Aviation Network. All rights reserved.
+          &copy; {{ copyrightYears }} Cerulean Aviation Network. All rights
+          reserved.
         </p>
         <p class="text-sm text-faint">
           Powered by
