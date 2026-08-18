@@ -24,7 +24,7 @@
 import { computed } from "vue";
 import Icon from "./Icon.vue";
 import Popover from "./Popover.vue";
-import { visibleSites, type SiteKey } from "../sites";
+import { sectionHeadings, visibleSites, type SiteKey } from "../sites";
 
 const props = withDefaults(
   defineProps<{
@@ -43,12 +43,22 @@ const props = withDefaults(
      * with no switcher pass nothing and get the whole network.
      */
     exclude?: SiteKey[];
-    /** Trigger label. The site's own dictionary owns this one word. */
-    label: string;
+    /**
+     * Trigger label. Defaults to the locale's word for the network.
+     *
+     * A site can override it, but should not need to: the control names the
+     * *network*, and one that reads 全网 on one host and 更多 on the next is
+     * two controls as far as a member is concerned.
+     */
+    label?: string;
     /** Compact trigger — icon only, for a crowded bar. */
     compact?: boolean;
   }>(),
   { signedIn: false, exclude: () => [], compact: false },
+);
+
+const triggerLabel = computed(
+  () => props.label ?? sectionHeadings(props.locale).menuLabel,
 );
 
 const sites = computed(() => {
@@ -73,7 +83,7 @@ const sites = computed(() => {
     v-if="sites.length"
     placement="bottom-end"
     width="19rem"
-    :label="label"
+    :label="triggerLabel"
   >
     <template #trigger="{ toggle, open }">
       <button
@@ -84,7 +94,7 @@ const sites = computed(() => {
         @click="toggle"
       >
         <Icon name="squaresPlus" class="size-5" />
-        <span :class="compact ? 'sr-only' : ''">{{ label }}</span>
+        <span :class="compact ? 'sr-only' : ''">{{ triggerLabel }}</span>
         <Icon
           v-if="!compact"
           name="chevronDown"

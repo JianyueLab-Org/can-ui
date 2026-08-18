@@ -1,7 +1,10 @@
 import { expect, test } from "bun:test";
 import {
+  COMMUNITY_LINKS,
   NETWORK_SITES,
   SITE_LABELS,
+  communityLinks,
+  sectionHeadings,
   siteLabels,
   siteUrl,
   sitesBySection,
@@ -149,4 +152,40 @@ test("sections keep declaration order and drop empty columns", () => {
   // Signed out there is no ATC column at all — every entry in it needs a session.
   const anon = sitesBySection({ locale: "zh-cn" });
   expect(anon.map((g) => g.section)).toEqual(["flight", "network"]);
+});
+
+/**
+ * The footer's headings and the menu's trigger word are here for the same
+ * reason the site names are, and they fail the same way: a locale missing one
+ * renders the English word next to Chinese labels, which reads as a
+ * half-translated page rather than as a bug.
+ */
+test("every locale has every heading, including the menu's own word", () => {
+  for (const { code } of LANGUAGES) {
+    const h = sectionHeadings(code);
+    for (const field of [
+      "flight",
+      "atc",
+      "network",
+      "community",
+      "description",
+      "menuLabel",
+    ] as const) {
+      expect(h[field]?.length).toBeGreaterThan(0);
+    }
+  }
+});
+
+test("community links are named in every locale and are absolute", () => {
+  for (const { code } of LANGUAGES) {
+    const links = communityLinks(code);
+    expect(links.length).toBe(COMMUNITY_LINKS.length);
+    for (const link of links) {
+      expect(link.name.length).toBeGreaterThan(0);
+      expect(link.href.startsWith("https://")).toBe(true);
+      // The rename left `https://github.com/Cerulean Aviation Network/` in two
+      // footers. A URL with a space in it is the one this pins.
+      expect(link.href).not.toContain(" ");
+    }
+  }
 });

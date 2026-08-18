@@ -331,6 +331,15 @@ export interface SectionHeadings {
   community: string;
   /** One sentence under the logo. */
   description: string;
+  /**
+   * The network menu's trigger word.
+   *
+   * Here rather than in each site's dictionary for the same reason as the rest
+   * of this table: it names the *network*, not the site, and a control that
+   * reads 全网 on one host and 更多 on the next is two controls as far as a
+   * member is concerned.
+   */
+  menuLabel: string;
 }
 
 const HEADINGS: Readonly<Record<string, SectionHeadings>> = {
@@ -339,6 +348,7 @@ const HEADINGS: Readonly<Record<string, SectionHeadings>> = {
     atc: "管制",
     network: "网络",
     community: "社区",
+    menuLabel: "全网",
     description: "Cerulean Aviation Network —— 面向飞行模拟爱好者的空管网络。",
   },
   "zh-tw": {
@@ -346,6 +356,7 @@ const HEADINGS: Readonly<Record<string, SectionHeadings>> = {
     atc: "管制",
     network: "網路",
     community: "社群",
+    menuLabel: "全網",
     description: "Cerulean Aviation Network —— 面向飛行模擬愛好者的空管網路。",
   },
   "en-us": {
@@ -353,6 +364,7 @@ const HEADINGS: Readonly<Record<string, SectionHeadings>> = {
     atc: "Controlling",
     network: "Network",
     community: "Community",
+    menuLabel: "Network",
     description:
       "Cerulean Aviation Network — an air traffic control network for flight simulation.",
   },
@@ -361,6 +373,7 @@ const HEADINGS: Readonly<Record<string, SectionHeadings>> = {
     atc: "管制",
     network: "ネットワーク",
     community: "コミュニティ",
+    menuLabel: "ネットワーク",
     description:
       "Cerulean Aviation Network —— フライトシミュレーションのための航空管制ネットワーク。",
   },
