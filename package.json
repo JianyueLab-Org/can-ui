@@ -1,6 +1,6 @@
 {
   "name": "@jianyuelab-org/can-ui",
-  "version": "0.3.2",
+  "version": "0.3.3",
   "type": "module",
   "description": "Cerulean Aviation Network design system — tokens, motion and Vue primitives shared by every CAN web component.",
   "license": "UNLICENSED",
@@ -36,6 +36,7 @@
     "./icons": "./src/icons.ts",
     "./i18n": "./src/i18n.ts",
     "./nav": "./src/nav.ts",
+    "./sites": "./src/sites.ts",
     "./components/*": "./src/components/*",
     "./assets/*": "./src/assets/*"
   },

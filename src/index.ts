@@ -56,9 +56,38 @@ export { default as CommandPalette } from "./components/CommandPalette.vue";
 export type { CommandItem } from "./components/CommandPalette.vue";
 export { default as ThemeLangControls } from "./components/ThemeLangControls.vue";
 export { default as ThemeToggle } from "./components/ThemeToggle.vue";
+export { default as NetworkMenu } from "./components/NetworkMenu.vue";
+export { default as SiteFooter } from "./components/SiteFooter.vue";
 
 /* Navigation data shapes */
 export type { NavItem, NavChild, NavSecondary, Workspace } from "./nav";
+
+/* The network's map of itself. Unlike everything else here this carries
+   strings — see the header of sites.ts for why that exception is deliberate. */
+export {
+  NETWORK_SITES,
+  SITE_BY_KEY,
+  SITE_LABELS,
+  COMMUNITY_LINKS,
+  WORKSPACE_SITE_KEYS,
+  RATING_INSTRUCTOR,
+  RATING_ADMIN,
+  siteUrl,
+  siteLabel,
+  siteLabels,
+  sectionHeadings,
+  communityLinks,
+  visibleSites,
+  sitesBySection,
+  type SiteKey,
+  type SiteSection,
+  type NetworkSite,
+  type SiteLabel,
+  type ResolvedSite,
+  type SiteListOptions,
+  type SectionHeadings,
+  type CommunityLink,
+} from "./sites";
 
 /* i18n */
 export {

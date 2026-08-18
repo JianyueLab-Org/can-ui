@@ -73,6 +73,7 @@ src/
   icons.ts     the union of all six sites' icon tables, plus what the chrome needed
   i18n.ts      createTranslator + the chrome's own string keys
   nav.ts       NavItem / NavSecondary / Workspace — the shell's data shapes
+  sites.ts     the nine sites, their labels and who may see each — see below
   demo/        the gallery's islands (not exported)
   pages/       the gallery: / · /motion · /tokens · /brand · /shell
 ```
@@ -294,6 +295,35 @@ Two fixes went in on the way, both real bugs rather than tidying:
   the member has explicitly toggled is left alone rather than being re-opened under them.
 - **`useOverlay`'s scroll lock is reference-counted.** A sheet opened from inside a dialog used to
   restore `overflow` when _it_ closed, letting the page scroll behind the dialog still open.
+
+### `sites.ts` — the network's map of itself, and the one place strings live
+
+`NetworkMenu` and `SiteFooter` are the second thing lifted here for the reason `ThemeLangControls`
+was, and the drift had already happened by the time they were. "Which sites exist and how do I link
+to one" was written down independently in can-web, can-controller, can-portal and can-efb, and
+**not written down at all** in can-exam, can-dev and can-radar. Measured rather than assumed: the
+exam centre linked to one other site, the radar — the most public page on the network — linked to
+none, and the section switcher offered three destinations out of nine. Getting from the radar to the
+flight bag required knowing a hostname.
+
+Both copies of the footer also carried the same broken link — `https://github.com/Cerulean Aviation
+Network/`, a URL with two spaces in it, left by the AirwaySN rename and shipped on every page of two
+sites, because nothing type-checks a string that happens to be a URL. It is one constant now.
+
+**This module carries strings, and that is a deliberate exception to the i18n rule.** Everywhere else
+the site owns the dictionary and can-ui only knows how to read one. These strings name can-ui's
+_peers_: "在线雷达" is not a phrase the radar gets to write differently from the way the exam centre
+writes it, the same way `LANGUAGES` carries each language's endonym instead of asking seven sites to
+spell 日本語. Pushed out, it is nine names × four locales × seven sites — 252 strings kept in step by
+memory, where the first one to drift is the one nobody notices. What a site says about **itself**
+still belongs to the site.
+
+Two things it deliberately does not do. `minRating` is **a hint for drawing a menu, not a guard** —
+the listed sites check their own sessions and can-api checks every route; its only job is to keep a
+link out of a menu when following it would certainly 403. And a **missing** rating hides more rather
+than less, with an explicit `typeof` check, because `undefined >= 8` being false is luck rather than
+intent. `src/sites.test.ts` pins both, along with every locale having every label and every icon
+naming a real path — none of which throws when wrong, which is why they are tested.
 
 ### Still not here
 
