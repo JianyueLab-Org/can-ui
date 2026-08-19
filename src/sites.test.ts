@@ -71,6 +71,22 @@ test("siteUrl joins origin and path, and takes an override", () => {
   );
 });
 
+/**
+ * 每一条**公开**的落点都必须是那个站上不需要登录的地址。
+ *
+ * 这条测试是因为 `dev` 曾经指着 `/docs` 而写的：接口文档后来加了登录门槛，于是
+ * 那一条 `publicSite: true` 的菜单项对每一个未登录访客都是一堵登录墙 —— 恰恰是
+ * `minRating` 存在要避免的那种链接。断言写成「公开站点一律落在自己的首页」，因
+ * 为一个站的首页是它唯一能保证不设防的地址；要指某个子路径，就得先回答那一页是
+ * 不是也公开，而那个问题正是上一次答错的。
+ */
+test("public entries land on a page that needs no session", () => {
+  for (const site of NETWORK_SITES) {
+    if (!site.publicSite) continue;
+    expect(site.path).toBe("/");
+  }
+});
+
 /* ------------------------------------------------------------------ *
  * Visibility. The rule is "a menu never offers a link that will 403",
  * and the direction of failure matters more than the rule.
