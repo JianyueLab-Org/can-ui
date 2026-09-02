@@ -1,6 +1,7 @@
 import { expect, test } from "bun:test";
 import {
   COMMUNITY_LINKS,
+  ICP_FILING,
   NETWORK_SITES,
   SITE_LABELS,
   communityLinks,
@@ -204,4 +205,17 @@ test("community links are named in every locale and are absolute", () => {
       expect(link.href).not.toContain(" ");
     }
   }
+});
+
+/**
+ * 备案号是这个文件里最沉默的一条：抄错一个字符，页面照常渲染、构建照常通过、
+ * 没有任何东西会变红 —— 只是它不再是一个能核验的备案号。所以形状在这里钉住。
+ */
+test("the ICP filing keeps its shape: a numbered suffix and the official lookup", () => {
+  // 省份前缀 + ICP备 + 数字 + 号 + 网站序号。序号不是可选的：主体号本身不标识
+  // 某一个网站，少了它挂在页面上是不合规的。
+  expect(ICP_FILING.number).toMatch(/^[\u4e00-\u9fa5]+ICP备\d+号-\d+$/);
+
+  // 必须指向工信部的公开查询入口。指向站内页面等于自己证明自己。
+  expect(ICP_FILING.href).toBe("https://beian.miit.gov.cn/");
 });
