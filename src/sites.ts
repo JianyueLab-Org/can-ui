@@ -232,6 +232,33 @@ export const COMMUNITY_LINKS: readonly CommunityLink[] = [
   { key: "discord", href: "https://discord.gg/uWxEtNEVp9" },
 ];
 
+/**
+ * 中国大陆 ICP 备案号，全网一个常量。
+ *
+ * 备案号按规定要在**每一页**的页面底部显示，并链到工信部的查询入口。这里是一
+ * 个常量而不是九份手抄，理由和 `COMMUNITY_LINKS` 是同一条，而且更硬：一个抄错
+ * 的备案号不报错、不变红、不影响任何功能 —— 它和那个带空格的 GitHub URL 属于
+ * 同一类字符串，只是这一个错了是合规问题而不是死链。
+ *
+ * **`number` 里的 `-3` 是网站序号，不是版本号。** 主体备案号是
+ * `浙ICP备2026064687号`，后缀标识该主体名下的第几个网站，每个网站对应自己那一
+ * 份域名清单。换域名或新增站点时改的是这个后缀，不是随便跟着版本走的东西。
+ *
+ * 链接目标必须是 `beian.miit.gov.cn` 而不是站内页面：规定要的是能核验，指向自
+ * 己的页面等于自己证明自己。
+ */
+export interface IcpFiling {
+  /** The filing number, shown verbatim. */
+  number: string;
+  /** The public lookup service the number must link to. */
+  href: string;
+}
+
+export const ICP_FILING: IcpFiling = {
+  number: "浙ICP备2026064687号-3",
+  href: "https://beian.miit.gov.cn/",
+};
+
 /** Indexed lookup, for the common case of "where does this key live". */
 export const SITE_BY_KEY: Readonly<Record<SiteKey, NetworkSite>> =
   Object.fromEntries(NETWORK_SITES.map((s) => [s.key, s])) as Record<

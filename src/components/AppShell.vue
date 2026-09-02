@@ -33,6 +33,7 @@ import Drawer from "./Drawer.vue";
 import SidebarNav from "./SidebarNav.vue";
 import ThemeLangControls from "./ThemeLangControls.vue";
 import CommandPalette, { type CommandItem } from "./CommandPalette.vue";
+import BeianLine from "./BeianLine.vue";
 import { createTranslator, CHROME_MESSAGES } from "../i18n";
 import { useMediaQuery } from "../composables/usePreferences";
 import type { NavChild, NavItem, NavSecondary, Workspace } from "../nav";
@@ -389,9 +390,19 @@ onBeforeUnmount(() => {
         </div>
       </main>
 
-      <footer v-if="$slots.footer" class="border-t border-subtle">
+      <!--
+        页脚**始终**渲染，因为备案号必须出现在每一页上。
+
+        从前这里是 `v-if="$slots.footer"`，而用 AppShell 的四个站没有一个传过
+        这个插槽 —— 也就是说这条页脚写好之后一次都没有出现过。插槽本身保留：
+        有话要说的站把它放在备案号上面，没有的站就只有那一行。
+      -->
+      <footer class="border-t border-subtle">
         <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
           <slot name="footer" />
+          <div :class="$slots.footer ? 'mt-4' : undefined">
+            <BeianLine />
+          </div>
         </div>
       </footer>
     </div>

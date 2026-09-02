@@ -35,6 +35,7 @@ import {
   sitesBySection,
   type SiteKey,
 } from "../sites";
+import BeianLine from "./BeianLine.vue";
 
 const props = withDefaults(
   defineProps<{
@@ -155,6 +156,11 @@ const columns = computed(() =>
         <p class="text-sm text-faint">
           &copy; {{ copyrightYears }} Cerulean Aviation Network. All rights
           reserved.
+          <!--
+            备案号跟在版权后面而不是自成一行：两者是同一类东西（法定标识），
+            而且在手机上 sm 以下这一栏本来就是竖排的，多一行只是把页脚拉长。
+          -->
+          <BeianLine class="ml-1" />
         </p>
         <p class="text-sm text-faint">
           Powered by
