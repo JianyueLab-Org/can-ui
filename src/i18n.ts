@@ -86,6 +86,10 @@ export const CHROME_MESSAGES: Record<string, unknown> = {
   openSidebar: "Open sidebar",
   closeSidebar: "Close sidebar",
   close: "Close",
+  /** AlertBox's dismiss control — a banner is closed, not navigated away from. */
+  dismiss: "Dismiss",
+  /** The rail's landmark name, read out when a screen reader lists regions. */
+  sidebar: "Sidebar",
   openUserMenu: "Open user menu",
   workspace: {
     label: "Workspace",

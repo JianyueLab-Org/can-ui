@@ -12,6 +12,7 @@
  * every breakpoint.
  */
 import Icon from "./Icon.vue";
+import type { IconName } from "../icons";
 
 withDefaults(
   defineProps<{
@@ -20,7 +21,7 @@ withDefaults(
     /** Small uppercase label above the title. */
     eyebrow?: string;
     /** ICON_PATHS key rendered in a brand tile beside the title. */
-    icon?: string;
+    icon?: IconName;
     /** Adds the bottom rule used on list/table pages. */
     divided?: boolean;
     /** Drops the bottom margin, for parents that space their own children. */

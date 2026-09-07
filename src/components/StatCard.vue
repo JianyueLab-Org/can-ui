@@ -9,12 +9,13 @@
  */
 import { computed } from "vue";
 import Icon from "./Icon.vue";
+import type { IconName } from "../icons";
 
 const props = withDefaults(
   defineProps<{
     label: string;
     value: string | number;
-    icon?: string;
+    icon?: IconName;
     accent?: "info" | "success" | "warning" | "danger" | "neutral";
     /** Small caption under the value — counts, units, freshness. */
     hint?: string;

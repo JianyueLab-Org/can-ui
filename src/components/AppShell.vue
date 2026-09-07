@@ -184,6 +184,7 @@ onBeforeUnmount(() => {
       side="left"
       width="17rem"
       :label="t('openSidebar')"
+      :messages="messages"
     >
       <template #header>
         <a :href="homeHref" class="-m-1.5 block p-1.5">
@@ -220,6 +221,7 @@ onBeforeUnmount(() => {
           :navigation="navigation"
           :pathname="pathname"
           :secondary="secondary"
+          :messages="messages"
         />
       </div>
     </Drawer>
@@ -269,6 +271,7 @@ onBeforeUnmount(() => {
           :navigation="navigation"
           :pathname="pathname"
           :secondary="secondary"
+          :messages="messages"
         />
       </div>
     </div>

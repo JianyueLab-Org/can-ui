@@ -25,13 +25,24 @@
 import { reactive, watch } from "vue";
 import Icon from "./Icon.vue";
 import type { NavItem, NavSecondary } from "../nav";
+import { createTranslator, CHROME_MESSAGES } from "../i18n";
 
-const props = defineProps<{
-  navigation: NavItem[];
-  /** Current path — `Astro.url.pathname` at the call site. */
-  pathname: string;
-  secondary?: NavSecondary;
-}>();
+const props = withDefaults(
+  defineProps<{
+    navigation: NavItem[];
+    /** Current path — `Astro.url.pathname` at the call site. */
+    pathname: string;
+    secondary?: NavSecondary;
+    /**
+     * Dictionary for the strings this component renders itself. can-ui never
+     * picks a locale; the site owns the dictionary. See `src/i18n.ts`.
+     */
+    messages?: Record<string, unknown>;
+  }>(),
+  { messages: () => ({}) },
+);
+
+const t = createTranslator(props.messages, CHROME_MESSAGES);
 
 function isCurrentPath(href?: string): boolean {
   if (!href || href === "#" || href.startsWith("http")) return false;
@@ -78,7 +89,7 @@ const idleItem = "text-muted hover:bg-surface-raised hover:text-ink";
 </script>
 
 <template>
-  <nav class="flex flex-1 flex-col" aria-label="Sidebar">
+  <nav class="flex flex-1 flex-col" :aria-label="t('sidebar')">
     <ul role="list" class="-mx-1 space-y-0.5">
       <li v-for="item in navigation" :key="item.name">
         <!-- Leaf -->

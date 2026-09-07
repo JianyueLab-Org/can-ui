@@ -11,10 +11,12 @@
  * whose labels do not predict their contents costs a click every time.
  */
 
+import type { IconName } from "./icons";
+
 export interface NavChild {
   name: string;
   href: string;
-  icon?: string;
+  icon?: IconName;
 }
 
 export interface NavItem {
@@ -22,7 +24,7 @@ export interface NavItem {
   /** Omit on a group — an item with `children` and no `href` is a section. */
   href?: string;
   /** ICON_PATHS key. */
-  icon: string;
+  icon: IconName;
   children?: NavChild[];
 }
 
@@ -49,5 +51,5 @@ export interface Workspace {
   name: string;
   href: string;
   /** Used by the command palette, which has room for one. */
-  icon: string;
+  icon: IconName;
 }

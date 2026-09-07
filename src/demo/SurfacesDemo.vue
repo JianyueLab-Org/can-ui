@@ -75,9 +75,9 @@ const lastDetent = ref<number | null>(null);
             <div class="p-2">
               <Input name="q" placeholder="搜索机场…" />
             </div>
-            <ListRow label="仅显示已连线" chevron @click="close" />
-            <ListRow label="仅本管制区" chevron @click="close" />
-            <ListRow label="含模拟机会话" chevron @click="close" />
+            <ListRow label="仅显示已连线" @click="close" />
+            <ListRow label="仅本管制区" @click="close" />
+            <ListRow label="含模拟机会话" @click="close" />
           </template>
         </Popover>
 
@@ -91,18 +91,12 @@ const lastDetent = ref<number | null>(null);
             </Button>
           </template>
           <template #default="{ close }">
-            <ListRow
-              label="个人资料"
-              icon="userCircle"
-              chevron
-              @click="close"
-            />
-            <ListRow label="偏好设置" icon="cog6Tooth" chevron @click="close" />
+            <ListRow label="个人资料" icon="userCircle" @click="close" />
+            <ListRow label="偏好设置" icon="cog6Tooth" @click="close" />
             <ListRow
               label="退出登录"
               icon="arrowRightOnRectangle"
               destructive
-              chevron
               @click="close"
             />
           </template>

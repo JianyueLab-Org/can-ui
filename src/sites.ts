@@ -46,6 +46,8 @@
  * nothing.
  */
 
+import type { IconName } from "./icons";
+
 /** Every site in the network. Keys are stable — sites store them. */
 export type SiteKey =
   | "web"
@@ -75,7 +77,7 @@ export interface NetworkSite {
   /** Path on that origin the entry points at. Always starts with "/". */
   path: string;
   /** ICON_PATHS key. */
-  icon: string;
+  icon: IconName;
   section: SiteSection;
   /**
    * Hide the entry below this rating. A drawing hint, never a guard — see the
@@ -479,7 +481,7 @@ export function siteLabel(locale: string, key: SiteKey): SiteLabel {
 export interface ResolvedSite extends SiteLabel {
   key: SiteKey;
   href: string;
-  icon: string;
+  icon: IconName;
   section: SiteSection;
   /** True when this entry is the site the member is looking at. */
   current: boolean;

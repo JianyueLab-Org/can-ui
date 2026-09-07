@@ -1,3 +1,4 @@
+import type { IconName } from "../icons";
 import { readonly, ref, type Ref } from "vue";
 import { prefersReducedMotion } from "../motion/spring";
 import { cookieDomainFor } from "../i18n";
@@ -339,7 +340,7 @@ export function toggleTheme(event: MouseEvent, current: boolean): boolean {
 export const THEME_MODES: ThemeMode[] = ["light", "dark", "system"];
 
 /** ICON_PATHS key for each mode. */
-export const THEME_ICONS: Record<ThemeMode, string> = {
+export const THEME_ICONS: Record<ThemeMode, IconName> = {
   light: "sun",
   dark: "moon",
   system: "computerDesktop",

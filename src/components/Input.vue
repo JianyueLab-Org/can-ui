@@ -43,7 +43,30 @@ const props = withDefaults(
   { type: "text", required: false, disabled: false, readonly: false },
 );
 
-defineEmits<{ (e: "update:modelValue", value: string): void }>();
+const emit = defineEmits<{
+  (e: "update:modelValue", value: string | number): void;
+}>();
+
+/**
+ * Emit the type the model was declared with.
+ *
+ * `modelValue` has always been `string | number`, but the emit was typed — and
+ * behaved — as `string` only. So `<Input type="number" v-model="rating" />`
+ * against a `ref<number>` replaced the number with a string on the first
+ * keystroke, and every later `rating + 1` silently concatenated instead of
+ * adding. Nothing failed loudly and nothing type-checked it, because the
+ * declared prop type accepted both.
+ *
+ * A numeric field therefore parses, and falls back to the raw string when the
+ * parse does not round-trip — mid-typing states like "", "-" and "1e" have no
+ * sensible number, and emitting `NaN` for them would be worse than a string.
+ * This is the rule Vue's own `v-model.number` uses.
+ */
+function toModel(raw: string): string | number {
+  if (props.type !== "number") return raw;
+  const parsed = Number.parseFloat(raw);
+  return Number.isNaN(parsed) || String(parsed) !== raw.trim() ? raw : parsed;
+}
 
 const slots = useSlots();
 
@@ -111,7 +134,10 @@ const describedBy = computed(() => {
           disabled ? 'cursor-not-allowed opacity-50' : '',
         ]"
         @input="
-          $emit('update:modelValue', ($event.target as HTMLInputElement).value)
+          emit(
+            'update:modelValue',
+            toModel(($event.target as HTMLInputElement).value),
+          )
         "
       />
       <span

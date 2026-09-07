@@ -16,7 +16,7 @@
  * glyph — the stroke width is set once on the <svg> and a filled path drawn
  * with it comes out as a blob.
  */
-export const ICON_PATHS: Record<string, string> = {
+export const ICON_PATHS = {
   academicCap:
     "M4.26 10.147a60.438 60.438 0 0 0-.491 6.347A48.62 48.62 0 0 1 12 20.904a48.62 48.62 0 0 1 8.232-4.41 60.46 60.46 0 0 0-.491-6.347m-15.482 0a50.636 50.636 0 0 0-2.658-.813A59.906 59.906 0 0 1 12 3.493a59.903 59.903 0 0 1 10.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.717 50.717 0 0 1 12 13.489a50.702 50.702 0 0 1 7.74-3.342M6.75 15a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm0 0v-3.675A55.378 55.378 0 0 1 12 8.443m-7.007 11.55A5.981 5.981 0 0 0 6.75 15.75v-1.5",
   adjustments:
@@ -120,9 +120,16 @@ export const ICON_PATHS: Record<string, string> = {
   xCircle:
     "m9.75 9.75 4.5 4.5m0-4.5-4.5 4.5M21 12a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z",
   xMark: "M6 18 18 6M6 6l12 12",
-};
+  // `satisfies` rather than a `Record<string, string>` annotation. The
+  // annotation widened the key type to `string`, so `keyof typeof ICON_PATHS`
+  // — and therefore the exported `IconName` — erased to `string | number` and
+  // checked nothing: `<Icon name="chevron-down" />` (the table spells it
+  // `chevronRight`, camelCase) type-checked happily and rendered an empty
+  // `v-if`, i.e. nothing at all. `satisfies` keeps the literal keys while
+  // still enforcing that every value is a path string.
+} satisfies Record<string, string>;
 
 /** Every glyph name in the table — handy for a gallery or a lint rule. */
-export const ICON_NAMES = Object.keys(ICON_PATHS).sort();
+export const ICON_NAMES = (Object.keys(ICON_PATHS) as IconName[]).sort();
 
 export type IconName = keyof typeof ICON_PATHS;
