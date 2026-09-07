@@ -26,6 +26,7 @@
 import { computed, onMounted, ref, useId, watch } from "vue";
 import Icon from "./Icon.vue";
 import { useOverlay } from "../composables/useOverlay";
+import { createTranslator, CHROME_MESSAGES } from "../i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -35,9 +36,17 @@ const props = withDefaults(
     size?: "sm" | "md" | "lg" | "xl";
     /** Escape and a backdrop click dismiss. Off for a decision. */
     dismissible?: boolean;
+    /**
+     * Dictionary for the strings this component renders itself — currently the
+     * dismiss control's accessible name. can-ui never picks a locale; the site
+     * owns the dictionary and passes it in. See `src/i18n.ts`.
+     */
+    messages?: Record<string, unknown>;
   }>(),
-  { size: "md", dismissible: true },
+  { size: "md", dismissible: true, messages: () => ({}) },
 );
+
+const t = createTranslator(props.messages, CHROME_MESSAGES);
 
 const emit = defineEmits<{
   "update:open": [boolean];
@@ -147,7 +156,7 @@ watch(isOpen, (open) => {
             v-if="dismissible"
             type="button"
             class="btn btn-ghost -mr-1.5 -mt-1 size-8 p-0"
-            aria-label="Close"
+            :aria-label="t('close')"
             @click="dismiss"
           >
             <Icon name="xMark" class="size-4" />

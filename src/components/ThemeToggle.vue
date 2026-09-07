@@ -24,6 +24,15 @@ import Icon from "./Icon.vue";
 import { useTheme, THEME_ICONS } from "../composables/useTheme";
 import { createTranslator, CHROME_MESSAGES } from "../i18n";
 
+/**
+ * Two root nodes — the button and the live region beside it — so Vue has no
+ * single element to put fallthrough attributes on and drops them. That made
+ * `<ThemeToggle class="ml-2" />` lose its class silently, which is the whole
+ * reason this is declared: attributes are bound explicitly to the button
+ * below, which is the element a caller means in every case.
+ */
+defineOptions({ inheritAttrs: false });
+
 const props = withDefaults(
   defineProps<{
     /** Site dictionary; falls back to can-ui's English chrome strings. */
@@ -56,6 +65,7 @@ const label = computed(
     class="icon-button"
     :aria-label="label"
     :title="label"
+    v-bind="$attrs"
     @click="cycle"
   >
     <Icon v-if="mounted" :name="THEME_ICONS[mode]" class="size-5" />

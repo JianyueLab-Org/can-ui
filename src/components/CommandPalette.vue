@@ -16,15 +16,16 @@
  * palette: type to filter, ↑/↓ to move, Enter to go, Escape to leave. Escape
  * and focus-return come from `useOverlay`, so they cannot be forgotten.
  */
-import { computed, ref, watch } from "vue";
+import { computed, onMounted, ref, watch } from "vue";
 import Icon from "./Icon.vue";
 import { useOverlay } from "../composables/useOverlay";
 import { createTranslator, CHROME_MESSAGES } from "../i18n";
+import type { IconName } from "../icons";
 
 export interface CommandItem {
   name: string;
   href: string;
-  icon: string;
+  icon: IconName;
   /** Group label shown beside the name — the section it belongs to. */
   section?: string;
 }
@@ -55,6 +56,18 @@ const query = ref("");
 const highlighted = ref(0);
 const input = ref<HTMLInputElement | null>(null);
 const panel = useOverlay(isOpen, { initialFocus: input });
+
+// The teleport is disabled until mount, exactly as in Dialog/Sheet/Drawer/
+// Popover. Vue's `ssrRenderTeleport` writes an *enabled* teleport's children
+// into `ssrContext.__teleportBuffers`, and `@astrojs/vue`'s server entry
+// returns only `html` — so the buffer is dropped and the island ships an empty
+// `<!--teleport start--><!--teleport end-->` pair. Hydration then finds no
+// anchor, matches this component's `v-if` comment against a real page node,
+// and *removes* that node; when the island is preceded by whitespace that node
+// is Astro's `astro-island{display:contents}` style, and losing it un-collapses
+// every island wrapper on the page.
+const mounted = ref(false);
+onMounted(() => (mounted.value = true));
 
 const results = computed(() => {
   const needle = query.value.trim().toLowerCase();
@@ -106,7 +119,7 @@ function onKeydown(event: KeyboardEvent) {
 </script>
 
 <template>
-  <Teleport to="body">
+  <Teleport to="body" :disabled="!mounted">
     <div
       v-if="open"
       class="fixed inset-0 z-50 flex items-start justify-center px-4 pb-[var(--keyboard-inset,0px)] pt-16 sm:pt-24"

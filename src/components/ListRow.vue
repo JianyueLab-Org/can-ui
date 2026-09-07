@@ -12,20 +12,33 @@
  * wayfinding a list of this shape has — without it there is no way to tell a
  * row that opens a page from a row that is just displaying a value.
  */
-import { computed, ref } from "vue";
+import { computed, ref, useAttrs } from "vue";
 import Icon from "./Icon.vue";
+import type { IconName } from "../icons";
 import { usePress } from "../composables/usePress";
+
+// The click listener has to be read off `$attrs`, and a listener can only
+// reach `$attrs` if it is *not* declared in `defineEmits` — a declared emit is
+// stripped from them. So `click` is deliberately undeclared here, and the
+// handler is forwarded by hand below. Attribute inheritance is off for the
+// same reason: the root element takes everything except `onClick`, which is
+// wrapped so `disabled` can suppress it.
+defineOptions({ inheritAttrs: false });
 
 const props = withDefaults(
   defineProps<{
     label?: string;
     description?: string;
     /** ICON_PATHS key rendered at the leading edge. */
-    icon?: string;
+    icon?: IconName;
     /** Short value shown at the trailing edge. */
     value?: string | number;
     href?: string;
-    /** Force the chevron on or off; defaults to on for links and buttons. */
+    /**
+     * Force the chevron on or off. Defaults to on for `href` rows — the ones
+     * that genuinely lead somewhere — and off otherwise, so a menu row that
+     * runs an action does not claim to navigate.
+     */
     chevron?: boolean;
     disabled?: boolean;
     /** Renders the label in the danger colour — for a destructive row. */
@@ -34,10 +47,33 @@ const props = withDefaults(
   { disabled: false, destructive: false },
 );
 
-const emit = defineEmits<{ (e: "click", event: MouseEvent): void }>();
+type ClickListener = (event: MouseEvent) => void;
+
+const attrs = useAttrs();
+
+/** Everything the root element should take verbatim — `onClick` excepted. */
+const forwarded = computed(() => {
+  const { onClick: _onClick, ...rest } = attrs;
+  return rest;
+});
 
 const el = ref<HTMLElement | null>(null);
-const interactive = computed(() => !!props.href || !!props.chevron);
+
+/**
+ * A row is interactive when it navigates *or* when it does something.
+ *
+ * `chevron` used to stand in for the second half, because a declared `click`
+ * emit is stripped from `$attrs` and there was no other way to see a listener.
+ * The result was that `<ListRow label="…" @click="…" />` — the shape the
+ * header comment above promises renders a `<button>` — rendered a plain
+ * `<div>`: it fired on a mouse click and was unreachable by every other route,
+ * with no `tabindex`, no role, no Enter/Space, and `usePress` disabled too.
+ * `chevron` is still honoured so that a row given one deliberately still reads
+ * as pressable.
+ */
+const interactive = computed(
+  () => !!props.href || !!attrs.onClick || !!props.chevron,
+);
 const { pressed } = usePress(el, {
   disabled: () => props.disabled || !interactive.value,
 });
@@ -47,12 +83,26 @@ const tag = computed(() => {
   return interactive.value ? "button" : "div";
 });
 const showChevron = computed(() => props.chevron ?? !!props.href);
+
+function onActivate(event: MouseEvent) {
+  // `<button disabled>` blocks this natively, but an `<a>` carrying only
+  // `aria-disabled` does not — it would still navigate and still call the
+  // handler.
+  if (props.disabled) {
+    event.preventDefault();
+    return;
+  }
+  const listener = attrs.onClick as ClickListener | ClickListener[] | undefined;
+  if (Array.isArray(listener)) listener.forEach((fn) => fn(event));
+  else listener?.(event);
+}
 </script>
 
 <template>
   <component
     :is="tag"
     ref="el"
+    v-bind="forwarded"
     :href="href"
     :type="tag === 'button' ? 'button' : undefined"
     :disabled="tag === 'button' && disabled ? true : undefined"
@@ -67,7 +117,7 @@ const showChevron = computed(() => props.chevron ?? !!props.href);
       pressed ? 'bg-surface-sunken' : '',
       interactive && !disabled ? 'hover:bg-surface-sunken' : '',
     ]"
-    @click="!disabled && emit('click', $event)"
+    @click="onActivate"
   >
     <span
       v-if="icon"

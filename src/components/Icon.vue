@@ -13,10 +13,10 @@
  * Size comes from the caller with a `size-*` utility; attrs fall through.
  */
 import { computed } from "vue";
-import { ICON_PATHS } from "../icons";
+import { ICON_PATHS, type IconName } from "../icons";
 
 const props = defineProps<{
-  name: string;
+  name: IconName;
   /** Makes the glyph meaningful rather than decorative. */
   label?: string;
 }>();

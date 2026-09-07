@@ -37,7 +37,22 @@ const props = withDefaults(
   { required: false, disabled: false },
 );
 
-defineEmits<{ (e: "update:modelValue", value: string): void }>();
+const emit = defineEmits<{
+  (e: "update:modelValue", value: string | number): void;
+}>();
+
+/**
+ * Emit the option's own `value`, not the DOM's stringified copy.
+ *
+ * A `<select>` element's `value` is always a string, so a numeric option —
+ * `Option.value` is `string | number` — came back as `"3"` rather than `3`,
+ * turning a `ref<number>` model into a string on first change and making every
+ * later `=== 3` comparison false. Matching on the stringified form and
+ * emitting the original preserves whichever type the caller declared.
+ */
+function toModel(raw: string): string | number {
+  return props.options.find((opt) => String(opt.value) === raw)?.value ?? raw;
+}
 
 /**
  * Fall back to a generated id rather than trusting the call site.
@@ -86,7 +101,10 @@ const describedBy = computed(() => {
           disabled ? 'cursor-not-allowed opacity-50' : '',
         ]"
         @change="
-          $emit('update:modelValue', ($event.target as HTMLSelectElement).value)
+          emit(
+            'update:modelValue',
+            toModel(($event.target as HTMLSelectElement).value),
+          )
         "
       >
         <option v-if="placeholder" value="" disabled>{{ placeholder }}</option>

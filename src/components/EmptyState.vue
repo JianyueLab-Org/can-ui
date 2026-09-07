@@ -9,13 +9,14 @@
  * from here" on the spot.
  */
 import Icon from "./Icon.vue";
+import type { IconName } from "../icons";
 
 withDefaults(
   defineProps<{
     title: string;
     description?: string;
     /** ICON_PATHS key; defaults to a tray. */
-    icon?: string;
+    icon?: IconName;
     compact?: boolean;
   }>(),
   { icon: "inbox", compact: false },

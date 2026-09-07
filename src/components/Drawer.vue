@@ -27,6 +27,7 @@ import { useOverlay } from "../composables/useOverlay";
 import { useSpring } from "../motion/useSpring";
 import { useDrag } from "../motion/useDrag";
 import { projectToDetent, rubberband } from "../motion/project";
+import { createTranslator, CHROME_MESSAGES } from "../i18n";
 
 const props = withDefaults(
   defineProps<{
@@ -39,15 +40,24 @@ const props = withDefaults(
     dismissible?: boolean;
     /** Accessible name when there is no visible title. */
     label?: string;
+    /**
+     * Dictionary for the strings this component renders itself — currently the
+     * dismiss control's accessible name. can-ui never picks a locale; the site
+     * owns the dictionary and passes it in. See `src/i18n.ts`.
+     */
+    messages?: Record<string, unknown>;
   }>(),
   {
     side: "left",
     width: "18rem",
     dismissible: true,
+    messages: () => ({}),
   },
 );
 
 const emit = defineEmits<{ "update:open": [boolean]; close: [] }>();
+
+const t = createTranslator(props.messages, CHROME_MESSAGES);
 
 const isOpen = computed({
   get: () => props.open,
@@ -57,7 +67,36 @@ const isOpen = computed({
   },
 });
 
-const panel = useOverlay(isOpen, { dismissible: () => props.dismissible });
+/**
+ * The panel stays mounted for the length of its exit, so `visible` — not the
+ * `open` prop — is what `v-if` reads and what `useOverlay` is bound to. Binding
+ * the scroll lock and the focus trap to the prop instead would release both the
+ * instant the parent flipped it, while the drawer was still sliding out.
+ */
+const visible = ref(false);
+
+/**
+ * Every close funnels through `requestClose`.
+ *
+ * The spring-out used to live only in `dismiss()` and the drag's `onEnd`, so
+ * two of the four close paths animated and two did not. Escape goes through
+ * `useOverlay`, which assigns `isOpen.value = false` outright; a parent's own
+ * handler — a "save" button, much the commonest programmatic close — flips the
+ * prop. Both landed straight on `v-if` and tore the element out in the same
+ * tick, so the panel vanished with no slide and no scrim fade while the ×
+ * beside it animated. Exit by the same edge is the reason this component
+ * exists, so it has to hold for all four.
+ */
+const overlayOpen = computed({
+  get: () => visible.value,
+  set: (value) => {
+    if (!value) requestClose();
+  },
+});
+
+const panel = useOverlay(overlayOpen, {
+  dismissible: () => props.dismissible,
+});
 const mounted = ref(false);
 onMounted(() => (mounted.value = true));
 
@@ -69,7 +108,15 @@ onMounted(() => (mounted.value = true));
  */
 const OFFSCREEN = 10000;
 const width = ref(0);
+/**
+ * `pendingClose` — the exit should end by telling the parent.
+ * `closing`      — the parent already knows (it flipped the prop, or Escape
+ *                  did); the exit should end by unmounting and nothing more.
+ * Keeping them apart is what stops an externally-driven close emitting
+ * `update:open` straight back at the parent that asked for it.
+ */
 let pendingClose = false;
+let closing = false;
 
 const {
   value: offset,
@@ -82,7 +129,13 @@ const {
   onRest: () => {
     if (pendingClose) {
       pendingClose = false;
+      visible.value = false;
       isOpen.value = false;
+      return;
+    }
+    if (closing) {
+      closing = false;
+      visible.value = false;
     }
   },
 });
@@ -100,13 +153,32 @@ function measure() {
 }
 
 watch(
-  isOpen,
+  () => props.open,
   async (open) => {
-    if (!open) return;
-    await nextTick();
-    measure();
-    springSet(width.value);
-    requestAnimationFrame(() => springTo(0));
+    if (open) {
+      // Re-opened mid-exit: spring back from wherever it got to rather than
+      // re-parking it off-screen, which would restart the entrance from the
+      // edge and throw away the velocity it already carries.
+      const resuming = visible.value;
+      pendingClose = false;
+      closing = false;
+      visible.value = true;
+      await nextTick();
+      measure();
+      if (resuming) {
+        springTo(0);
+        return;
+      }
+      springSet(width.value);
+      requestAnimationFrame(() => springTo(0));
+      return;
+    }
+    // Closed from outside. Escape's own emit also lands here, by which point
+    // the panel is off-screen already and there is nothing left to animate —
+    // hence the `pendingClose` guard.
+    if (!visible.value || pendingClose || closing) return;
+    closing = true;
+    springTo(width.value);
   },
   { immediate: true },
 );
@@ -140,16 +212,23 @@ useDrag(panel, {
   onCancel: () => springTo(0),
 });
 
-function dismiss() {
-  if (!props.dismissible) return;
+/** Spring out, then tell the parent once the panel has actually left. */
+function requestClose() {
+  if (!visible.value || pendingClose) return;
+  closing = false;
   pendingClose = true;
   springTo(width.value);
+}
+
+function dismiss() {
+  if (!props.dismissible) return;
+  requestClose();
 }
 </script>
 
 <template>
   <Teleport to="body" :disabled="!mounted">
-    <div v-if="open" class="fixed inset-0 z-50">
+    <div v-if="visible" class="fixed inset-0 z-50">
       <div
         class="absolute inset-0 bg-[var(--scrim)]"
         :style="{ opacity: scrimOpacity }"
@@ -187,7 +266,7 @@ function dismiss() {
             v-if="dismissible"
             type="button"
             class="btn btn-ghost -mr-1.5 size-8 shrink-0 p-0"
-            aria-label="Close"
+            :aria-label="t('close')"
             @click="dismiss"
           >
             <Icon name="xMark" class="size-4" />
