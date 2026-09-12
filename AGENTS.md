@@ -252,8 +252,9 @@ Without it SSR tries to `require` a `.vue` file and the page 500s on first rende
 ### Dev port 4327
 
 The ladder is fixed: 4321 can-web, 4322 can-dev, 4323 can-radar, 4324 can-efb, 4325 can-exam,
-4326 can-controller, **4327 can-ui**. (can-exam still says 4324 in its `package.json` and is the one
-that should move — can-efb had 4324 first. can-docs is off the ladder entirely on VitePress's 5173.)
+4326 can-controller, **4327 can-ui**. (can-exam used to say 4324 as well — can-efb had it first, so
+can-exam moved; its `package.json`, its `PUBLIC_ORIGIN` default and its `.env.example` all say 4325
+now. can-docs is off the ladder entirely on VitePress's 5173.)
 
 ### TypeScript stays on 6.x
 
