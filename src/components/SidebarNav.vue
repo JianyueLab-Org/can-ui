@@ -5,12 +5,9 @@
  *
  * Two things here are worth more than they look.
  *
- * **`isCurrentPath` is prefix-aware but not naively so.** A link to `/exams`
- * must highlight on `/exams/papers`, but a link to `/exams/` — a section root
- * — must *not* highlight on every route beneath it, or the dashboard entry is
- * lit on every page in the section and stops meaning anything. The trailing
- * slash is the opt-out, and the character check after the prefix is what stops
- * `/exam` matching `/examples`.
+ * **Which link is lit is `isCurrentPath` from `nav.ts`** — prefix-aware, with a
+ * trailing slash as the opt-out. The header and can-efb's rail call the same
+ * function, so a route lights the same way in every frame.
  *
  * **Which sections start open is derived from the current path**, so arriving
  * deep in a section shows you where you are rather than a closed accordion you
@@ -24,7 +21,11 @@
  */
 import { reactive, watch } from "vue";
 import Icon from "./Icon.vue";
-import type { NavItem, NavSecondary } from "../nav";
+import {
+  isCurrentPath as matchesPath,
+  type NavItem,
+  type NavSecondary,
+} from "../nav";
 import { createTranslator, CHROME_MESSAGES } from "../i18n";
 
 const props = withDefaults(
@@ -45,16 +46,7 @@ const props = withDefaults(
 const t = createTranslator(props.messages, CHROME_MESSAGES);
 
 function isCurrentPath(href?: string): boolean {
-  if (!href || href === "#" || href.startsWith("http")) return false;
-  if (href.endsWith("/")) {
-    return props.pathname === href || props.pathname === href.slice(0, -1);
-  }
-  if (props.pathname === href) return true;
-  if (props.pathname.startsWith(href)) {
-    const nextChar = props.pathname[href.length];
-    return !nextChar || nextChar === "/";
-  }
-  return false;
+  return matchesPath(href, props.pathname);
 }
 
 function sectionActive(item: NavItem): boolean {

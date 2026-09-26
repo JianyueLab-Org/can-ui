@@ -59,8 +59,18 @@ export { default as ThemeToggle } from "./components/ThemeToggle.vue";
 export { default as NetworkMenu } from "./components/NetworkMenu.vue";
 export { default as SiteFooter } from "./components/SiteFooter.vue";
 
-/* Navigation data shapes */
-export type { NavItem, NavChild, NavSecondary, Workspace } from "./nav";
+/* Navigation data shapes, and the two functions every frame shares */
+export {
+  buildWorkspaces,
+  isCurrentPath,
+  workspaceVisible,
+  type NavItem,
+  type NavChild,
+  type NavSecondary,
+  type Workspace,
+  type WorkspaceKey,
+  type WorkspaceOptions,
+} from "./nav";
 
 /* The network's map of itself. Unlike everything else here this carries
    strings — see the header of sites.ts for why that exception is deliberate. */
