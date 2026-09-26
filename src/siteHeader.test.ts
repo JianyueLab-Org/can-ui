@@ -36,3 +36,34 @@ test("signed out sees only the public sites", () => {
   }).map((site) => site.key);
   expect(signedOut).toEqual(["radar", "docs", "dev"]);
 });
+
+/**
+ * `origins` reaching `visibleSites` from here is what a dev box needs: the
+ * drawer must link to another site's own dev origin instead of production,
+ * without touching which sites show. `current` is `efb` rather than `web` so
+ * the overridden entry itself is not the one excluded by `excludeCurrent`.
+ */
+test("origins overrides one site's link and leaves the rest on production", () => {
+  const withOverride = headerNetworkSites({
+    current: "efb",
+    locale: "zh-cn",
+    signedIn: true,
+    rating: 12,
+    origins: { web: "http://localhost:4321" },
+  });
+  const web = withOverride.find((site) => site.key === "web");
+  const radar = withOverride.find((site) => site.key === "radar");
+  expect(web?.href).toBe("http://localhost:4321/");
+  expect(radar?.href).toBe("https://radar.ceruleanavi.net/");
+});
+
+test("without origins, hrefs are unchanged", () => {
+  const withoutOverride = headerNetworkSites({
+    current: "efb",
+    locale: "zh-cn",
+    signedIn: true,
+    rating: 12,
+  });
+  const web = withoutOverride.find((site) => site.key === "web");
+  expect(web?.href).toBe("https://ceruleanavi.net/");
+});

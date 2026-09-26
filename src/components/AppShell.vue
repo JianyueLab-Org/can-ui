@@ -37,6 +37,7 @@ import SiteFooter from "./SiteFooter.vue";
 import { createTranslator, CHROME_MESSAGES } from "../i18n";
 import { useMediaQuery } from "../composables/usePreferences";
 import type { NavChild, NavItem, NavSecondary, Workspace } from "../nav";
+import type { SiteOrigins } from "../sites";
 
 const props = withDefaults(
   defineProps<{
@@ -59,6 +60,8 @@ const props = withDefaults(
     homeHref?: string;
     /** Offer the language menu. Off for a single-language surface. */
     languages?: boolean;
+    /** Dev/staging origin overrides — see `siteUrl` in `sites.ts`. Reaches the footer. */
+    origins?: SiteOrigins;
   }>(),
   {
     messages: () => ({}),
@@ -400,7 +403,7 @@ onBeforeUnmount(() => {
         底下那一行是同一个组件。站点的 `#footer` 插槽落进它的 `#services`，排
         在这一行最前面。
       -->
-      <SiteFooter compact :locale="locale">
+      <SiteFooter compact :locale="locale" :origins="origins">
         <template v-if="$slots.footer" #services>
           <slot name="footer" />
         </template>

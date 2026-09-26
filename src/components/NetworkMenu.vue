@@ -24,7 +24,12 @@
 import { computed } from "vue";
 import Icon from "./Icon.vue";
 import Popover from "./Popover.vue";
-import { sectionHeadings, visibleSites, type SiteKey } from "../sites";
+import {
+  sectionHeadings,
+  visibleSites,
+  type SiteKey,
+  type SiteOrigins,
+} from "../sites";
 
 const props = withDefaults(
   defineProps<{
@@ -53,6 +58,8 @@ const props = withDefaults(
     label?: string;
     /** Compact trigger — icon only, for a crowded bar. */
     compact?: boolean;
+    /** Dev/staging origin overrides — see `siteUrl` in `sites.ts`. */
+    origins?: SiteOrigins;
   }>(),
   { signedIn: false, exclude: () => [], compact: false },
 );
@@ -69,6 +76,7 @@ const sites = computed(() => {
     rating: props.rating,
     signedIn: props.signedIn,
     excludeCurrent: true,
+    origins: props.origins,
   }).filter((site) => !hidden.has(site.key));
 });
 </script>

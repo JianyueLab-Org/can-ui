@@ -35,6 +35,7 @@ import {
   sectionHeadings,
   sitesBySection,
   type SiteKey,
+  type SiteOrigins,
 } from "../sites";
 import BeianLine from "./BeianLine.vue";
 
@@ -57,6 +58,8 @@ const props = withDefaults(
      * would repeat the menu one scroll away.
      */
     compact?: boolean;
+    /** Dev/staging origin overrides — see `siteUrl` in `sites.ts`. */
+    origins?: SiteOrigins;
   }>(),
   { signedIn: false, logoSrc: "/logo.png", since: 2025, compact: false },
 );
@@ -94,6 +97,7 @@ const columns = computed(() =>
     rating: props.rating,
     signedIn: props.signedIn,
     excludeCurrent: true,
+    origins: props.origins,
   }),
 );
 </script>

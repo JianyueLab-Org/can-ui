@@ -3,7 +3,12 @@
  * mounting a component.
  */
 
-import { visibleSites, type ResolvedSite, type SiteKey } from "./sites";
+import {
+  visibleSites,
+  type ResolvedSite,
+  type SiteKey,
+  type SiteOrigins,
+} from "./sites";
 
 /**
  * Every string the header renders itself. The site passes them from its own
@@ -30,6 +35,8 @@ export interface HeaderNetworkOptions {
   /** Menu only — see `sites.ts`. */
   rating?: number;
   signedIn: boolean;
+  /** Dev/staging origin overrides — see `siteUrl` in `sites.ts`. */
+  origins?: SiteOrigins;
 }
 
 /**
@@ -48,5 +55,6 @@ export function headerNetworkSites(
     rating: options.rating,
     signedIn: options.signedIn,
     excludeCurrent: true,
+    origins: options.origins,
   });
 }

@@ -354,6 +354,10 @@ SiteOrigins` — a dev/staging override, since a site running on a dev box alrea
 env-configured origin and needs a way to hand it to another site's link. It never decides which
 sites show, only where a shown one points; the registry origin is still the default.
 
+`SiteHeader`, `NetworkMenu`, `SiteFooter` and `AppShell` all take the same optional `origins` prop
+and pass it straight through to whichever of the above they call, so a dev box's network menu and
+drawer link to other sites' dev origins instead of production.
+
 ### Still not here
 
 **`AppRail`** — can-efb's railed shell, the one with no top bar. It exists in exactly one site, so

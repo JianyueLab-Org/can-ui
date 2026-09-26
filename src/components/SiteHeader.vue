@@ -43,7 +43,7 @@ import { useOverlay } from "../composables/useOverlay";
 import { useMediaQuery } from "../composables/usePreferences";
 import { CHROME_MESSAGES, createTranslator } from "../i18n";
 import { isCurrentPath, type NavChild } from "../nav";
-import { sectionHeadings, type SiteKey } from "../sites";
+import { sectionHeadings, type SiteKey, type SiteOrigins } from "../sites";
 import { headerNetworkSites, type SiteHeaderLabels } from "../siteHeader";
 
 const props = withDefaults(
@@ -69,6 +69,8 @@ const props = withDefaults(
      */
     signInHref?: string;
     labels: SiteHeaderLabels;
+    /** Dev/staging origin overrides — see `siteUrl` in `sites.ts`. */
+    origins?: SiteOrigins;
   }>(),
   {
     rating: undefined,
@@ -117,6 +119,7 @@ const networkSites = computed(() =>
     locale: props.locale,
     rating: props.rating,
     signedIn: props.signedIn,
+    origins: props.origins,
   }),
 );
 
@@ -235,6 +238,7 @@ function drawerItemClass(href: string) {
             :current="current"
             :rating="rating"
             :signed-in="signedIn"
+            :origins="origins"
           />
         </div>
         <div class="hidden sm:block">
