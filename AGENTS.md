@@ -297,6 +297,29 @@ Two fixes went in on the way, both real bugs rather than tidying:
 - **`useOverlay`'s scroll lock is reference-counted.** A sheet opened from inside a dialog used to
   restore `overflow` when _it_ closed, letting the page scroll behind the dialog still open.
 
+### `SiteHeader` — the page sites' header
+
+can-web, can-dev, can-exam and can-radar render `SiteHeader`. Props: `current`, `locale`,
+`pathname`, `nav` (`NavChild[]`, the site's own pages), `signedIn`, `rating`, `homeHref`,
+`signInHref`, `variant`, `labels`. Emits `signout`. Slots: `brand`, `actions`, `account`,
+`drawer-extra`.
+
+- The network menu and the drawer's site list both come from `visibleSites` with
+  `excludeCurrent`; the drawer's goes through `headerNetworkSites` in `src/siteHeader.ts`.
+- The drawer is a sibling of `<header>`, never a child and never teleported: `bg-chrome` sets a
+  backdrop-filter, which makes `<header>` the containing block for fixed descendants.
+- `variant="compact"` is can-radar's: 56px, not sticky, hairline border, underlined active item.
+- Active matching is `isCurrentPath` in `src/nav.ts`, shared with `SidebarNav` and can-efb's rail.
+
+`buildWorkspaces` in `src/nav.ts` is the section switcher for every `AppShell` site. Its two
+off-main-site entries are `WORKSPACE_SITE_KEYS`; the calling site's own entry links by path.
+
+`AppShell`'s footer is `SiteFooter compact`. Its `#footer` slot renders in `SiteFooter`'s
+`#services`.
+
+`.focus-ring` (`src/styles/base.css`) draws the focus outline inside the element. Chrome controls
+inside a clipping or scrolling container carry it.
+
 ### `sites.ts` — the network's map of itself, and the one place strings live
 
 `NetworkMenu` and `SiteFooter` are the second thing lifted here for the reason `ThemeLangControls`
@@ -383,7 +406,7 @@ bun install
 bun run dev            # gallery on :4327 — the interactive demo
 bun run lint           # format:check + astro check + vue-tsc + bun test
 bun run build          # what CI builds
-bun test               # the spring solver's physics, headless
+bun test               # spring solver, sites.ts, nav.ts, siteHeader.ts
 bun run format         # prettier --write .
 ```
 
@@ -392,10 +415,8 @@ needed: `astro check` diagnoses `.astro` and `.ts` and _silently ignores `.vue`_
 "0 errors" for a component containing any type error at all — so `vue-tsc` runs over
 `tsconfig.vue.json` as well via `scripts/typecheck-vue.mjs`.
 
-`bun test` covers `src/motion/spring.ts` and nothing else, on purpose. It is the one file here that
-can be wrong in a way nobody sees: every other bug shows up as a component that looks off, while a
-subtly wrong integration shows up as motion that feels slightly cheap — and nobody files a bug for
-that.
+`bun test` covers the pure modules: `src/motion/spring.ts`, `src/sites.ts`, `src/nav.ts` and
+`src/siteHeader.ts`. Each can be wrong with nothing on screen looking wrong.
 
 ## The gallery is part of the work
 
