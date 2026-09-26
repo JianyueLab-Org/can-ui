@@ -33,7 +33,7 @@ import Drawer from "./Drawer.vue";
 import SidebarNav from "./SidebarNav.vue";
 import ThemeLangControls from "./ThemeLangControls.vue";
 import CommandPalette, { type CommandItem } from "./CommandPalette.vue";
-import BeianLine from "./BeianLine.vue";
+import SiteFooter from "./SiteFooter.vue";
 import { createTranslator, CHROME_MESSAGES } from "../i18n";
 import { useMediaQuery } from "../composables/usePreferences";
 import type { NavChild, NavItem, NavSecondary, Workspace } from "../nav";
@@ -187,7 +187,7 @@ onBeforeUnmount(() => {
       :messages="messages"
     >
       <template #header>
-        <a :href="homeHref" class="-m-1.5 block p-1.5">
+        <a :href="homeHref" class="focus-ring -m-1.5 block p-1.5">
           <slot name="brand"><Logo class="h-9 w-auto" /></slot>
         </a>
       </template>
@@ -207,7 +207,7 @@ onBeforeUnmount(() => {
               workspace.key === activeWorkspace ? 'true' : undefined
             "
             :class="[
-              'tap-row flex flex-1 items-center justify-center truncate rounded-[calc(var(--radius-control)-2px)] px-2 py-1.5 text-center text-xs font-semibold transition-colors',
+              'focus-ring tap-row flex flex-1 items-center justify-center truncate rounded-[calc(var(--radius-control)-2px)] px-2 py-1.5 text-center text-xs font-semibold transition-colors',
               workspace.key === activeWorkspace
                 ? 'bg-surface-raised text-can shadow-card'
                 : 'text-muted hover:text-ink',
@@ -234,7 +234,7 @@ onBeforeUnmount(() => {
         class="flex grow flex-col gap-y-4 overflow-y-auto border-r border-subtle bg-surface-sunken px-5 pb-4"
       >
         <div class="flex h-16 shrink-0 items-center">
-          <a :href="homeHref" class="-m-1.5 p-1.5">
+          <a :href="homeHref" class="focus-ring -m-1.5 p-1.5">
             <slot name="brand"><Logo class="h-9 w-auto" /></slot>
           </a>
         </div>
@@ -257,7 +257,7 @@ onBeforeUnmount(() => {
               workspace.key === activeWorkspace ? 'true' : undefined
             "
             :class="[
-              'tap-row flex flex-1 items-center justify-center truncate rounded-[calc(var(--radius-control)-2px)] px-2 py-1.5 text-center text-xs font-semibold transition-colors',
+              'focus-ring tap-row flex flex-1 items-center justify-center truncate rounded-[calc(var(--radius-control)-2px)] px-2 py-1.5 text-center text-xs font-semibold transition-colors',
               workspace.key === activeWorkspace
                 ? 'bg-surface-raised text-can shadow-card'
                 : 'text-muted hover:text-ink',
@@ -285,7 +285,7 @@ onBeforeUnmount(() => {
         >
           <button
             type="button"
-            class="icon-button -ml-2 lg:hidden"
+            class="focus-ring icon-button -ml-2 lg:hidden"
             :aria-label="t('openSidebar')"
             :aria-expanded="sidebarOpen"
             @click="sidebarOpen = true"
@@ -297,7 +297,7 @@ onBeforeUnmount(() => {
                refused to shrink and squeezed the menu button to 27px. -->
           <button
             type="button"
-            class="flex size-10 shrink-0 items-center justify-center rounded-control text-muted transition-colors hover:bg-surface-sunken hover:text-ink sm:h-9 sm:w-auto sm:min-w-0 sm:max-w-xs sm:flex-1 sm:shrink sm:justify-start sm:gap-2 sm:border sm:border-subtle sm:bg-surface-sunken sm:px-3 sm:text-sm sm:text-faint sm:hover:border-strong sm:hover:text-muted"
+            class="focus-ring flex size-10 shrink-0 items-center justify-center rounded-control text-muted transition-colors hover:bg-surface-sunken hover:text-ink sm:h-9 sm:w-auto sm:min-w-0 sm:max-w-xs sm:flex-1 sm:shrink sm:justify-start sm:gap-2 sm:border sm:border-subtle sm:bg-surface-sunken sm:px-3 sm:text-sm sm:text-faint sm:hover:border-strong sm:hover:text-muted"
             :aria-label="t('search.label')"
             @click="searchOpen = true"
           >
@@ -323,7 +323,7 @@ onBeforeUnmount(() => {
               <button
                 ref="profileButton"
                 type="button"
-                class="flex items-center gap-2 rounded-control p-1.5 transition-colors hover:bg-surface-sunken"
+                class="focus-ring flex items-center gap-2 rounded-control p-1.5 transition-colors hover:bg-surface-sunken"
                 :aria-expanded="profileOpen"
                 aria-haspopup="menu"
                 @click="profileOpen = !profileOpen"
@@ -365,7 +365,7 @@ onBeforeUnmount(() => {
                     :key="item.href"
                     :href="item.href"
                     role="menuitem"
-                    class="tap-row flex items-center gap-2.5 px-4 py-2.5 text-sm text-muted transition-colors hover:bg-surface-sunken hover:text-ink"
+                    class="focus-ring tap-row flex items-center gap-2.5 px-4 py-2.5 text-sm text-muted transition-colors hover:bg-surface-sunken hover:text-ink"
                   >
                     <Icon v-if="item.icon" :name="item.icon" class="size-4" />
                     {{ item.name }}
@@ -375,7 +375,7 @@ onBeforeUnmount(() => {
                 <button
                   type="button"
                   role="menuitem"
-                  class="tap-row flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-muted transition-colors hover:bg-surface-sunken hover:text-danger"
+                  class="focus-ring tap-row flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-muted transition-colors hover:bg-surface-sunken hover:text-danger"
                   @click="emit('signout')"
                 >
                   <Icon name="arrowRightOnRectangle" class="size-4" />
@@ -396,18 +396,15 @@ onBeforeUnmount(() => {
       <!--
         页脚**始终**渲染，因为备案号必须出现在每一页上。
 
-        从前这里是 `v-if="$slots.footer"`，而用 AppShell 的四个站没有一个传过
-        这个插槽 —— 也就是说这条页脚写好之后一次都没有出现过。插槽本身保留：
-        有话要说的站把它放在备案号上面，没有的站就只有那一行。
+        它是 `SiteFooter` 的 compact 版：一行社区链接加备案号，和页面站、登录页
+        底下那一行是同一个组件。站点的 `#footer` 插槽落进它的 `#services`，排
+        在这一行最前面。
       -->
-      <footer class="border-t border-subtle">
-        <div class="mx-auto max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
+      <SiteFooter compact :locale="locale">
+        <template v-if="$slots.footer" #services>
           <slot name="footer" />
-          <div :class="$slots.footer ? 'mt-4' : undefined">
-            <BeianLine />
-          </div>
-        </div>
-      </footer>
+        </template>
+      </SiteFooter>
     </div>
 
     <CommandPalette

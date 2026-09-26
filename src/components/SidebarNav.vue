@@ -74,8 +74,10 @@ function toggleSection(name: string) {
   openSections[name] = !openSections[name];
 }
 
+// `focus-ring`: every item sits in a scrolling rail, and the sub-items in an
+// `overflow-hidden` row, so an outside focus offset is clipped.
 const baseItem =
-  "group flex w-full items-center gap-x-3 rounded-control px-2.5 py-2 text-sm font-medium transition-colors duration-150";
+  "focus-ring group flex w-full items-center gap-x-3 rounded-control px-2.5 py-2 text-sm font-medium transition-colors duration-150";
 const activeItem = "bg-surface-raised text-can shadow-card";
 const idleItem = "text-muted hover:bg-surface-raised hover:text-ink";
 </script>
@@ -161,7 +163,7 @@ const idleItem = "text-muted hover:bg-surface-raised hover:text-ink";
                     isCurrentPath(subItem.href) ? 'page' : undefined
                   "
                   :class="[
-                    'tap-row ml-4 flex items-center truncate border-l-2 py-1.5 pl-4 pr-2 text-sm transition-colors duration-150',
+                    'focus-ring tap-row ml-4 flex items-center truncate border-l-2 py-1.5 pl-4 pr-2 text-sm transition-colors duration-150',
                     isCurrentPath(subItem.href)
                       ? 'border-can font-semibold text-can'
                       : 'border-[var(--border-subtle)] text-muted hover:border-strong hover:text-ink',

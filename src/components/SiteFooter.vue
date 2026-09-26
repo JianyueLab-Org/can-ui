@@ -20,7 +20,8 @@
  * *only* here get lost in it. A footer's job is the things no other control
  * offers — the other sites, the community, the legal line.
  *
- * A site with a genuine exception passes `#extra` and gets one more column.
+ * A site with a genuine exception passes `#services` and gets one more column
+ * (in `compact` mode, the first items of the line).
  *
  * ## Ordering
  *
@@ -49,8 +50,15 @@ const props = withDefaults(
     logoSrc?: string;
     /** First year in the copyright line. */
     since?: number;
+    /**
+     * One line: whatever the site passes as `#services`, the community links
+     * and the ICP filing. For frames that already carry the network — an
+     * `AppShell` rail, a credential page — where the full footer's columns
+     * would repeat the menu one scroll away.
+     */
+    compact?: boolean;
   }>(),
-  { signedIn: false, logoSrc: "/logo.png", since: 2025 },
+  { signedIn: false, logoSrc: "/logo.png", since: 2025, compact: false },
 );
 
 const headings = computed(() => sectionHeadings(props.locale));
@@ -91,7 +99,26 @@ const columns = computed(() =>
 </script>
 
 <template>
-  <footer class="border-t border-subtle bg-surface-sunken">
+  <footer v-if="compact" class="border-t border-subtle">
+    <div
+      class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-4 sm:px-6 lg:px-8"
+    >
+      <slot name="services" />
+      <a
+        v-for="link in community"
+        :key="link.key"
+        :href="link.href"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="focus-ring inline-block py-1 text-sm text-faint transition-colors hover:text-can"
+      >
+        {{ link.name }}
+      </a>
+      <BeianLine class="sm:ml-auto" />
+    </div>
+  </footer>
+
+  <footer v-else class="border-t border-subtle bg-surface-sunken">
     <div class="mx-auto max-w-7xl px-4 pb-10 pt-16 sm:px-6 lg:px-8 lg:pt-20">
       <div class="grid gap-12 lg:grid-cols-3 lg:gap-8">
         <div class="max-w-sm space-y-6">
@@ -146,7 +173,7 @@ const columns = computed(() =>
             </ul>
           </div>
 
-          <slot name="extra" />
+          <slot name="services" />
         </div>
       </div>
 

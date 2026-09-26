@@ -88,7 +88,7 @@ const sites = computed(() => {
     <template #trigger="{ toggle, open }">
       <button
         type="button"
-        class="flex items-center gap-1.5 rounded-control px-2.5 py-2 text-sm font-medium text-muted transition-colors hover:bg-surface-raised hover:text-ink"
+        class="focus-ring flex items-center gap-1.5 rounded-control px-2.5 py-2 text-sm font-medium text-muted transition-colors hover:bg-surface-raised hover:text-ink"
         :aria-expanded="open"
         aria-haspopup="menu"
         @click="toggle"
@@ -109,7 +109,7 @@ const sites = computed(() => {
         <a
           :href="site.href"
           role="menuitem"
-          class="flex items-start gap-3 rounded-control px-2.5 py-2 transition-colors hover:bg-surface-raised"
+          class="focus-ring flex items-start gap-3 rounded-control px-2.5 py-2 transition-colors hover:bg-surface-raised"
         >
           <Icon :name="site.icon" class="mt-0.5 size-5 shrink-0 text-can" />
           <span class="min-w-0">
