@@ -73,6 +73,28 @@ test("siteUrl joins origin and path, and takes an override", () => {
 });
 
 /**
+ * `origins` is the dev/staging escape hatch: a site running on localhost
+ * passes its own env-configured origin through so a rendered link points
+ * there instead of production. A missing key, or one holding `""`, must fall
+ * back to the registry rather than producing a bare path.
+ */
+test("siteUrl's origin override wins over the registry, trailing slash and all", () => {
+  expect(siteUrl("web", "/pilots/", { web: "http://localhost:4321" })).toBe(
+    "http://localhost:4321/pilots/",
+  );
+  expect(siteUrl("web", "/pilots/", { web: "http://localhost:4321/" })).toBe(
+    "http://localhost:4321/pilots/",
+  );
+  expect(siteUrl("web", "/pilots/", { web: "" })).toBe(
+    "https://ceruleanavi.net/pilots/",
+  );
+  expect(siteUrl("web", "/pilots/", {})).toBe(
+    "https://ceruleanavi.net/pilots/",
+  );
+  expect(siteUrl("web", "/pilots/")).toBe("https://ceruleanavi.net/pilots/");
+});
+
+/**
  * 每一条**公开**的落点都必须是那个站上不需要登录的地址。
  *
  * 这条测试是因为 `dev` 曾经指着 `/docs` 而写的：接口文档后来加了登录门槛，于是
@@ -136,6 +158,26 @@ test("a signed-in member with no rating is shown less, not more", () => {
   expect(keys).not.toContain("portal");
   expect(keys).not.toContain("database");
   expect(keys).toContain("web");
+});
+
+/**
+ * The override changes where a listed site points, never which sites are
+ * listed — `web` gets a dev-box href, every other public entry is untouched.
+ */
+test("visibleSites applies an origin override to only the site it names", () => {
+  const sites = visibleSites({
+    locale: "zh-cn",
+    origins: { web: "http://localhost:4321" },
+  });
+  expect(sites.find((s) => s.key === "web")?.href).toBe(
+    "http://localhost:4321/",
+  );
+  expect(sites.find((s) => s.key === "docs")?.href).toBe(
+    "https://docs.ceruleanavi.net/",
+  );
+  expect(sites.map((s) => s.key)).toEqual(
+    keysOf(visibleSites({ locale: "zh-cn" })),
+  );
 });
 
 test("the current site is marked, and dropped only when asked", () => {

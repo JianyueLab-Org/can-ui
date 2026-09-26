@@ -19,6 +19,7 @@ import {
   siteUrl,
   type NetworkSite,
   type SiteKey,
+  type SiteOrigins,
 } from "./sites";
 
 export interface NavChild {
@@ -104,6 +105,12 @@ export interface WorkspaceOptions {
   current?: SiteKey;
   /** Session rating, for `minRating`. A drawing hint, never a guard. */
   rating?: number;
+  /**
+   * Dev/staging origin overrides — see `siteUrl` in `sites.ts`. Reaches only
+   * the off-main-site entries; the calling site's own entry links by path
+   * regardless, so an override for it would be a no-op.
+   */
+  origins?: SiteOrigins;
 }
 
 interface WorkspaceSpec {
@@ -175,13 +182,16 @@ export function buildWorkspaces(
   t: Translator,
   options: WorkspaceOptions = {},
 ): Workspace[] {
-  const { current, rating } = options;
+  const { current, rating, origins } = options;
   return workspaceSpecs()
     .filter((spec) => workspaceVisible(SITE_BY_KEY[spec.site], rating))
     .map((spec) => ({
       key: spec.key,
       name: t(`workspace.${spec.key}`),
-      href: spec.site === current ? spec.path : siteUrl(spec.site, spec.path),
+      href:
+        spec.site === current
+          ? spec.path
+          : siteUrl(spec.site, spec.path, origins),
       icon: spec.icon,
     }));
 }

@@ -349,6 +349,11 @@ than less, with an explicit `typeof` check, because `undefined >= 8` being false
 intent. `src/sites.test.ts` pins both, along with every locale having every label and every icon
 naming a real path — none of which throws when wrong, which is why they are tested.
 
+`siteUrl` (and `visibleSites`/`buildWorkspaces`, which call it) take an optional `origins:
+SiteOrigins` — a dev/staging override, since a site running on a dev box already reads its own
+env-configured origin and needs a way to hand it to another site's link. It never decides which
+sites show, only where a shown one points; the registry origin is still the default.
+
 ### Still not here
 
 **`AppRail`** — can-efb's railed shell, the one with no top bar. It exists in exactly one site, so

@@ -79,6 +79,23 @@ describe("buildWorkspaces", () => {
     expect(buildWorkspaces(t, { current: "web" })).toHaveLength(3);
     expect(buildWorkspaces(t, { current: "web", rating: 1 })).toHaveLength(3);
   });
+
+  /**
+   * `origins` is a dev/staging override — see `siteUrl` in `sites.ts`. The
+   * calling site's own entry keeps linking by path regardless: it is not an
+   * origin lookup at all, so an override for it would be a no-op that could
+   * mislead.
+   */
+  test("an origin override reaches an off-main-site entry; the current site still links by path", () => {
+    const ws = buildWorkspaces(t, {
+      current: "controller",
+      origins: { web: "http://localhost:4321" },
+    });
+    expect(ws.find((w) => w.key === "pilots")?.href).toBe(
+      "http://localhost:4321/pilots/",
+    );
+    expect(ws.find((w) => w.key === "controllers")?.href).toBe("/");
+  });
 });
 
 describe("workspaceVisible", () => {

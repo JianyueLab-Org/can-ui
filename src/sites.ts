@@ -268,10 +268,36 @@ export const SITE_BY_KEY: Readonly<Record<SiteKey, NetworkSite>> =
     NetworkSite
   >;
 
-/** Absolute URL of a path on another site. `siteUrl("docs", "/zh_CN/atc")`. */
-export function siteUrl(key: SiteKey, path?: string): string {
+/**
+ * A dev/staging override for one or more sites' origins.
+ *
+ * Sites already read their own env-configured origin (`CAN_WEB_ORIGIN`, …)
+ * to know their own host on a dev box; `origins` is how they pass that same
+ * knowledge into `siteUrl` for a *different* site, so a workspace switcher or
+ * a site list renders dev-box links instead of production ones. It never
+ * changes which sites show — that is still `minRating` and `publicSite` — it
+ * only changes where a shown one points.
+ */
+export type SiteOrigins = Partial<Record<SiteKey, string>>;
+
+/**
+ * Absolute URL of a path on another site. `siteUrl("docs", "/zh_CN/atc")`.
+ *
+ * `origins?.[key]` overrides the registry origin when it holds a non-empty
+ * string — see `SiteOrigins`. A trailing slash on the override is stripped so
+ * callers can pass an env var verbatim; an absent or empty override falls
+ * back to `SITE_BY_KEY[key].origin` exactly as before.
+ */
+export function siteUrl(
+  key: SiteKey,
+  path?: string,
+  origins?: SiteOrigins,
+): string {
   const site = SITE_BY_KEY[key];
-  return `${site.origin}${path ?? site.path}`;
+  const override = origins?.[key];
+  const origin =
+    override && override.length > 0 ? override.replace(/\/$/, "") : site.origin;
+  return `${origin}${path ?? site.path}`;
 }
 
 export interface SiteLabel {
@@ -498,6 +524,8 @@ export interface SiteListOptions {
   signedIn?: boolean;
   /** Drop the current site. A switcher wants it marked; a footer wants it gone. */
   excludeCurrent?: boolean;
+  /** Dev/staging origin overrides — see `siteUrl`. Never changes which sites show. */
+  origins?: SiteOrigins;
 }
 
 /**
@@ -510,7 +538,14 @@ export interface SiteListOptions {
  * than intent.
  */
 export function visibleSites(options: SiteListOptions): ResolvedSite[] {
-  const { locale, current, rating, signedIn = false, excludeCurrent } = options;
+  const {
+    locale,
+    current,
+    rating,
+    signedIn = false,
+    excludeCurrent,
+    origins,
+  } = options;
   const labels = siteLabels(locale);
 
   return NETWORK_SITES.filter((site) => {
@@ -521,7 +556,7 @@ export function visibleSites(options: SiteListOptions): ResolvedSite[] {
     return typeof rating === "number" && rating >= site.minRating;
   }).map((site) => ({
     key: site.key,
-    href: siteUrl(site.key),
+    href: siteUrl(site.key, undefined, origins),
     icon: site.icon,
     section: site.section,
     current: site.key === current,

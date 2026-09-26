@@ -101,6 +101,7 @@ export {
   type SiteLabel,
   type ResolvedSite,
   type SiteListOptions,
+  type SiteOrigins,
   type SectionHeadings,
   type CommunityLink,
 } from "./sites";
