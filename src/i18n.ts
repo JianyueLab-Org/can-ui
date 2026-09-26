@@ -82,6 +82,7 @@ export function createTranslator(
  */
 export const CHROME_MESSAGES: Record<string, unknown> = {
   skipToContent: "Skip to content",
+  signIn: "Sign in",
   signOut: "Sign out",
   openSidebar: "Open sidebar",
   closeSidebar: "Close sidebar",

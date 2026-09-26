@@ -364,6 +364,15 @@ h6 {
   border-radius: var(--radius-control);
 }
 
+/* The same ring, drawn inside the element. For controls inside a scrolling or
+   clipping container — a rail, a drawer, a menu, a collapsible section — where
+   an outside offset is cut off on the edge that touches the container. Kept
+   unlayered like the rule above and one class more specific, so it wins
+   without !important. */
+.focus-ring:focus-visible {
+  outline-offset: -2px;
+}
+
 /* Slim, theme-aware scrollbars for panel lists and side rails. */
 * {
   scrollbar-width: thin;

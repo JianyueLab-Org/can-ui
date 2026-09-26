@@ -58,6 +58,12 @@ export { default as ThemeLangControls } from "./components/ThemeLangControls.vue
 export { default as ThemeToggle } from "./components/ThemeToggle.vue";
 export { default as NetworkMenu } from "./components/NetworkMenu.vue";
 export { default as SiteFooter } from "./components/SiteFooter.vue";
+export { default as SiteHeader } from "./components/SiteHeader.vue";
+export {
+  headerNetworkSites,
+  type SiteHeaderLabels,
+  type HeaderNetworkOptions,
+} from "./siteHeader";
 
 /* Navigation data shapes, and the two functions every frame shares */
 export {
