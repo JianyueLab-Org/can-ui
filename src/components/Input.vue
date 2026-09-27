@@ -25,6 +25,15 @@ const props = withDefaults(
     disabled?: boolean;
     readonly?: boolean;
     autocomplete?: string;
+    /**
+     * Phone keyboard behaviour. Attributes the caller puts on `<Input>` land
+     * on the wrapper `<div>`, not the `<input>`, so these three are props. A
+     * CAN ID or an email address wants all of them off: a phone capitalises
+     * and autocorrects a text field by default.
+     */
+    autocapitalize?: "none" | "off" | "sentences" | "words" | "characters";
+    autocorrect?: "on" | "off";
+    spellcheck?: boolean;
     inputmode?:
       | "none"
       | "text"
@@ -40,7 +49,15 @@ const props = withDefaults(
     minlength?: number;
     maxlength?: number;
   }>(),
-  { type: "text", required: false, disabled: false, readonly: false },
+  {
+    type: "text",
+    required: false,
+    disabled: false,
+    readonly: false,
+    // Left unset rather than cast to `false`: an absent boolean prop would
+    // otherwise render `spellcheck="false"` on every field.
+    spellcheck: undefined,
+  },
 );
 
 const emit = defineEmits<{
@@ -121,6 +138,9 @@ const describedBy = computed(() => {
         :disabled="disabled"
         :readonly="readonly"
         :autocomplete="autocomplete"
+        :autocapitalize="autocapitalize"
+        :autocorrect="autocorrect"
+        :spellcheck="spellcheck"
         :inputmode="inputmode"
         :minlength="minlength"
         :maxlength="maxlength"
