@@ -15,14 +15,14 @@ describe("signOutDestination", () => {
 });
 
 describe("signOut", () => {
-  test("posts to the same-origin path, then reloads", async () => {
+  test("posts to the same-origin path, then reloads when ok", async () => {
     const calls: Array<[string, RequestInit]> = [];
     let reloads = 0;
-    await signOut({
+    const result = await signOut({
       after: "reload",
       fetch: async (input, init) => {
         calls.push([input, init]);
-        return {};
+        return { ok: true };
       },
       location: {
         assign: () => {
@@ -38,14 +38,55 @@ describe("signOut", () => {
       [SIGN_OUT_PATH, { method: "POST", credentials: "same-origin" }],
     ]);
     expect(reloads).toBe(1);
+    expect(result).toBe(true);
   });
 
-  test("a gated site leaves even when the request fails", async () => {
-    let target = "";
-    await signOut({
+  test("returns false and does not navigate when the request fails", async () => {
+    let navigated = false;
+    const result = await signOut({
       after: "web",
       fetch: async () => {
         throw new Error("offline");
+      },
+      location: {
+        assign: () => {
+          navigated = true;
+        },
+        reload: () => {
+          navigated = true;
+        },
+      },
+    });
+    expect(result).toBe(false);
+    expect(navigated).toBe(false);
+  });
+
+  test("returns false and does not navigate when ok is false", async () => {
+    let navigated = false;
+    const result = await signOut({
+      after: "web",
+      fetch: async () => {
+        return { ok: false };
+      },
+      location: {
+        assign: () => {
+          navigated = true;
+        },
+        reload: () => {
+          navigated = true;
+        },
+      },
+    });
+    expect(result).toBe(false);
+    expect(navigated).toBe(false);
+  });
+
+  test("navigates to web destination and returns true when ok", async () => {
+    let target = "";
+    const result = await signOut({
+      after: "web",
+      fetch: async () => {
+        return { ok: true };
       },
       location: {
         assign: (url) => {
@@ -55,5 +96,6 @@ describe("signOut", () => {
       },
     });
     expect(target).toBe("https://ceruleanavi.net/");
+    expect(result).toBe(true);
   });
 });

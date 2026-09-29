@@ -6,8 +6,9 @@
  * cookie lives on the parent domain, so one request signs the member out of
  * every site. This path is the one endpoint can-ui knows.
  *
- * After the request: public sites reload in place; gated sites go to can-web
- * `/`, since reloading a gated page would bounce to sign-in.
+ * After a successful request: public sites reload in place; gated sites go to
+ * can-web `/`, since reloading a gated page would bounce to sign-in.
+ * On failure (fetch error or ok === false): returns false and does not navigate.
  */
 import { siteUrl, type SiteOrigins } from "./sites";
 
@@ -27,7 +28,7 @@ export function signOutDestination(
 export type SignOutFetch = (
   input: string,
   init: RequestInit,
-) => Promise<unknown>;
+) => Promise<{ ok: boolean }>;
 
 export interface SignOutLocation {
   assign(url: string): void;
@@ -44,19 +45,27 @@ export interface SignOutOptions {
 }
 
 /**
- * Posts the sign-out, then reloads or navigates. A failed request still
- * navigates: the next page shows the real session state.
+ * Posts the sign-out request. Returns true and navigates on success (ok === true).
+ * Returns false and does not navigate on failure (fetch error or ok === false).
  */
-export async function signOut(options: SignOutOptions): Promise<void> {
+export async function signOut(options: SignOutOptions): Promise<boolean> {
   const send: SignOutFetch =
-    options.fetch ?? ((input, init) => fetch(input, init));
+    options.fetch ??
+    ((input, init) => fetch(input, init) as Promise<{ ok: boolean }>);
   const location = options.location ?? window.location;
   try {
-    await send(SIGN_OUT_PATH, { method: "POST", credentials: "same-origin" });
+    const response = await send(SIGN_OUT_PATH, {
+      method: "POST",
+      credentials: "same-origin",
+    });
+    if (!response.ok) {
+      return false;
+    }
   } catch {
-    // Navigate anyway; see above.
+    return false;
   }
   const target = signOutDestination(options.after, options.origins);
   if (target) location.assign(target);
   else location.reload();
+  return true;
 }
