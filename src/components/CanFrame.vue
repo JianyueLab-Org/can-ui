@@ -145,7 +145,11 @@ const isDesktop = useMediaQuery("(min-width: 1024px)");
 watch(isDesktop, (desktop) => {
   if (desktop) drawerOpen.value = false;
 });
-const isPhone = useMediaQuery("(max-width: 639.98px)");
+// Drives NetworkMenu's DOM, so false in SSR and the first client render;
+// the query applies from onMounted on.
+const mounted = ref(false);
+const phoneQuery = useMediaQuery("(max-width: 639.98px)");
+const isPhone = computed(() => mounted.value && phoneQuery.value);
 
 /* Scroll edge, content layout only. ---------------------------------------- */
 const scrolled = ref(false);
@@ -174,6 +178,8 @@ watch(isRailWidth, (wide) => {
 });
 
 function onGlobalKeydown(event: KeyboardEvent) {
+  // Another frame or AppShell handled it first: one palette, not two.
+  if (event.defaultPrevented) return;
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();
     paletteOpen.value = !paletteOpen.value;
@@ -181,6 +187,7 @@ function onGlobalKeydown(event: KeyboardEvent) {
 }
 
 onMounted(() => {
+  mounted.value = true;
   document.addEventListener("keydown", onGlobalKeydown);
   if (props.layout === "content") {
     onScroll();
