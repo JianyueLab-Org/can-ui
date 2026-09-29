@@ -55,8 +55,6 @@ export { default as Popover } from "./components/Popover.vue";
 export { default as CanFrame } from "./components/CanFrame.vue";
 export { default as AccountMenu } from "./components/AccountMenu.vue";
 export { default as NoAccess } from "./components/NoAccess.vue";
-export { default as FrameSearchButton } from "./components/FrameSearchButton.vue";
-export { default as FrameSidebar } from "./components/FrameSidebar.vue";
 export { default as SidebarNav } from "./components/SidebarNav.vue";
 export { default as CommandPalette } from "./components/CommandPalette.vue";
 export { default as ThemeLangControls } from "./components/ThemeLangControls.vue";
