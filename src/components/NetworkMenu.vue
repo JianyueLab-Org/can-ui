@@ -60,8 +60,15 @@ const props = withDefaults(
     compact?: boolean;
     /** Dev/staging origin overrides — see `siteUrl` in `sites.ts`. */
     origins?: SiteOrigins;
+    /** Where the panel opens. A rail opens it to the right, downward. */
+    placement?: "bottom-start" | "bottom-end" | "top-start" | "top-end";
   }>(),
-  { signedIn: false, exclude: () => [], compact: false },
+  {
+    signedIn: false,
+    exclude: () => [],
+    compact: false,
+    placement: "bottom-end",
+  },
 );
 
 const triggerLabel = computed(
@@ -89,7 +96,7 @@ const sites = computed(() => {
   -->
   <Popover
     v-if="sites.length"
-    placement="bottom-end"
+    :placement="placement"
     width="19rem"
     :label="triggerLabel"
   >
