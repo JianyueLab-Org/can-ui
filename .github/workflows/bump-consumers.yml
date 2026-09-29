@@ -1,0 +1,150 @@
+name: Bump consumers
+
+# A published release opens one PR per site that pins the new version exactly
+# and updates bun.lock. Sites hold no token and no config for this.
+#
+# release: published also starts publish.yml. The wait job polls the registry
+# until that version is installable, so bun install below does not race it.
+
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "can-ui version to pin, without the leading v (e.g. 27.1.0)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+
+concurrency:
+  group: bump-consumers-${{ github.event.release.tag_name || inputs.version }}
+  cancel-in-progress: false
+
+jobs:
+  wait:
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.version.outputs.version }}
+    steps:
+      - id: version
+        env:
+          TAG: ${{ github.event.release.tag_name }}
+          INPUT: ${{ inputs.version }}
+        run: |
+          if [ -n "$TAG" ]; then v="${TAG#v}"; else v="${INPUT#v}"; fi
+          if ! printf '%s' "$v" | grep -Eq '^[0-9]+\.[0-9]+\.[0-9]+$'; then
+            echo "::error::not a version: '$v'"
+            exit 1
+          fi
+          echo "version=$v" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          registry-url: https://npm.pkg.github.com
+          scope: "@jianyuelab-org"
+
+      # Up to 20 minutes: publish.yml reruns lint and build before npm publish.
+      - name: Wait for the package on GitHub Packages
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.CAN_UI_BUMP_TOKEN }}
+          VERSION: ${{ steps.version.outputs.version }}
+        run: |
+          for i in $(seq 1 40); do
+            if npm view "@jianyuelab-org/can-ui@$VERSION" version >/dev/null 2>&1; then
+              echo "@jianyuelab-org/can-ui@$VERSION is published"
+              exit 0
+            fi
+            echo "not yet published ($i/40)"
+            sleep 30
+          done
+          echo "::error::@jianyuelab-org/can-ui@$VERSION did not appear within 20 minutes"
+          exit 1
+
+  bump:
+    needs: wait
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        repo:
+          - JianyueLab/can-web
+          - JianyueLab-Org/can-dev
+          - JianyueLab-Org/can-exam
+          - JianyueLab-Org/can-radar
+          - JianyueLab-Org/can-efb
+          - JianyueLab-Org/can-controller
+          - JianyueLab-Org/can-portal
+          - JianyueLab-Org/can-database
+    env:
+      VERSION: ${{ needs.wait.outputs.version }}
+      REPO: ${{ matrix.repo }}
+      GH_TOKEN: ${{ secrets.CAN_UI_BUMP_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          repository: ${{ matrix.repo }}
+          token: ${{ secrets.CAN_UI_BUMP_TOKEN }}
+          fetch-depth: 1
+
+      - uses: oven-sh/setup-bun@v2
+        with:
+          bun-version: latest
+
+      # package.json decides whether there is anything to do. A newer bun can
+      # rewrite bun.lock on its own, so the lockfile is not consulted here.
+      - name: Pin the exact version
+        id: pin
+        run: |
+          if ! grep -Eq '"@jianyuelab-org/can-ui"[[:space:]]*:' package.json; then
+            echo "::error::$REPO/package.json has no @jianyuelab-org/can-ui dependency"
+            exit 1
+          fi
+          sed -E -i "s#(\"@jianyuelab-org/can-ui\"[[:space:]]*:[[:space:]]*)\"[^\"]*\"#\1\"$VERSION\"#" package.json
+          grep -E '"@jianyuelab-org/can-ui"' package.json
+          if git diff --quiet -- package.json; then
+            echo "changed=false" >> "$GITHUB_OUTPUT"
+            echo "$REPO already pins $VERSION; nothing to do"
+          else
+            echo "changed=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      # The site's own .npmrc names the registry and reads ${GITHUB_TOKEN}.
+      - name: Update bun.lock
+        if: steps.pin.outputs.changed == 'true'
+        env:
+          GITHUB_TOKEN: ${{ secrets.CAN_UI_BUMP_TOKEN }}
+        run: |
+          bun install
+          git diff --stat
+
+      - name: Skip when a PR is already open
+        id: existing
+        if: steps.pin.outputs.changed == 'true'
+        run: |
+          count=$(gh pr list -R "$REPO" --head "chore/can-ui-$VERSION" --state open --json number --jq 'length')
+          echo "count=$count" >> "$GITHUB_OUTPUT"
+          if [ "$count" != "0" ]; then echo "$REPO already has an open PR for $VERSION"; fi
+
+      - name: Push the branch and open the PR
+        if: steps.pin.outputs.changed == 'true' && steps.existing.outputs.count == '0'
+        run: |
+          branch="chore/can-ui-$VERSION"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git checkout -b "$branch"
+          git add package.json bun.lock
+          git commit -m "chore: bump can-ui to $VERSION"
+          git push --force origin "HEAD:refs/heads/$branch"
+          printf '%s\n\n%s\n\n%s\n' \
+            "Pins @jianyuelab-org/can-ui to $VERSION and updates bun.lock." \
+            "Opened by the bump-consumers workflow in JianyueLab-Org/can-ui." \
+            "Check: bun run lint && bun run build && bun run check:pages" \
+            > "$RUNNER_TEMP/pr-body.md"
+          gh pr create -R "$REPO" \
+            --head "$branch" \
+            --title "chore: bump can-ui to $VERSION" \
+            --body-file "$RUNNER_TEMP/pr-body.md"
