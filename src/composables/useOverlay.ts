@@ -162,9 +162,10 @@ export function useOverlay(
     if (!isOpen.value) return;
 
     if (event.key === "Escape" && canDismiss()) {
-      // Stopped so a sheet inside a dialog closes only the sheet. The listener
-      // is registered in the capture phase, and the innermost overlay is the
-      // most recently registered, so it sees the key first.
+      // Capture listeners on `document` run in registration order, so the
+      // outer overlay's listener runs first, and stopPropagation does not
+      // stop another listener on the same node. It only keeps the key from
+      // reaching handlers further down the tree.
       event.stopPropagation();
       isOpen.value = false;
       return;

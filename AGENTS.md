@@ -65,17 +65,27 @@ narrow only when something in `files` actually breaks on the older major.
 
 ```
 src/
-  styles/      tokens.css · base.css · components.css · motion.css → index.css
-  motion/      the spring engine, momentum projection, gesture tracking
-  composables/ useOverlay · usePress · usePreferences · useTheme · haptics
-  components/  31 Vue components + ThemeScript.astro
-  assets/logo/ the identity — 12 official files + 6 generated adaptive ones
-  icons.ts     the union of all six sites' icon tables, plus what the chrome needed
-  i18n.ts      createTranslator + the chrome's own string keys
-  nav.ts       NavItem / NavSecondary / Workspace — the shell's data shapes
-  sites.ts     the nine sites, their labels and who may see each — see below
-  demo/        the gallery's islands (not exported)
-  pages/       the gallery: / · /motion · /tokens · /brand · /shell
+  styles/        tokens.css · base.css · components.css · frame.css · motion.css → index.css
+  motion/        the spring engine, momentum projection, gesture tracking
+  composables/   useOverlay · usePress · usePreferences · useTheme · haptics
+  components/    40 Vue components + ThemeScript.astro + RailScript.astro
+  assets/logo/   the identity — 12 official files + 6 generated adaptive ones
+  icons.ts       the union of all six sites' icon tables, plus what the chrome needed
+  i18n.ts        createTranslator, createSiteI18n, the chrome's own string keys
+  nav.ts         NavItem / NavSecondary / Workspace — the shell's data shapes
+  sites.ts       the nine sites, their labels, who may see each, originsFromEnv
+  sitePages.ts   every site's ⌘K pages
+  ratings.ts     RATING_INSTRUCTOR · RATING_SUP · RATING_ADMIN
+  palette.ts     ⌘K items and the matcher
+  frame.ts       CanFrame's pure helpers
+  rail.ts        the rail's data-rail state
+  signOut.ts     the sign-out request
+  frameEntry.ts  @jianyuelab-org/can-ui/frame — frame, sign-out and rail helpers, no Vue
+  checkPages.ts  check:pages — Bun only (server side), not in the barrel
+  demo/          the gallery's islands (not exported)
+  pages/         the gallery: / · /motion · /tokens · /brand · /shell · /header · /frame
+bin/             can-ui-check-pages
+test/fixtures/   a fixture src/pages tree for checkPages.test.ts
 ```
 
 `src/index.ts` is the barrel. `src/demo/` and `src/pages/` are the gallery and are **not** part of
@@ -297,7 +307,55 @@ Two fixes went in on the way, both real bugs rather than tidying:
 - **`useOverlay`'s scroll lock is reference-counted.** A sheet opened from inside a dialog used to
   restore `overflow` when _it_ closed, letting the page scroll behind the dialog still open.
 
-### `SiteHeader` — the page sites' header
+### `CanFrame` — the network frame
+
+Every site renders `CanFrame` from one `src/components/Frame.vue`. It replaces `SiteHeader`,
+`AppShell` and can-efb's `AppRail`.
+
+- `layout`: `content` (top bar, own nav, full `SiteFooter`), `tool` (top bar, sidebar below it,
+  compact footer), `rail` (side rail, bottom tabs under 768px), `map` (56px bar, full-bleed, no
+  footer).
+- Five parts, in this order, in every layout: brand and `NetworkMenu`, ⌘K, the `notifications`
+  slot, `ThemeLangControls`, `AccountMenu`.
+- The frame renders `<main id="main-content">`. A site does not render its own.
+- ⌘K lists the site's own nav, then other sites' `pages` (`sitePages.ts`), grouped by site.
+  `palette.ts` filters by `visibleSites` plus each page's `minRating` and `signedIn`. This is
+  presentation only; access stays with each site and can-api.
+- The matcher ranks name, section and href first, then other-locale titles, keywords and the
+  site name.
+- `navLeaves` in `nav.ts` is the one flattener shared by the palette, `frameLinks` and `railTabs`.
+- `AccountMenu` posts to the site's own `POST /api/v1/auth/signout`, which every site serves and
+  forwards to can-api. This path is the one endpoint can-ui knows. `afterSignOut` is `reload` on
+  public sites and `web` (can-web `/`) on gated ones.
+- `signOut` returns `Promise<boolean>`. On a failed request it does not navigate, and
+  `AccountMenu` shows the chrome key `signOutFailed` inline. Sites translate `signOutFailed` with
+  the other chrome keys.
+- `rail` state is `<html data-rail>`, written before paint by `RailScript.astro` and read by
+  `rail.ts`. `frame.css` holds `--rail-*`, `--tabbar-height`, `.app-rail` and `.tab-bar`, with
+  can-efb's names and values. Its rules are unlayered. The rail does not offset page content; the
+  site uses `--rail-current`. The storage key stays `efb.rail`.
+- On phones the rail layout shows the tab bar: up to three nav items, then ⌘K, then "Me".
+  `railTabs` flattens groups for the phone only and picks the leaves (`NavItem` or `NavChild`)
+  flagged `phoneTab`, or the first three internal leaves. "Me" opens a bottom sheet (via
+  `useOverlay`) with the remaining leaves, then `NetworkMenu`, the
+  `notifications` slot, `ThemeLangControls` and `AccountMenu`, so the frame carries all five parts
+  without a settings page. can-efb's settings page may keep its own controls.
+- `CanFrame` computes `isPhone` only after mount, and ignores ⌘K when `event.defaultPrevented`.
+- `FrameSearchButton` and `FrameSidebar` are `CanFrame` internals, not exported from the barrel.
+- `@jianyuelab-org/can-ui/frame` (`frameEntry.ts`) exports the frame's pure half with no Vue in
+  its import graph, for middleware and endpoints: `FrameLayout`, `FrameUser`, `NoAccessReason`,
+  `AfterSignOut`, `SIGN_OUT_PATH`, `signOut`, `signOutDestination`, `RailState`, `RailSetting`,
+  `RAIL_STORAGE_KEY`, `initialRail`, `effectiveRail`, `currentRail`, `setRail`, `frameLinks`,
+  `reachableSites`, `railTabs`. `frameEntry.test.ts` checks the graph.
+- `NoAccess` renders inside the frame. The site sets HTTP 403. It lists reachable sites from
+  `visibleSites`; slot `next-steps` holds site guidance.
+- Each site runs `check:pages` (`bin/check-pages.ts`) in CI. It fails when a `sitePages.ts` entry
+  has no route in that site's `src/pages`. Catch-all routes do not count. can-docs has no check.
+
+`SiteHeader` and `AppShell` are deprecated through 27.1.x: JSDoc `@deprecated` on the barrel
+exports, no runtime warning. 27.2.0 deletes them with `siteHeader.ts` and `headerNetworkSites`.
+
+### `SiteHeader` — deprecated, removed in 27.2.0
 
 can-web, can-dev, can-exam and can-radar render `SiteHeader`. Props: `current`, `locale`,
 `pathname`, `nav` (`NavChild[]`, the site's own pages), `signedIn`, `rating`, `homeHref`,
@@ -360,11 +418,7 @@ drawer link to other sites' dev origins instead of production.
 
 ### Still not here
 
-**`AppRail`** — can-efb's railed shell, the one with no top bar. It exists in exactly one site, so
-there is nothing to de-duplicate, and its collapsed state lives on `<html data-rail>` coordinated
-with site-level CSS and a separate Astro script rather than inside the component. Lifting a
-single-use component whose state is not even its own is premature abstraction. Revisit if a second
-site wants a rail.
+**`AppRail`** is `CanFrame layout="rail"` now.
 
 **Toasts.** Feedback comes in four kinds and this system covers three; there is no transient
 "completion" surface yet. `AlertBox` occupies the space in the meantime.
@@ -408,6 +462,20 @@ them from the originals rather than editing them.
 Inside a site's own `components/ui/` the prefix disambiguated a design-system button from a page
 component; imported from `can-ui` the package name already does that job.
 
+## Versions
+
+`vXX.YY.ZZ`. `XX` is the year, rolling over in September: September 2026 to August 2027 is `27`.
+`YY` counts from 1; `0` is reserved for pre-release. `ZZ` is the patch. Tags are `v27.1.0`.
+Every site pins the exact version.
+
+Publishing a release runs `.github/workflows/bump-consumers.yml`. It waits until the version is on
+GitHub Packages, then opens `chore: bump can-ui to <version>` (branch `chore/can-ui-<version>`) in
+each of the eight site repos, with the exact pin and an updated `bun.lock`. It uses
+`CAN_UI_BUMP_TOKEN`, a classic PAT with `repo` and `read:packages` held in this repo only; a
+fine-grained PAT cannot cover both `JianyueLab` and `JianyueLab-Org`. Sites add nothing for
+bumps: no config, no secret. The site list is the workflow's matrix; a new consumer is
+added there.
+
 ## Commands
 
 ```bash
@@ -415,8 +483,9 @@ bun install
 bun run dev            # gallery on :4327 — the interactive demo
 bun run lint           # format:check + astro check + vue-tsc + bun test
 bun run build          # what CI builds
-bun test               # spring solver, sites.ts, nav.ts, siteHeader.ts
+bun test               # the pure modules — see below
 bun run format         # prettier --write .
+./bin/check-pages.ts <site> [pagesDir]   # what a site's check:pages runs
 ```
 
 **The gate is `bun run lint` followed by `bun run build`.** Both halves of the typecheck are
@@ -424,8 +493,11 @@ needed: `astro check` diagnoses `.astro` and `.ts` and _silently ignores `.vue`_
 "0 errors" for a component containing any type error at all — so `vue-tsc` runs over
 `tsconfig.vue.json` as well via `scripts/typecheck-vue.mjs`.
 
-`bun test` covers the pure modules: `src/motion/spring.ts`, `src/sites.ts`, `src/nav.ts` and
-`src/siteHeader.ts`. Each can be wrong with nothing on screen looking wrong.
+`bun test` covers the pure modules: `src/motion/spring.ts`, `src/sites.ts`, `src/sitePages.ts`,
+`src/nav.ts`, `src/siteHeader.ts`, `src/i18n.ts`, `src/palette.ts`, `src/frame.ts`,
+`src/rail.ts`, `src/signOut.ts` and `src/checkPages.ts`. Each can be wrong with nothing on screen
+looking wrong. Components have no test stack; they are covered by the type gate, the build and
+the gallery.
 
 ## The gallery is part of the work
 

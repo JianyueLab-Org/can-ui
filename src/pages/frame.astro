@@ -1,0 +1,28 @@
+---
+import ThemeScript from "../components/ThemeScript.astro";
+import RailScript from "../components/RailScript.astro";
+import FrameDemo from "../demo/FrameDemo.vue";
+import "../styles/index.css";
+---
+
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content"
+    />
+    <title>网络外壳 · can-ui</title>
+    <meta
+      name="description"
+      content="CanFrame —— 九个站共用的外壳：content、tool、rail、map 四种布局。"
+    />
+    <ThemeScript />
+    <RailScript />
+  </head>
+  <!-- No GalleryLayout: CanFrame is the page frame. -->
+  <body class="bg-surface">
+    <FrameDemo client:only="vue" />
+  </body>
+</html>

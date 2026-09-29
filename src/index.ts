@@ -11,6 +11,8 @@
  * A deep import is available for the rare case where one component is wanted
  * without the barrel — `can-ui/components/Button.vue`.
  */
+import AppShellComponent from "./components/AppShell.vue";
+import SiteHeaderComponent from "./components/SiteHeader.vue";
 
 /* Brand */
 export { default as Logo } from "./components/Logo.vue";
@@ -48,29 +50,93 @@ export { default as Sheet } from "./components/Sheet.vue";
 export { default as Drawer } from "./components/Drawer.vue";
 export { default as Popover } from "./components/Popover.vue";
 
-/* Chrome — the site frame. These take data and emit events; they call no API
-   and import no site module. See AGENTS.md for what had to be untangled. */
-export { default as AppShell } from "./components/AppShell.vue";
+/* Chrome — the site frame. It calls one endpoint, the site's own
+   /api/v1/auth/signout, and imports no site module. See AGENTS.md. */
+export { default as CanFrame } from "./components/CanFrame.vue";
+export { default as AccountMenu } from "./components/AccountMenu.vue";
+export { default as NoAccess } from "./components/NoAccess.vue";
 export { default as SidebarNav } from "./components/SidebarNav.vue";
 export { default as CommandPalette } from "./components/CommandPalette.vue";
-export type { CommandItem } from "./components/CommandPalette.vue";
 export { default as ThemeLangControls } from "./components/ThemeLangControls.vue";
 export { default as ThemeToggle } from "./components/ThemeToggle.vue";
 export { default as NetworkMenu } from "./components/NetworkMenu.vue";
 export { default as SiteFooter } from "./components/SiteFooter.vue";
-export { default as SiteHeader } from "./components/SiteHeader.vue";
+
+/** @deprecated Use `CanFrame` with `layout="tool"`. Removed in 27.2.0. */
+export const AppShell = AppShellComponent;
+
+/**
+ * @deprecated Use `CanFrame` with `layout="content"` or `layout="map"`.
+ * Removed in 27.2.0.
+ */
+export const SiteHeader = SiteHeaderComponent;
+
+/* Removed with SiteHeader in 27.2.0. */
 export {
   headerNetworkSites,
   type SiteHeaderLabels,
   type HeaderNetworkOptions,
 } from "./siteHeader";
 
+/* Frame helpers */
+export {
+  frameLinks,
+  noAccessText,
+  railTabs,
+  reachableSites,
+  type FrameLayout,
+  type FrameLink,
+  type FrameUser,
+  type NoAccessReason,
+  type ReachableOptions,
+} from "./frame";
+
+/* ⌘K */
+export {
+  commandTier,
+  filterCommands,
+  framePaletteItems,
+  navCommandItems,
+  networkPageItems,
+  pageKeywords,
+  pageTitle,
+  pageVisible,
+  type CommandItem,
+  type FramePaletteOptions,
+  type NavCommandInput,
+  type PaletteOptions,
+} from "./palette";
+
+/* Sign-out */
+export {
+  SIGN_OUT_PATH,
+  signOut,
+  signOutDestination,
+  type AfterSignOut,
+  type SignOutFetch,
+  type SignOutLocation,
+  type SignOutOptions,
+} from "./signOut";
+
+/* Rail state */
+export {
+  RAIL_STORAGE_KEY,
+  currentRail,
+  effectiveRail,
+  initialRail,
+  setRail,
+  type RailSetting,
+  type RailState,
+} from "./rail";
+
 /* Navigation data shapes, and the two functions every frame shares */
 export {
   buildWorkspaces,
   isCurrentPath,
+  navLeaves,
   workspaceVisible,
   type NavItem,
+  type NavLeaf,
   type NavChild,
   type NavSecondary,
   type Workspace,
@@ -87,6 +153,7 @@ export {
   COMMUNITY_LINKS,
   WORKSPACE_SITE_KEYS,
   RATING_INSTRUCTOR,
+  RATING_SUP,
   RATING_ADMIN,
   siteUrl,
   siteLabel,
@@ -95,24 +162,38 @@ export {
   communityLinks,
   visibleSites,
   sitesBySection,
+  originEnvName,
+  originsFromEnv,
   type SiteKey,
   type SiteSection,
   type NetworkSite,
+  type NetworkPage,
   type SiteLabel,
   type ResolvedSite,
   type SiteListOptions,
   type SiteOrigins,
+  type OriginEnv,
   type SectionHeadings,
   type CommunityLink,
 } from "./sites";
+export { SITE_PAGES } from "./sitePages";
 
 /* i18n */
 export {
   createTranslator,
+  createSiteI18n,
+  resolveLocale,
+  cookieDomainFor,
   CHROME_MESSAGES,
   LANGUAGES,
+  LOCALES,
+  DEFAULT_LOCALE,
+  LOCALE_COOKIE,
   type Translator,
   type LanguageOption,
+  type Locale,
+  type SiteI18n,
+  type CookieReader,
 } from "./i18n";
 
 /* Theme — three modes: light, dark, system (the default). */

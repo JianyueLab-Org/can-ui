@@ -26,6 +26,8 @@ export interface NavChild {
   name: string;
   href: string;
   icon?: IconName;
+  /** Show in the rail layout's phone tab bar. See `railTabs`. */
+  phoneTab?: boolean;
 }
 
 export interface NavItem {
@@ -35,6 +37,49 @@ export interface NavItem {
   /** ICON_PATHS key. */
   icon: IconName;
   children?: NavChild[];
+  /** Show in the rail layout's phone tab bar. See `railTabs`. */
+  phoneTab?: boolean;
+}
+
+/** One link of a flattened nav. See `navLeaves`. */
+export interface NavLeaf {
+  name: string;
+  href: string;
+  /** The child's own icon, else its group's. */
+  icon: IconName;
+  phoneTab: boolean;
+  /** The name of the group a child sits in. Absent on top-level items. */
+  group?: string;
+}
+
+/**
+ * The nav as a flat list of links, in nav order: each top-level item with an
+ * href, then each group's children. Items without an href and `#`
+ * placeholders are dropped. Palette, frame links and phone tabs all read it.
+ */
+export function navLeaves(nav: readonly NavItem[]): NavLeaf[] {
+  const out: NavLeaf[] = [];
+  for (const item of nav) {
+    if (item.href && item.href !== "#") {
+      out.push({
+        name: item.name,
+        href: item.href,
+        icon: item.icon,
+        phoneTab: !!item.phoneTab,
+      });
+    }
+    for (const child of item.children ?? []) {
+      if (!child.href || child.href === "#") continue;
+      out.push({
+        name: child.name,
+        href: child.href,
+        icon: child.icon ?? item.icon,
+        phoneTab: !!child.phoneTab,
+        group: item.name,
+      });
+    }
+  }
+  return out;
 }
 
 /**

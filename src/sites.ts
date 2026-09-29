@@ -47,6 +47,11 @@
  */
 
 import type { IconName } from "./icons";
+import type { Locale } from "./i18n";
+import { RATING_ADMIN, RATING_INSTRUCTOR } from "./ratings";
+import { SITE_PAGES } from "./sitePages";
+
+export { RATING_ADMIN, RATING_INSTRUCTOR, RATING_SUP } from "./ratings";
 
 /** Every site in the network. Keys are stable — sites store them. */
 export type SiteKey =
@@ -87,18 +92,27 @@ export interface NetworkSite {
   minRating?: number;
   /** Reachable without signing in — decides what an anonymous visitor sees. */
   publicSite?: boolean;
+  /** Top-level pages offered in every other site's ⌘K. See `sitePages.ts`. */
+  pages: readonly NetworkPage[];
 }
 
 /**
- * Rating floors, named.
+ * One ⌘K entry for a page on a site.
  *
- * Copied from can-web's `ratingTrans`, like every other consumer. If a level
- * above ADM is ever added, this is one of the places that has to hear about
- * it — can-controller's `nav.ts` carries the same warning about the same two
- * numbers.
+ * `minRating` and `signedIn` are drawing hints, like `NetworkSite.minRating`.
  */
-export const RATING_INSTRUCTOR = 8;
-export const RATING_ADMIN = 12;
+export interface NetworkPage {
+  /** Unique within the site. */
+  key: string;
+  /** Path on the site, starting with "/". */
+  path: string;
+  icon: IconName;
+  title: Readonly<Record<Locale, string>>;
+  /** Extra search terms. Other-locale titles are matched already. */
+  keywords?: readonly string[];
+  minRating?: number;
+  signedIn?: boolean;
+}
 
 /**
  * The nine sites.
@@ -118,6 +132,7 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     path: "/",
     icon: "map",
     section: "flight",
+    pages: SITE_PAGES.efb,
   },
   {
     key: "radar",
@@ -125,6 +140,7 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     path: "/",
     icon: "mapPin",
     section: "flight",
+    pages: SITE_PAGES.radar,
     publicSite: true,
   },
   {
@@ -133,6 +149,7 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     path: "/",
     icon: "signal",
     section: "atc",
+    pages: SITE_PAGES.controller,
   },
   {
     key: "exam",
@@ -140,6 +157,7 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     path: "/",
     icon: "academicCap",
     section: "atc",
+    pages: SITE_PAGES.exam,
   },
   {
     key: "portal",
@@ -147,6 +165,7 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     path: "/instr/roster",
     icon: "shieldCheck",
     section: "atc",
+    pages: SITE_PAGES.portal,
     minRating: RATING_INSTRUCTOR,
   },
   {
@@ -158,6 +177,7 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     path: "/",
     icon: "home",
     section: "network",
+    pages: SITE_PAGES.web,
     publicSite: true,
   },
   {
@@ -166,6 +186,7 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     path: "/",
     icon: "bookOpen",
     section: "network",
+    pages: SITE_PAGES.docs,
     publicSite: true,
   },
   {
@@ -183,6 +204,7 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     path: "/",
     icon: "commandLine",
     section: "network",
+    pages: SITE_PAGES.dev,
     publicSite: true,
   },
   {
@@ -191,6 +213,7 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     path: "/",
     icon: "globeAlt",
     section: "network",
+    pages: SITE_PAGES.database,
     minRating: RATING_ADMIN,
   },
 ];
@@ -298,6 +321,32 @@ export function siteUrl(
   const origin =
     override && override.length > 0 ? override.replace(/\/$/, "") : site.origin;
   return `${origin}${path ?? site.path}`;
+}
+
+/** The env variable that overrides one site's origin. */
+export function originEnvName(key: SiteKey): string {
+  return `PUBLIC_CAN_${key.toUpperCase()}_ORIGIN`;
+}
+
+/** `import.meta.env`, or any object of the same shape. */
+export type OriginEnv = Readonly<Record<string, string | boolean | undefined>>;
+
+/**
+ * Every site's origin: `PUBLIC_CAN_<SITE>_ORIGIN` when set and non-blank,
+ * the registry origin otherwise. A trailing slash is stripped.
+ *
+ * Pass `import.meta.env`. `PUBLIC_` variables are inlined at build time, so
+ * the result is the same on the server and in an island.
+ */
+export function originsFromEnv(env: OriginEnv): Record<SiteKey, string> {
+  return Object.fromEntries(
+    NETWORK_SITES.map((site) => {
+      const raw = env[originEnvName(site.key)];
+      const value =
+        typeof raw === "string" ? raw.trim().replace(/\/+$/, "") : "";
+      return [site.key, value || site.origin];
+    }),
+  ) as Record<SiteKey, string>;
 }
 
 export interface SiteLabel {

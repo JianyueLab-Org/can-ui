@@ -1,0 +1,25 @@
+---
+/**
+ * Sets `<html data-rail>` before first paint, from the stored choice.
+ *
+ * Put it in `<head>` next to ThemeScript on every page that renders
+ * `CanFrame layout="rail"`. `is:inline` is required: it must not be bundled
+ * or deferred.
+ *
+ * The key must equal `RAIL_STORAGE_KEY` in src/rail.ts; rail.test.ts checks it.
+ * The script is idempotent, so it survives view-transition re-runs.
+ */
+---
+
+<script is:inline>
+  (function () {
+    var root = document.documentElement;
+    try {
+      var stored = localStorage.getItem("efb.rail");
+      root.dataset.rail =
+        stored === "collapsed" || stored === "expanded" ? stored : "auto";
+    } catch (e) {
+      root.dataset.rail = "auto";
+    }
+  })();
+</script>

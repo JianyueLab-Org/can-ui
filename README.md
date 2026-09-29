@@ -79,25 +79,24 @@ import { Button, Card, Sheet, StatCard } from "@jianyuelab-org/can-ui";
 
 ## What is in it
 
-| Group          | Components                                                                        |
-| -------------- | --------------------------------------------------------------------------------- |
-| Brand          | `Logo` `LogoMark`                                                                 |
-| Primitives     | `Icon` `Avatar` `Spinner` `Skeleton` `Button` `Badge` `Card`                      |
-| Forms          | `Input` `Textarea` `Select` `Toggle` `Segmented`                                  |
-| Page furniture | `AlertBox` `EmptyState` `PageHeader` `StatCard` `DataTable` `ListGroup` `ListRow` |
-| Surfaces       | `Toolbar` `Dialog` `Sheet` `Drawer` `Popover`                                     |
-| Chrome         | `AppShell` `SidebarNav` `CommandPalette` `ThemeLangControls` `ThemeToggle`        |
+| Group          | Components                                                                                                                     |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------ |
+| Brand          | `Logo` `LogoMark`                                                                                                              |
+| Primitives     | `Icon` `Avatar` `Spinner` `Skeleton` `Button` `Badge` `Card`                                                                   |
+| Forms          | `Input` `Textarea` `Select` `Toggle` `Segmented`                                                                               |
+| Page furniture | `AlertBox` `EmptyState` `PageHeader` `StatCard` `DataTable` `ListGroup` `ListRow`                                              |
+| Surfaces       | `Toolbar` `Dialog` `Sheet` `Drawer` `Popover`                                                                                  |
+| Chrome         | `CanFrame` `AccountMenu` `NoAccess` `SidebarNav` `CommandPalette` `ThemeLangControls` `ThemeToggle` `NetworkMenu` `SiteFooter` |
 
 Plus `ThemeScript.astro` (the no-flash inline script), the motion layer — `useSpring`, `useDrag`,
 `Spring`, `Spring2D`, `project`, `rubberband`, `projectToDetent`, `shouldCommit`,
 `VelocityTracker` — and the composables `useOverlay`, `usePress`, `useIsDark`, `toggleTheme`,
 `useReducedMotion`, `useReducedTransparency`, `useHighContrast`, `useCoarsePointer`, `haptics`.
 
-**The chrome components are the site frame** — sidebar, top bar, ⌘K palette, account menu — and
-they take data and emit events: no API call, no site import, no hardcoded route. Sign-out is an
-`@signout` event, the brand is a slot, the account links are a prop, and every string comes from
-the `messages` dictionary the site already builds. `ThemeLangControls` alone was 243 lines
-duplicated byte-for-byte across all six sites.
+**The chrome components are the site frame.** `CanFrame` is the one frame every site renders:
+four layouts, the same five parts in the same order. It takes data and messages as props and
+calls one endpoint, the site's own `/api/v1/auth/signout`. `AppShell` and `SiteHeader` are
+deprecated and removed in 27.2.0.
 
 **The identity lives here too.** `src/assets/logo/` carries the twelve official files —
 horizontal/vertical × black/white × Chinese/Chinese+English/English — plus six generated
@@ -114,10 +113,57 @@ rewrite rather than a redesign:
 3. `@/components/ui/BaseButton.vue` → `@jianyuelab-org/can-ui`, dropping the `Base` prefix.
 4. Add the `.npmrc` and the `noExternal` line.
 
-The chrome goes too. `AppShell` now takes its data as props and emits `@signout` instead of
-calling can-api, so the site keeps the one line it always owned — the sign-out request and where
-to send the member afterwards — and drops the other five hundred. `AppRail` stays in can-efb: it
-exists in one site, so there is nothing to de-duplicate. See [AGENTS.md](AGENTS.md).
+The chrome goes too: one `src/components/Frame.vue` renders `CanFrame`. See
+[The frame](#the-frame) and [AGENTS.md](AGENTS.md).
+
+## The frame
+
+```vue
+<!-- src/components/Frame.vue -->
+<script setup lang="ts">
+import { CanFrame, originsFromEnv } from "@jianyuelab-org/can-ui";
+import type { FrameUser, NavItem } from "@jianyuelab-org/can-ui";
+
+defineProps<{
+  locale: string;
+  pathname: string;
+  user: FrameUser | null;
+  nav: NavItem[];
+  messages: Record<string, unknown>;
+}>();
+const origins = originsFromEnv(import.meta.env);
+</script>
+
+<template>
+  <CanFrame
+    layout="tool"
+    current="controller"
+    :locale="locale"
+    :pathname="pathname"
+    :nav="nav"
+    :user="user"
+    :messages="messages"
+    :origins="origins"
+    after-sign-out="web"
+  >
+    <slot />
+  </CanFrame>
+</template>
+```
+
+`layout="rail"` also needs `RailScript.astro` in `<head>`, next to `ThemeScript.astro`.
+
+Each site checks its ⌘K registry entries against its own routes:
+
+```json
+"check:pages": "can-ui-check-pages controller"
+```
+
+## Versions
+
+`vXX.YY.ZZ`: year (rolling over in September), minor from 1, patch. Sites pin the exact version.
+A published release opens a bump PR in every site repo (`.github/workflows/bump-consumers.yml`,
+secret `CAN_UI_BUMP_TOKEN`). Sites add nothing for bumps.
 
 ## The design language, in five lines
 
@@ -138,7 +184,7 @@ The reasoning behind each is in the source, next to the code it governs.
 bun run dev      # gallery on :4327
 bun run lint     # format:check + astro check + vue-tsc + bun test
 bun run build
-bun test         # the spring solver's physics, headless
+bun test         # the pure modules: sites, pages, palette, frame, i18n, rail, sign-out, check:pages, springs
 ```
 
 The gate is `bun run lint` then `bun run build`.

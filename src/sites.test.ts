@@ -5,6 +5,8 @@ import {
   NETWORK_SITES,
   SITE_LABELS,
   communityLinks,
+  originEnvName,
+  originsFromEnv,
   sectionHeadings,
   siteLabels,
   siteUrl,
@@ -260,4 +262,43 @@ test("the ICP filing keeps its shape: a numbered suffix and the official lookup"
 
   // 必须指向工信部的公开查询入口。指向站内页面等于自己证明自己。
   expect(ICP_FILING.href).toBe("https://beian.miit.gov.cn/");
+});
+
+test("originEnvName is PUBLIC_CAN_<SITE>_ORIGIN", () => {
+  expect(originEnvName("controller")).toBe("PUBLIC_CAN_CONTROLLER_ORIGIN");
+  expect(originEnvName("database")).toBe("PUBLIC_CAN_DATABASE_ORIGIN");
+});
+
+test("originsFromEnv with no variables is the registry", () => {
+  const origins = originsFromEnv({});
+  for (const site of NETWORK_SITES) {
+    expect(origins[site.key]).toBe(site.origin);
+  }
+});
+
+test("originsFromEnv reads each site's variable and strips the slash", () => {
+  const origins = originsFromEnv({
+    PUBLIC_CAN_WEB_ORIGIN: "http://localhost:4321/",
+    PUBLIC_CAN_DATABASE_ORIGIN: "http://localhost:4330",
+    DEV: true,
+  });
+  expect(origins.web).toBe("http://localhost:4321");
+  expect(origins.database).toBe("http://localhost:4330");
+  expect(origins.radar).toBe("https://radar.ceruleanavi.net");
+});
+
+test("an empty or blank variable falls back to the registry", () => {
+  const origins = originsFromEnv({
+    PUBLIC_CAN_EXAM_ORIGIN: "  ",
+    PUBLIC_CAN_EFB_ORIGIN: "",
+  });
+  expect(origins.exam).toBe("https://exam.ceruleanavi.net");
+  expect(origins.efb).toBe("https://efb.ceruleanavi.net");
+});
+
+test("originsFromEnv feeds siteUrl", () => {
+  const origins = originsFromEnv({
+    PUBLIC_CAN_RADAR_ORIGIN: "http://localhost:4323",
+  });
+  expect(siteUrl("radar", "/", origins)).toBe("http://localhost:4323/");
 });
