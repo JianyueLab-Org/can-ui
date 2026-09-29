@@ -32,7 +32,8 @@ import Avatar from "./Avatar.vue";
 import Drawer from "./Drawer.vue";
 import SidebarNav from "./SidebarNav.vue";
 import ThemeLangControls from "./ThemeLangControls.vue";
-import CommandPalette, { type CommandItem } from "./CommandPalette.vue";
+import CommandPalette from "./CommandPalette.vue";
+import { navCommandItems, type CommandItem } from "../palette";
 import SiteFooter from "./SiteFooter.vue";
 import { createTranslator, CHROME_MESSAGES } from "../i18n";
 import { useMediaQuery } from "../composables/usePreferences";
@@ -89,41 +90,14 @@ const profileButton = ref<HTMLElement | null>(null);
    Quick nav. Flattened from the rail, so a route added to the shell is
    searchable with no second list to maintain.
 --------------------------------------------------------------------------- */
-const commands = computed<CommandItem[]>(() => {
-  const items: CommandItem[] = [];
-  const push = (item: CommandItem) => {
-    if (item.href && item.href !== "#") items.push(item);
-  };
-
-  for (const workspace of props.workspaces ?? []) {
-    push({
-      name: workspace.name,
-      href: workspace.href,
-      icon: workspace.icon,
-      section: t("workspace.label"),
-    });
-  }
-  for (const item of props.navigation) {
-    if (item.href) push({ name: item.name, href: item.href, icon: item.icon });
-    for (const child of item.children ?? []) {
-      push({
-        name: child.name,
-        href: child.href,
-        icon: child.icon ?? item.icon,
-        section: item.name,
-      });
-    }
-  }
-  for (const item of props.secondary?.items ?? []) {
-    push({
-      name: item.name,
-      href: item.href,
-      icon: item.icon ?? "arrowPath",
-      section: props.secondary?.label,
-    });
-  }
-  return items;
-});
+const commands = computed<CommandItem[]>(() =>
+  navCommandItems({
+    navigation: props.navigation,
+    workspaces: props.workspaces,
+    secondary: props.secondary,
+    workspaceLabel: t("workspace.label"),
+  }),
+);
 
 function onSelect(item: CommandItem) {
   window.location.href = item.href;

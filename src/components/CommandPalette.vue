@@ -2,33 +2,20 @@
 /**
  * ⌘K quick navigation.
  *
- * It searches **what is already in the rail** and nothing else. That is a
- * deliberate ceiling rather than a first version: searching members, flights
- * or documents needs an API, and a palette that sometimes searches the network
- * and sometimes only the menu is a palette nobody can predict. What it
- * replaces is a search box in can-web's top bar that was wired to nothing at
- * all — visibly a control, functionally a decoration.
+ * It searches the items it is handed and nothing else: the site's own nav
+ * and, under `CanFrame`, other sites' registered pages (`sitePages.ts`). No
+ * API search. Matching is `filterCommands` in `src/palette.ts`: name, section
+ * and href first, then other-locale titles, keywords and the site name.
+ * Items with a `group` are listed under a heading per group.
  *
- * Add a route to the shell and it appears here; there is no second list to
- * keep in step.
- *
- * The keyboard contract is the one people already have from every other
- * palette: type to filter, ↑/↓ to move, Enter to go, Escape to leave. Escape
- * and focus-return come from `useOverlay`, so they cannot be forgotten.
+ * Keyboard: type to filter, ↑/↓ to move, Enter to go, Escape to leave.
+ * Escape and focus-return come from `useOverlay`.
  */
 import { computed, onMounted, ref, watch } from "vue";
 import Icon from "./Icon.vue";
 import { useOverlay } from "../composables/useOverlay";
 import { createTranslator, CHROME_MESSAGES } from "../i18n";
-import type { IconName } from "../icons";
-
-export interface CommandItem {
-  name: string;
-  href: string;
-  icon: IconName;
-  /** Group label shown beside the name — the section it belongs to. */
-  section?: string;
-}
+import { filterCommands, type CommandItem } from "../palette";
 
 const props = withDefaults(
   defineProps<{
@@ -41,7 +28,7 @@ const props = withDefaults(
 
 const emit = defineEmits<{
   "update:open": [boolean];
-  /** Navigation is the site's to perform — see the note on `select`. */
+  /** Navigation is the site's to perform. */
   select: [CommandItem];
 }>();
 
@@ -69,16 +56,14 @@ const panel = useOverlay(isOpen, { initialFocus: input });
 const mounted = ref(false);
 onMounted(() => (mounted.value = true));
 
-const results = computed(() => {
-  const needle = query.value.trim().toLowerCase();
-  if (!needle) return props.items;
-  return props.items.filter(
-    (item) =>
-      item.name.toLowerCase().includes(needle) ||
-      item.section?.toLowerCase().includes(needle) ||
-      item.href.toLowerCase().includes(needle),
-  );
-});
+const results = computed(() => filterCommands(props.items, query.value));
+
+/** Whether the item at `index` opens a new group heading. */
+function startsGroup(index: number): boolean {
+  const item = results.value[index];
+  if (!item?.group) return false;
+  return index === 0 || results.value[index - 1]?.group !== item.group;
+}
 
 // Reset on open rather than on close: resetting on close is visible, because
 // the panel is still on screen while it animates out.
@@ -168,35 +153,42 @@ function onKeydown(event: KeyboardEvent) {
           role="listbox"
           class="max-h-[calc(50dvh-var(--keyboard-inset,0px))] overflow-y-auto overscroll-contain p-2 sm:max-h-80"
         >
-          <li
+          <template
             v-for="(item, index) in results"
-            :key="item.href"
-            role="option"
-            :aria-selected="index === highlighted"
+            :key="item.key ?? item.href"
           >
-            <button
-              type="button"
-              tabindex="-1"
-              :class="[
-                'tap-row flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left text-sm transition-colors',
-                index === highlighted
-                  ? 'bg-surface-sunken text-ink'
-                  : 'text-muted hover:bg-surface-sunken hover:text-ink',
-              ]"
-              @mouseenter="highlighted = index"
-              @click="choose(item)"
+            <li
+              v-if="startsGroup(index)"
+              role="presentation"
+              class="px-3 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-widest text-faint first:pt-1"
             >
-              <Icon :name="item.icon" class="size-4 shrink-0 text-faint" />
-              <span class="truncate font-medium">{{ item.name }}</span>
-              <span v-if="item.section" class="truncate text-xs text-faint">
-                {{ item.section }}
-              </span>
-              <Icon
-                name="arrowRight"
-                class="ml-auto size-4 shrink-0 text-faint"
-              />
-            </button>
-          </li>
+              {{ item.group }}
+            </li>
+            <li role="option" :aria-selected="index === highlighted">
+              <button
+                type="button"
+                tabindex="-1"
+                :class="[
+                  'tap-row flex w-full items-center gap-3 rounded-control px-3 py-2.5 text-left text-sm transition-colors',
+                  index === highlighted
+                    ? 'bg-surface-sunken text-ink'
+                    : 'text-muted hover:bg-surface-sunken hover:text-ink',
+                ]"
+                @mouseenter="highlighted = index"
+                @click="choose(item)"
+              >
+                <Icon :name="item.icon" class="size-4 shrink-0 text-faint" />
+                <span class="truncate font-medium">{{ item.name }}</span>
+                <span v-if="item.section" class="truncate text-xs text-faint">
+                  {{ item.section }}
+                </span>
+                <Icon
+                  name="arrowRight"
+                  class="ml-auto size-4 shrink-0 text-faint"
+                />
+              </button>
+            </li>
+          </template>
         </ul>
         <p v-else class="px-4 py-8 text-center text-sm text-muted">
           {{ t("search.noResults") }}

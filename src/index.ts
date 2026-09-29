@@ -53,7 +53,7 @@ export { default as Popover } from "./components/Popover.vue";
 export { default as AppShell } from "./components/AppShell.vue";
 export { default as SidebarNav } from "./components/SidebarNav.vue";
 export { default as CommandPalette } from "./components/CommandPalette.vue";
-export type { CommandItem } from "./components/CommandPalette.vue";
+export type { CommandItem } from "./palette";
 export { default as ThemeLangControls } from "./components/ThemeLangControls.vue";
 export { default as ThemeToggle } from "./components/ThemeToggle.vue";
 export { default as NetworkMenu } from "./components/NetworkMenu.vue";
