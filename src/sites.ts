@@ -323,6 +323,32 @@ export function siteUrl(
   return `${origin}${path ?? site.path}`;
 }
 
+/** The env variable that overrides one site's origin. */
+export function originEnvName(key: SiteKey): string {
+  return `PUBLIC_CAN_${key.toUpperCase()}_ORIGIN`;
+}
+
+/** `import.meta.env`, or any object of the same shape. */
+export type OriginEnv = Readonly<Record<string, string | boolean | undefined>>;
+
+/**
+ * Every site's origin: `PUBLIC_CAN_<SITE>_ORIGIN` when set and non-blank,
+ * the registry origin otherwise. A trailing slash is stripped.
+ *
+ * Pass `import.meta.env`. `PUBLIC_` variables are inlined at build time, so
+ * the result is the same on the server and in an island.
+ */
+export function originsFromEnv(env: OriginEnv): Record<SiteKey, string> {
+  return Object.fromEntries(
+    NETWORK_SITES.map((site) => {
+      const raw = env[originEnvName(site.key)];
+      const value =
+        typeof raw === "string" ? raw.trim().replace(/\/+$/, "") : "";
+      return [site.key, value || site.origin];
+    }),
+  ) as Record<SiteKey, string>;
+}
+
 export interface SiteLabel {
   /** The site's name. Shown in the menu, the footer and the palette. */
   name: string;
