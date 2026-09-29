@@ -1,0 +1,110 @@
+/* ===========================================================================
+   CanFrame layout="rail" — the side rail and the phone tab bar.
+
+   Moved from can-efb. Names and values are unchanged, so can-efb's floating
+   panels keep reading --rail-current.
+
+   The collapse state is <html data-rail>, written before first paint by
+   RailScript.astro. The rail does not offset page content; a page positions
+   itself against --rail-current and --tabbar-height.
+
+   Unlayered, as in can-efb: Tailwind utilities such as px-* on .rail-item
+   must not override the collapsed-rail rules.
+   =========================================================================== */
+
+:root {
+  --rail-width: 17rem;
+  --rail-width-collapsed: 4.75rem;
+  --rail-current: var(--rail-width);
+  /* What `data-rail="auto"` resolves to. Flips to collapsed on tablets. */
+  --rail-auto: expanded;
+  --tabbar-height: 4rem;
+}
+:root[data-rail="collapsed"] {
+  --rail-current: var(--rail-width-collapsed);
+}
+
+/* Hidden on phones, where the tab bar replaces it. */
+.app-rail {
+  display: none;
+}
+@media (min-width: 768px) {
+  .app-rail {
+    position: fixed;
+    inset-block: 0;
+    left: 0;
+    z-index: 40;
+    display: flex;
+    flex-direction: column;
+    width: var(--rail-current);
+    border-right: 1px solid var(--border-subtle);
+    transition: width 200ms ease;
+  }
+}
+
+/* Tablets collapse unless the member chose otherwise. */
+@media (min-width: 768px) and (max-width: 1151.98px) {
+  :root {
+    --rail-auto: collapsed;
+  }
+  :root[data-rail="auto"] {
+    --rail-current: var(--rail-width-collapsed);
+  }
+  :root[data-rail="auto"] .app-rail .rail-item {
+    justify-content: center;
+    padding-left: 0;
+    padding-right: 0;
+  }
+  :root[data-rail="auto"] .app-rail .rail-label {
+    display: none;
+  }
+}
+
+/* Collapsed: icons only, centred. */
+:root[data-rail="collapsed"] .app-rail .rail-item {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+}
+:root[data-rail="collapsed"] .app-rail .rail-label {
+  display: none;
+}
+
+/* Phone tab bar. Clears the home indicator. */
+.tab-bar {
+  position: fixed;
+  z-index: 40;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: calc(var(--tabbar-height) + env(safe-area-inset-bottom));
+  padding-bottom: env(safe-area-inset-bottom);
+  display: grid;
+  grid-auto-flow: column;
+  grid-auto-columns: minmax(0, 1fr);
+  border-top: 1px solid var(--border-subtle);
+}
+/* 44px is the touch-target floor. */
+.tab-bar-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.125rem;
+  min-width: 44px;
+  min-height: 44px;
+  font-size: 0.6875rem;
+  color: var(--color-muted);
+}
+.tab-bar-item[aria-current="page"] {
+  color: var(--color-can);
+}
+/* The bar sits on the viewport edge; an outward ring would be clipped. */
+.tab-bar-item:focus-visible {
+  outline-offset: -2px;
+}
+@media (min-width: 768px) {
+  .tab-bar {
+    display: none;
+  }
+}
