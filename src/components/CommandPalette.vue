@@ -74,6 +74,11 @@ watch(isOpen, (open) => {
   }
 });
 
+// Typing starts a new search: the cursor goes back to the first result.
+watch(query, () => {
+  highlighted.value = 0;
+});
+
 // A filter that shortens the list can leave the cursor past its end.
 watch(results, (list) => {
   if (highlighted.value > list.length - 1) highlighted.value = 0;

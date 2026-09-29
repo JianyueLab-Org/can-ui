@@ -366,12 +366,7 @@ function railLinkClass(href: string) {
             class="mt-auto flex flex-col gap-y-2 border-t border-subtle pt-3"
           >
             <!-- 4. Theme and language, plus the collapse toggle -->
-            <div
-              :class="[
-                'flex items-center gap-0.5',
-                collapsed ? 'flex-col' : '',
-              ]"
-            >
+            <div class="rail-controls flex items-center gap-0.5">
               <ThemeLangControls
                 :locale="locale"
                 :languages="languages"

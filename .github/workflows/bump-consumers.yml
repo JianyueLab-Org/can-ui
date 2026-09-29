@@ -152,7 +152,7 @@ jobs:
           printf '%s\n\n%s\n\n%s\n' \
             "Pins @jianyuelab-org/can-ui to $VERSION and updates bun.lock." \
             "Opened by the bump-consumers workflow in JianyueLab-Org/can-ui." \
-            "Check: bun run lint && bun run build && bun run check:pages" \
+            "Check: bun run lint && bun run build. Once the site has migrated to CanFrame, also run bun run check:pages (sites without the script skip it)." \
             > "$RUNNER_TEMP/pr-body.md"
           gh pr create -R "$REPO" \
             --head "$branch" \

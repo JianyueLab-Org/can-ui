@@ -120,6 +120,7 @@ watch(isDesktop, (desktop) => {
 });
 
 function onGlobalKeydown(event: KeyboardEvent) {
+  if (event.defaultPrevented) return;
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();
     searchOpen.value = !searchOpen.value;

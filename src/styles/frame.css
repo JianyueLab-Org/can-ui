@@ -58,6 +58,9 @@
   :root[data-rail="auto"] .app-rail .rail-label {
     display: none;
   }
+  :root[data-rail="auto"] .app-rail .rail-controls {
+    flex-direction: column;
+  }
 }
 
 /* Collapsed: icons only, centred. */
@@ -66,8 +69,12 @@
   padding-left: 0;
   padding-right: 0;
 }
+
 :root[data-rail="collapsed"] .app-rail .rail-label {
   display: none;
+}
+:root[data-rail="collapsed"] .app-rail .rail-controls {
+  flex-direction: column;
 }
 
 /* Phone tab bar. Clears the home indicator. */
