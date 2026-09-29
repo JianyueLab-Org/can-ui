@@ -54,6 +54,7 @@ test("every key the frame renders has an English default", () => {
     "openMenu",
     "siteNavigation",
     "signingOut",
+    "signOutFailed",
     "rail.collapse",
     "rail.expand",
     "rail.me",

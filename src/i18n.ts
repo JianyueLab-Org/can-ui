@@ -97,6 +97,7 @@ export const CHROME_MESSAGES: Record<string, unknown> = {
   /** The site's own nav landmark in a bar, drawer or rail. */
   siteNavigation: "Site navigation",
   signingOut: "Signing out…",
+  signOutFailed: "Sign-out failed. Try again.",
   rail: {
     collapse: "Collapse sidebar",
     expand: "Expand sidebar",
