@@ -106,6 +106,7 @@ describe("workspaceVisible", () => {
     icon: "shieldCheck",
     section: "atc",
     minRating: 8,
+    pages: [],
   };
   const open: NetworkSite = { ...gated, minRating: undefined };
 
