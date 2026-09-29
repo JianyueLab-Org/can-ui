@@ -158,3 +158,96 @@ export function cookieDomainFor(hostname: string): string {
   if (labels.length < 2) return ""; // localhost and friends
   return "." + labels.slice(-2).join(".");
 }
+
+/** The four locales the network ships. Cookie values, lower-case. */
+export type Locale = "zh-cn" | "zh-tw" | "en-us" | "ja-jp";
+
+export const LOCALES: readonly Locale[] = ["zh-cn", "zh-tw", "en-us", "ja-jp"];
+
+/** The product language. Missing keys fall back to it. */
+export const DEFAULT_LOCALE: Locale = "zh-cn";
+
+/** The cookie every site reads the locale from. Next.js-era name, current. */
+export const LOCALE_COOKIE = "NEXT_LOCALE";
+
+/** A cookie value resolved to a shipped locale. Anything else is zh-cn. */
+export function resolveLocale(cookieValue?: string | null): Locale {
+  return cookieValue && (LOCALES as readonly string[]).includes(cookieValue)
+    ? (cookieValue as Locale)
+    : DEFAULT_LOCALE;
+}
+
+/** The part of Astro's `cookies` that `getLocale` reads. */
+export interface CookieReader {
+  get(name: string): { value: string } | undefined;
+}
+
+/** What a site's `src/lib/i18n.ts` exports. */
+export interface SiteI18n {
+  LOCALES: Locale[];
+  DEFAULT_LOCALE: Locale;
+  resolveLocale(cookieValue?: string | null): Locale;
+  getLocale(cookies: CookieReader): Locale;
+  useTranslations(locale: Locale, namespace?: string): Translator;
+  getMessages(locale: Locale, namespace?: string): Record<string, unknown>;
+}
+
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return !!value && typeof value === "object" && !Array.isArray(value);
+}
+
+function deepMerge(
+  base: Record<string, unknown>,
+  over: Record<string, unknown>,
+): Record<string, unknown> {
+  const out: Record<string, unknown> = { ...base };
+  for (const [key, value] of Object.entries(over)) {
+    const prev = out[key];
+    out[key] =
+      isRecord(prev) && isRecord(value) ? deepMerge(prev, value) : value;
+  }
+  return out;
+}
+
+/**
+ * A site's i18n module, built from its four dictionaries.
+ *
+ * Missing keys fall back to zh-cn: `useTranslations` through the two-argument
+ * `createTranslator`, `getMessages` by merging the zh-cn dictionary under the
+ * requested one, so an island gets the same fallback.
+ *
+ *   export const { LOCALES, DEFAULT_LOCALE, resolveLocale, getLocale,
+ *     useTranslations, getMessages } = createSiteI18n({ "zh-cn": zhCn, … });
+ */
+export function createSiteI18n(
+  dicts: Readonly<Record<Locale, Record<string, unknown>>>,
+): SiteI18n {
+  function section(
+    locale: Locale,
+    namespace?: string,
+  ): Record<string, unknown> {
+    const base = namespace ? lookup(dicts[locale], namespace) : dicts[locale];
+    return isRecord(base) ? base : {};
+  }
+
+  return {
+    LOCALES: [...LOCALES],
+    DEFAULT_LOCALE,
+    resolveLocale,
+    getLocale: (cookies) => resolveLocale(cookies.get(LOCALE_COOKIE)?.value),
+    useTranslations: (locale, namespace) =>
+      createTranslator(
+        section(locale, namespace),
+        locale === DEFAULT_LOCALE
+          ? undefined
+          : section(DEFAULT_LOCALE, namespace),
+      ),
+    getMessages: (locale, namespace) =>
+      locale === DEFAULT_LOCALE
+        ? section(locale, namespace)
+        : deepMerge(
+            section(DEFAULT_LOCALE, namespace),
+            section(locale, namespace),
+          ),
+  };
+}
