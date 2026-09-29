@@ -19,11 +19,15 @@
   },
   "files": [
     "src",
+    "bin",
     "!src/demo",
     "!src/pages",
     "!src/layouts",
     "!src/**/*.test.ts"
   ],
+  "bin": {
+    "can-ui-check-pages": "./bin/check-pages.ts"
+  },
   "sideEffects": [
     "*.css"
   ],
@@ -37,6 +41,7 @@
     "./i18n": "./src/i18n.ts",
     "./nav": "./src/nav.ts",
     "./sites": "./src/sites.ts",
+    "./check-pages": "./src/checkPages.ts",
     "./components/*": "./src/components/*",
     "./assets/*": "./src/assets/*"
   },
