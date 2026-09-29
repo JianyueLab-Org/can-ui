@@ -92,6 +92,24 @@ export const CHROME_MESSAGES: Record<string, unknown> = {
   /** The rail's landmark name, read out when a screen reader lists regions. */
   sidebar: "Sidebar",
   openUserMenu: "Open user menu",
+  /** Content and map layouts' drawer button, and the drawer's name. */
+  openMenu: "Open menu",
+  /** The site's own nav landmark in a bar, drawer or rail. */
+  siteNavigation: "Site navigation",
+  signingOut: "Signing out…",
+  rail: {
+    collapse: "Collapse sidebar",
+    expand: "Expand sidebar",
+    /** The phone tab that opens the sheet with the other frame parts. */
+    me: "Me",
+  },
+  noAccess: {
+    title: "You do not have access to this page",
+    rating: "It needs rating {required} or above.",
+    permission: "It needs the {name} permission.",
+    signedInAs: "Signed in as {name} (#{id}).",
+    reachable: "Sites you can use",
+  },
   workspace: {
     label: "Workspace",
   },

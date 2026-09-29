@@ -10,7 +10,12 @@
  */
 import type { IconName } from "./icons";
 import { LOCALES } from "./i18n";
-import type { NavItem, NavSecondary, Workspace } from "./nav";
+import {
+  navLeaves,
+  type NavItem,
+  type NavSecondary,
+  type Workspace,
+} from "./nav";
 import {
   SITE_BY_KEY,
   siteLabel,
@@ -133,16 +138,13 @@ export function navCommandItems(input: NavCommandInput): CommandItem[] {
       section: input.workspaceLabel,
     });
   }
-  for (const item of input.navigation) {
-    if (item.href) push({ name: item.name, href: item.href, icon: item.icon });
-    for (const child of item.children ?? []) {
-      push({
-        name: child.name,
-        href: child.href,
-        icon: child.icon ?? item.icon,
-        section: item.name,
-      });
-    }
+  for (const leaf of navLeaves(input.navigation)) {
+    push({
+      name: leaf.name,
+      href: leaf.href,
+      icon: leaf.icon,
+      ...(leaf.group ? { section: leaf.group } : {}),
+    });
   }
   for (const item of input.secondary?.items ?? []) {
     push({

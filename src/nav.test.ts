@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { buildWorkspaces, isCurrentPath, workspaceVisible } from "./nav";
+import {
+  buildWorkspaces,
+  isCurrentPath,
+  navLeaves,
+  workspaceVisible,
+  type NavItem,
+} from "./nav";
 import {
   NETWORK_SITES,
   WORKSPACE_SITE_KEYS,
@@ -147,5 +153,42 @@ describe("isCurrentPath", () => {
     expect(isCurrentPath("#", "/")).toBe(false);
     expect(isCurrentPath("", "/")).toBe(false);
     expect(isCurrentPath(undefined, "/")).toBe(false);
+  });
+});
+
+describe("navLeaves", () => {
+  const nav: NavItem[] = [
+    { name: "A", href: "/a", icon: "home", phoneTab: true },
+    { name: "Ph", href: "#", icon: "home" },
+    { name: "Empty", icon: "home" },
+    {
+      name: "G",
+      icon: "paperAirplane",
+      children: [
+        { name: "C1", href: "/c1", phoneTab: true },
+        { name: "C2", href: "#", icon: "map" },
+        { name: "C3", href: "/c3", icon: "map" },
+      ],
+    },
+    { name: "Z", href: "/z", icon: "users" },
+  ];
+
+  test("walks items then children in order, dropping # and hrefless", () => {
+    expect(navLeaves(nav)).toEqual([
+      { name: "A", href: "/a", icon: "home", phoneTab: true },
+      {
+        name: "C1",
+        href: "/c1",
+        icon: "paperAirplane",
+        phoneTab: true,
+        group: "G",
+      },
+      { name: "C3", href: "/c3", icon: "map", phoneTab: false, group: "G" },
+      { name: "Z", href: "/z", icon: "users", phoneTab: false },
+    ]);
+  });
+
+  test("an empty nav", () => {
+    expect(navLeaves([])).toEqual([]);
   });
 });

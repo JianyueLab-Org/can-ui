@@ -42,6 +42,7 @@
     "./nav": "./src/nav.ts",
     "./sites": "./src/sites.ts",
     "./check-pages": "./src/checkPages.ts",
+    "./frame": "./src/frameEntry.ts",
     "./components/*": "./src/components/*",
     "./assets/*": "./src/assets/*"
   },
