@@ -81,7 +81,7 @@ src/
   rail.ts        the rail's data-rail state
   signOut.ts     the sign-out request
   frameEntry.ts  @jianyuelab-org/can-ui/frame — frame, sign-out and rail helpers, no Vue
-  checkPages.ts  check:pages — Node only, not in the barrel
+  checkPages.ts  check:pages — Bun only (server side), not in the barrel
   demo/          the gallery's islands (not exported)
   pages/         the gallery: / · /motion · /tokens · /brand · /shell · /header · /frame
 bin/             can-ui-check-pages

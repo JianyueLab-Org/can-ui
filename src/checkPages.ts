@@ -2,7 +2,7 @@
  * `check:pages` — every `pages` entry for a site must name a route that the
  * site's `src/pages` serves.
  *
- * Node only; not in the barrel. Import from
+ * Bun only (server side); not in the barrel. Import from
  * `@jianyuelab-org/can-ui/check-pages`, or run `can-ui-check-pages`.
  *
  * Catch-all routes (`[...path]`) do not count: on these sites they are
