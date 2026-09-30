@@ -178,7 +178,7 @@ watch(isRailWidth, (wide) => {
 });
 
 function onGlobalKeydown(event: KeyboardEvent) {
-  // Another frame or AppShell handled it first: one palette, not two.
+  // Another frame handled it first: one palette, not two.
   if (event.defaultPrevented) return;
   if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === "k") {
     event.preventDefault();

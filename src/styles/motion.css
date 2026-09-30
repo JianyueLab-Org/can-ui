@@ -127,7 +127,7 @@ html.theme-transitioning body * {
 .animate-panel-in {
   animation: scale-in var(--duration-medium) var(--ease-out-quint) both;
   /* Anchored to whatever opened it, exactly as `.animate-materialize` is.
-     Only that class used to read these, so the account menu (AppShell) and the
+     Only that class used to read these, so the account menu and the
      theme/language menus (ThemeLangControls) — which both set `--origin-x` /
      `--origin-y` from their trigger corner — scaled from their own centre and
      the properties did nothing at all. The 50% fallbacks keep the two centred
