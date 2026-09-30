@@ -48,8 +48,8 @@ export { default as Sheet } from "./components/Sheet.vue";
 export { default as Drawer } from "./components/Drawer.vue";
 export { default as Popover } from "./components/Popover.vue";
 
-/* Chrome — the site frame. It calls one endpoint, the site's own
-   /api/v1/auth/signout, and imports no site module. See AGENTS.md. */
+/* Chrome — the site frame. It calls the site's own /api/v1/auth/signout and
+   /api/v1/notifications/*, and imports no site module. See AGENTS.md. */
 export { default as CanFrame } from "./components/CanFrame.vue";
 export { default as AccountMenu } from "./components/AccountMenu.vue";
 export { default as NoAccess } from "./components/NoAccess.vue";
@@ -59,6 +59,7 @@ export { default as ThemeLangControls } from "./components/ThemeLangControls.vue
 export { default as ThemeToggle } from "./components/ThemeToggle.vue";
 export { default as NetworkMenu } from "./components/NetworkMenu.vue";
 export { default as SiteFooter } from "./components/SiteFooter.vue";
+export { default as NotificationBell } from "./components/NotificationBell.vue";
 
 /* Frame helpers */
 export {
@@ -99,6 +100,56 @@ export {
   type SignOutLocation,
   type SignOutOptions,
 } from "./signOut";
+
+/* Notifications */
+export {
+  NOTIFICATION_KINDS,
+  NOTIFICATION_PARAMS,
+  NOTIFICATIONS_PATH,
+  NOTIFICATIONS_UNREAD_PATH,
+  NOTIFICATIONS_READ_ALL_PATH,
+  NOTIFICATIONS_PAGE_SIZE,
+  notificationsListPath,
+  notificationReadPath,
+  notificationHref,
+  notificationIcon,
+  notificationBadgeText,
+  notificationTime,
+  type NotificationItem,
+  type NotificationKind,
+  type NotificationPage,
+  type NotificationSource,
+} from "./notifications";
+export {
+  NOTIFICATION_MESSAGES,
+  NOTIFICATION_UI,
+  notificationChrome,
+  notificationLocale,
+  renderNotification,
+  type NotificationUi,
+  type RenderNotificationOptions,
+} from "./notificationMessages";
+export {
+  POLL_INTERVAL_MS,
+  BACKOFF_INTERVAL_MS,
+  BACKOFF_AFTER_FAILURES,
+  createNotificationClient,
+  createNotificationPoller,
+  type NotificationClient,
+  type NotificationFetch,
+  type NotificationPoller,
+  type NotificationResponse,
+  type PageVisibility,
+  type PollClock,
+  type RequestResult,
+} from "./notificationPoller";
+export { RATING_SHORT, ratingShort } from "./ratings";
+export {
+  placePopover,
+  popoverOrigin,
+  type PopoverPlacement,
+  type ResolvedPlacement,
+} from "./popoverPosition";
 
 /* Rail state */
 export {
@@ -220,6 +271,10 @@ export {
 
 /* Composables */
 export {
+  NOTIFICATION_FETCH_KEY,
+  useNotifications,
+  type UseNotificationsOptions,
+  type UseNotificationsReturn,
   useOverlay,
   usePress,
   useMediaQuery,

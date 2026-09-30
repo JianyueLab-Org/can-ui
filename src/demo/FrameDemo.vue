@@ -1,13 +1,20 @@
 <script setup lang="ts">
 /**
- * CanFrame in each layout. Query: `layout`, `signedIn`, `denied`.
+ * CanFrame in each layout. Query: `layout`, `signedIn`, `denied`,
+ * `bell` (`on` · `empty` · `off`).
  * Mounted client-only: the layout comes from the URL.
+ * The bell reads fixtures through NOTIFICATION_FETCH_KEY: 8 rows, 5 per page.
  */
-import { computed, onMounted, ref } from "vue";
+import { computed, onMounted, provide, ref } from "vue";
 import CanFrame from "../components/CanFrame.vue";
 import NoAccess from "../components/NoAccess.vue";
+import { NOTIFICATION_FETCH_KEY } from "../composables/useNotifications";
 import type { FrameLayout, FrameUser } from "../frame";
 import type { NavChild, NavItem, Workspace } from "../nav";
+import type { NotificationItem } from "../notifications";
+
+type BellMode = "on" | "empty" | "off";
+const BELL_MODES: BellMode[] = ["on", "empty", "off"];
 
 const profileItems: NavChild[] = [
   { name: "账号", href: "#account", icon: "userCircle" },
@@ -18,6 +25,7 @@ const LAYOUTS: FrameLayout[] = ["content", "tool", "rail", "map"];
 const layout = ref<FrameLayout>("content");
 const signedIn = ref(true);
 const denied = ref(false);
+const bell = ref<BellMode>("on");
 
 onMounted(() => {
   const params = new URLSearchParams(window.location.search);
@@ -27,7 +35,150 @@ onMounted(() => {
   }
   signedIn.value = params.get("signedIn") !== "0";
   denied.value = params.get("denied") === "1";
+  const mode = params.get("bell");
+  if (mode && (BELL_MODES as string[]).includes(mode)) {
+    bell.value = mode as BellMode;
+  }
 });
+
+/* Notification fixtures ---------------------------------------------------- */
+const minutesAgo = (minutes: number) =>
+  new Date(Date.now() - minutes * 60_000).toISOString();
+
+const fixtures: NotificationItem[] = [
+  {
+    id: 41,
+    source: "member",
+    kind: "promotion.approved",
+    params: { toRating: 3, comment: "欢迎加入塔台" },
+    site: "web",
+    path: "/pilots",
+    createdAt: minutesAgo(2),
+    read: false,
+  },
+  {
+    id: 7,
+    source: "broadcast",
+    kind: "activity.published",
+    params: {
+      activityId: 12,
+      title: "国庆联飞",
+      startsAt: "2026-10-01T12:00:00Z",
+    },
+    site: "web",
+    path: "/activities/12",
+    createdAt: minutesAgo(45),
+    read: false,
+  },
+  {
+    id: 40,
+    source: "member",
+    kind: "reservation.cancelledByStaff",
+    params: { callsign: "ZBAA_TWR", startsAt: "2026-10-02T10:00:00Z" },
+    site: "controller",
+    path: "/frame",
+    createdAt: minutesAgo(180),
+    read: false,
+  },
+  {
+    id: 39,
+    source: "member",
+    kind: "exam.passed",
+    params: { paper: "S2 理论", score: 92, promoted: true },
+    site: "exam",
+    path: "/",
+    createdAt: minutesAgo(60 * 26),
+    read: true,
+  },
+  {
+    id: 38,
+    source: "member",
+    kind: "security.newSignIn",
+    params: { browser: "Safari", os: "iOS", ipPrefix: "203.0.113.0/24" },
+    site: "web",
+    path: "/pilots/account",
+    createdAt: minutesAgo(60 * 50),
+    read: true,
+  },
+  {
+    id: 37,
+    source: "member",
+    kind: "redemption.cancelled",
+    params: { prize: "机模", points: 300, note: "库存不足" },
+    site: "web",
+    path: "/rewards",
+    createdAt: minutesAgo(60 * 24 * 3),
+    read: true,
+  },
+  {
+    id: 36,
+    source: "member",
+    kind: "access.aipGranted",
+    params: {},
+    site: "database",
+    path: "/",
+    createdAt: minutesAgo(60 * 24 * 9),
+    read: true,
+  },
+  {
+    id: 35,
+    source: "member",
+    kind: "future.kind",
+    params: {},
+    site: "web",
+    path: "/",
+    createdAt: minutesAgo(60 * 24 * 12),
+    read: true,
+  },
+];
+
+const FIXTURE_PAGE = 5;
+
+function reply(status: number, body?: unknown): Response {
+  return body === undefined
+    ? new Response(null, { status })
+    : new Response(JSON.stringify(body), {
+        status,
+        headers: { "Content-Type": "application/json" },
+      });
+}
+
+async function fixtureFetch(
+  input: string,
+  init: RequestInit,
+): Promise<Response> {
+  await new Promise((resolve) => setTimeout(resolve, 400));
+  const url = new URL(input, window.location.origin);
+  const rows = bell.value === "empty" ? [] : fixtures;
+  if (url.pathname === "/api/v1/notifications/unread") {
+    return reply(200, { count: rows.filter((row) => !row.read).length });
+  }
+  if (url.pathname === "/api/v1/notifications") {
+    const start = Number(url.searchParams.get("before") ?? 0);
+    const end = start + FIXTURE_PAGE;
+    return reply(200, {
+      items: rows.slice(start, end),
+      next: end < rows.length ? String(end) : null,
+    });
+  }
+  if (url.pathname === "/api/v1/notifications/read-all") {
+    for (const row of fixtures) row.read = true;
+    return reply(204);
+  }
+  const match = /^\/api\/v1\/notifications\/(member|broadcast)\/(\d+)$/.exec(
+    url.pathname,
+  );
+  if (match && init.method === "PATCH") {
+    const row = fixtures.find(
+      (have) => have.source === match[1] && have.id === Number(match[2]),
+    );
+    if (row) row.read = true;
+    return reply(row ? 204 : 404);
+  }
+  return reply(404);
+}
+
+provide(NOTIFICATION_FETCH_KEY, fixtureFetch);
 
 const user = computed<FrameUser | null>(() =>
   signedIn.value ? { name: "Li Wei", id: 1024, rating: 11 } : null,
@@ -82,11 +233,13 @@ function href(next: {
   layout?: FrameLayout;
   signedIn?: boolean;
   denied?: boolean;
+  bell?: BellMode;
 }): string {
   const params = new URLSearchParams({
     layout: next.layout ?? layout.value,
     signedIn: (next.signedIn ?? signedIn.value) ? "1" : "0",
     denied: (next.denied ?? denied.value) ? "1" : "0",
+    bell: next.bell ?? bell.value,
   });
   return `/frame?${params.toString()}`;
 }
@@ -94,8 +247,9 @@ function href(next: {
 
 <template>
   <CanFrame
-    :key="layout"
+    :key="`${layout}-${bell}`"
     :layout="layout"
+    :notifications="bell !== 'off'"
     current="controller"
     locale="zh-cn"
     pathname="/frame"
@@ -157,6 +311,18 @@ function href(next: {
             class="btn btn-ghost px-3 py-1.5 text-sm"
           >
             {{ denied ? "关闭无权限页" : "显示无权限页" }}
+          </a>
+        </div>
+        <div class="flex flex-wrap items-center gap-2">
+          <span class="text-sm text-muted">通知：</span>
+          <a
+            v-for="mode in BELL_MODES"
+            :key="mode"
+            :href="href({ bell: mode })"
+            :aria-current="bell === mode ? 'true' : undefined"
+            class="btn btn-ghost px-3 py-1.5 text-sm aria-[current]:text-can"
+          >
+            {{ mode }}
           </a>
         </div>
         <p v-for="n in 30" :key="n" class="text-sm text-faint">
