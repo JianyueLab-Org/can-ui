@@ -275,9 +275,10 @@ Revisit when `@astrojs/check` and `vue-tsc` ship TS 7 support — not because a 
 ## The chrome layer
 
 `CanFrame`, `SidebarNav`, `ThemeLangControls`, `CommandPalette`, `Drawer` and `Avatar` are the
-site frame. They were the last things lifted because they were the only ones with real couplings
-rather than merely large ones, and the couplings are worth naming — the next shell somebody tries
-to share will have the same four. They were found lifting `AppShell`, which 27.2.0 removed:
+site frame. The four couplings below were found lifting `AppShell`, which 27.2.0 removed. They
+were the last things lifted because they were the only ones with real couplings rather than
+merely large ones, and the couplings are worth naming — the next shell somebody tries to share
+will have the same four:
 
 1. **`AppShell` called can-api.** Sign-out was `api("/api/v1/auth/signout")` inline. A design
    system that knows the network's auth endpoint is not a design system. It is now an `@signout`
@@ -320,8 +321,8 @@ Every site renders `CanFrame` from one `src/components/Frame.vue`. It replaces `
 - Five parts, in this order, in every layout: brand and `NetworkMenu`, ⌘K, the `notifications`
   slot, `ThemeLangControls`, `AccountMenu`.
 - The frame renders `<main id="main-content">`. A site does not render its own.
-  The skip link targets it; every layout's `<main>` draws a 2px inset `--color-can` ring on
-  `focus-visible` and none on mouse focus.
+  The skip link targets it; every layout's `<main>` carries `.focus-ring`, so keyboard focus
+  draws base.css's 2px `--color-can` outline inset by 2px, and mouse focus draws none.
 - ⌘K lists the site's own nav, then other sites' `pages` (`sitePages.ts`), grouped by site.
   `palette.ts` filters by `visibleSites` plus each page's `minRating` and `signedIn`. This is
   presentation only; access stays with each site and can-api.
