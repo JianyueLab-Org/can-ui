@@ -113,23 +113,23 @@ describe("renderNotification", () => {
   test("redemption.cancelled adds the refund only when points is present", () => {
     expect(
       renderNotification(
-        { kind: "redemption.cancelled", params: { prize: "T 恤" } },
+        { kind: "redemption.cancelled", params: { prize: "限定徽章" } },
         "zh-cn",
       ),
-    ).toBe("你兑换的 T 恤 已取消");
+    ).toBe("你兑换的限定徽章已取消");
     expect(
       renderNotification(
         {
           kind: "redemption.cancelled",
-          params: { prize: "T 恤", points: 200 },
+          params: { prize: "限定徽章", points: 200 },
         },
         "zh-cn",
       ),
-    ).toBe("你兑换的 T 恤 已取消，200 积分已退回");
+    ).toBe("你兑换的限定徽章已取消，200 积分已退回");
     for (const locale of LOCALES) {
       expect(
         renderNotification(
-          { kind: "redemption.cancelled", params: { prize: "T 恤" } },
+          { kind: "redemption.cancelled", params: { prize: "限定徽章" } },
           locale,
         ),
       ).not.toContain("{points}");
@@ -182,6 +182,44 @@ describe("renderNotification", () => {
         "en-us",
       ),
     ).toBe("Leaderboard reward for September 2026: 50 points");
+  });
+
+  test("an invalid month renders as given and does not throw", () => {
+    for (const month of ["2026-13", "2026-00"]) {
+      expect(
+        renderNotification(
+          { kind: "leaderboard.credited", params: { month, points: 50 } },
+          "en-us",
+        ),
+      ).toBe(`Leaderboard reward for ${month}: 50 points`);
+    }
+  });
+
+  test("placeholders read own params only", () => {
+    expect(
+      renderNotification(
+        { kind: "oauth.revoked", params: { app: "SimBrief" } },
+        "zh-cn",
+        { "oauth.revoked": "{constructor} {app}" },
+      ),
+    ).toBe("{constructor} SimBrief");
+    expect(
+      renderNotification(
+        { kind: "oauth.revoked", params: { app: "SimBrief" } },
+        "zh-cn",
+        { "oauth.revoked": "[{toString}]{app}" },
+      ),
+    ).toBe("SimBrief");
+  });
+
+  test("Chinese templates put no space around Chinese-valued placeholders", () => {
+    for (const locale of ["zh-cn", "zh-tw"] as const) {
+      for (const kind of NOTIFICATION_KINDS) {
+        const message = NOTIFICATION_MESSAGES[locale][kind];
+        expect(message).not.toMatch(/ \{(prize|position|title|app|paper)\}/);
+        expect(message).not.toMatch(/\{(prize|position|title|app|paper)\} /);
+      }
+    }
   });
 
   test("an unknown locale falls back to zh-cn", () => {

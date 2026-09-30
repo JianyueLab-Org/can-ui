@@ -25,14 +25,14 @@ const ZH_CN: Messages = {
   "activity.published": "新活动「{title}」已发布，{startsAt} 开始",
   "activity.changed": "你报名的活动「{title}」有更新",
   "activity.cancelled": "你报名的活动「{title}」已取消",
-  "activity.seatReleased": "你在「{title}」的 {position} 席位已被释放",
+  "activity.seatReleased": "你在「{title}」的{position}席位已被释放",
   "activity.settled": "「{title}」已结算，你获得 {points} 积分",
   "reservation.cancelledByStaff":
     "你 {startsAt} 的 {callsign} 预约已被管理人员取消",
-  "lottery.won": "你在「{title}」中抽中了 {prize}",
-  "redemption.issued": "你兑换的 {prize} 已发放[：{note}]",
+  "lottery.won": "你在「{title}」中抽中了{prize}",
+  "redemption.issued": "你兑换的{prize}已发放[：{note}]",
   "redemption.cancelled":
-    "你兑换的 {prize} 已取消[，{points} 积分已退回][：{note}]",
+    "你兑换的{prize}已取消[，{points} 积分已退回][：{note}]",
   "leaderboard.credited": "{month} 排行榜奖励已到账：{points} 积分",
   "security.passwordChanged": "你的密码已修改。如非本人操作，请立即重置",
   "security.emailChanged": "你的邮箱已更改。如非本人操作，请立即联系管理人员",
@@ -55,14 +55,14 @@ const ZH_TW: Messages = {
   "activity.published": "新活動「{title}」已發布，{startsAt} 開始",
   "activity.changed": "你報名的活動「{title}」有更新",
   "activity.cancelled": "你報名的活動「{title}」已取消",
-  "activity.seatReleased": "你在「{title}」的 {position} 席位已被釋出",
+  "activity.seatReleased": "你在「{title}」的{position}席位已被釋出",
   "activity.settled": "「{title}」已結算，你獲得 {points} 積分",
   "reservation.cancelledByStaff":
     "你 {startsAt} 的 {callsign} 預約已被管理人員取消",
-  "lottery.won": "你在「{title}」中抽中了 {prize}",
-  "redemption.issued": "你兌換的 {prize} 已發放[：{note}]",
+  "lottery.won": "你在「{title}」中抽中了{prize}",
+  "redemption.issued": "你兌換的{prize}已發放[：{note}]",
   "redemption.cancelled":
-    "你兌換的 {prize} 已取消[，{points} 積分已退回][：{note}]",
+    "你兌換的{prize}已取消[，{points} 積分已退回][：{note}]",
   "leaderboard.credited": "{month} 排行榜獎勵已入帳：{points} 積分",
   "security.passwordChanged": "你的密碼已修改。如非本人操作，請立即重設",
   "security.emailChanged":
@@ -300,11 +300,13 @@ function formatParam(
     typeof value === "string" &&
     /^\d{4}-\d{2}$/.test(value)
   ) {
+    const time = Date.parse(`${value}-01T00:00:00Z`);
+    if (Number.isNaN(time)) return value;
     return new Intl.DateTimeFormat(locale, {
       year: "numeric",
       month: "long",
       timeZone: "UTC",
-    }).format(Date.parse(`${value}-01T00:00:00Z`));
+    }).format(time);
   }
   if (typeof value === "string" || typeof value === "number") {
     return String(value);
@@ -318,11 +320,17 @@ function fill(
 ): string {
   return template
     .replace(SEGMENT, (_, inner: string) =>
-      [...inner.matchAll(PLACEHOLDER)].every((match) => values[match[1]!])
+      [...inner.matchAll(PLACEHOLDER)].every(
+        (match) => Object.hasOwn(values, match[1]!) && values[match[1]!],
+      )
         ? inner
         : "",
     )
-    .replace(PLACEHOLDER, (_, key: string) => values[key] ?? `{${key}}`);
+    .replace(
+      PLACEHOLDER,
+      (_, key: string) =>
+        (Object.hasOwn(values, key) ? values[key] : undefined) ?? `{${key}}`,
+    );
 }
 
 function own(

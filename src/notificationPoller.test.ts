@@ -321,6 +321,32 @@ describe("createNotificationPoller", () => {
     expect(s.client.calls).toBe(2);
   });
 
+  test("a client that throws counts as a failure and does not stall the loop", async () => {
+    const clock = new FakeClock();
+    const visibility = new FakeVisibility();
+    let calls = 0;
+    const counts: number[] = [];
+    const poller = createNotificationPoller({
+      client: {
+        async unread() {
+          calls += 1;
+          if (calls === 1) throw new Error("boom");
+          return { ok: true, value: 7 };
+        },
+      },
+      clock,
+      visibility,
+      onCount: (count) => counts.push(count),
+      onGone: () => {},
+    });
+    poller.start();
+    await flush();
+    expect(poller.failures).toBe(1);
+    expect(clock.pending()).toEqual([POLL_INTERVAL_MS]);
+    await clock.advance(POLL_INTERVAL_MS);
+    expect(counts).toEqual([7]);
+  });
+
   test("stop clears the timer and the listener", async () => {
     const s = setup([OK(1)]);
     s.poller.start();

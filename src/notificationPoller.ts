@@ -225,8 +225,14 @@ export function createNotificationPoller(
     if (!running || inFlight || !visibility.isVisible()) return;
     inFlight = true;
     clear();
-    const result = await client.unread();
-    inFlight = false;
+    let result: RequestResult<number>;
+    try {
+      result = await client.unread();
+    } catch {
+      result = FAILED;
+    } finally {
+      inFlight = false;
+    }
     if (!running) return;
     if (result.ok) {
       failures = 0;
