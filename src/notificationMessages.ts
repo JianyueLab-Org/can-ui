@@ -29,7 +29,7 @@ const ZH_CN: Messages = {
   "activity.published": "新活动「{title}」已发布，{startsAt} 开始",
   "activity.changed": "你报名的活动「{title}」有更新",
   "activity.cancelled": "你报名的活动「{title}」已取消",
-  "activity.seatReleased": "你在「{title}」的{position}席位已被释放",
+  "activity.seatReleased": "你在「{title}」的 {position} 席位已被释放",
   "activity.settled": "「{title}」已结算，你获得 {points} 积分",
   "reservation.cancelledByStaff":
     "你 {startsAt} 的 {callsign} 预约已被管理人员取消",
@@ -59,7 +59,7 @@ const ZH_TW: Messages = {
   "activity.published": "新活動「{title}」已發布，{startsAt} 開始",
   "activity.changed": "你報名的活動「{title}」有更新",
   "activity.cancelled": "你報名的活動「{title}」已取消",
-  "activity.seatReleased": "你在「{title}」的{position}席位已被釋出",
+  "activity.seatReleased": "你在「{title}」的 {position} 席位已被釋出",
   "activity.settled": "「{title}」已結算，你獲得 {points} 積分",
   "reservation.cancelledByStaff":
     "你 {startsAt} 的 {callsign} 預約已被管理人員取消",

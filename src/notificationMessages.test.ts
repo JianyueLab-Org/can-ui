@@ -218,10 +218,31 @@ describe("renderNotification", () => {
     for (const locale of ["zh-cn", "zh-tw"] as const) {
       for (const kind of NOTIFICATION_KINDS) {
         const message = NOTIFICATION_MESSAGES[locale][kind];
-        expect(message).not.toMatch(/ \{(prize|position|title|app|paper)\}/);
-        expect(message).not.toMatch(/\{(prize|position|title|app|paper)\} /);
+        expect(message).not.toMatch(/ \{(prize|title|app|paper)\}/);
+        expect(message).not.toMatch(/\{(prize|title|app|paper)\} /);
       }
     }
+  });
+
+  test("a seat callsign keeps its spaces in the Chinese templates", () => {
+    expect(
+      renderNotification(
+        {
+          kind: "activity.seatReleased",
+          params: { title: "国庆联飞", position: "ZSSS_TWR" },
+        },
+        "zh-cn",
+      ),
+    ).toBe("你在「国庆联飞」的 ZSSS_TWR 席位已被释放");
+    expect(
+      renderNotification(
+        {
+          kind: "activity.seatReleased",
+          params: { title: "國慶聯飛", position: "ZSSS_TWR" },
+        },
+        "zh-tw",
+      ),
+    ).toBe("你在「國慶聯飛」的 ZSSS_TWR 席位已被釋出");
   });
 
   test("an unknown locale falls back to zh-cn", () => {

@@ -156,7 +156,7 @@ describe("createNotificationClient", () => {
       params: { toRating: 3 },
       site: "web",
       path: "/pilots",
-      createdAt: "2026-09-30T08:00:00Z",
+      createdAt: "2026-09-30T08:00:00.123Z",
       read: false,
     };
     const { send, calls } = fakeFetch(() =>
@@ -215,7 +215,7 @@ describe("createNotificationClient", () => {
   test("markAllRead: POST read-all with upTo; bare when absent", async () => {
     const { send, calls } = fakeFetch(() => reply(204));
     const client = createNotificationClient(send);
-    expect(await client.markAllRead("2026-09-30T08:00:00Z")).toEqual({
+    expect(await client.markAllRead("2026-09-30T08:00:00.123Z")).toEqual({
       ok: true,
       value: true,
     });
@@ -225,7 +225,7 @@ describe("createNotificationClient", () => {
         method: "POST",
         credentials: "include",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ upTo: "2026-09-30T08:00:00Z" }),
+        body: JSON.stringify({ upTo: "2026-09-30T08:00:00.123Z" }),
       },
     ]);
     await client.markAllRead();

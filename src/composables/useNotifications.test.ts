@@ -36,7 +36,7 @@ function item(
     params: { toRating: 3 },
     site: "web",
     path: "/pilots",
-    createdAt: "2026-09-30T08:00:00Z",
+    createdAt: "2026-09-30T08:00:00.123Z",
     read,
   };
 }
@@ -129,8 +129,8 @@ describe("useNotifications", () => {
   });
 
   test("markAllRead sends upTo and clears only rows up to it", async () => {
-    const newest = { ...item(3), createdAt: "2026-09-30T09:00:00Z" };
-    const newer = { ...item(4), createdAt: "2026-09-30T09:30:00Z" };
+    const newest = { ...item(3), createdAt: "2026-09-30T09:00:00.123Z" };
+    const newer = { ...item(4), createdAt: "2026-09-30T09:30:00.123Z" };
     const older = { ...item(1, false, "broadcast") };
     const { n, calls } = make({
       "GET /api/v1/notifications/unread": () => reply(200, { count: 3 }),
@@ -145,14 +145,16 @@ describe("useNotifications", () => {
     n.items.value = [newer, ...n.items.value];
     expect(await n.markAllRead()).toBe(true);
     const post = calls.find(([, init]) => init.method === "POST")!;
-    expect(post[1].body).toBe(JSON.stringify({ upTo: "2026-09-30T09:30:00Z" }));
+    expect(post[1].body).toBe(
+      JSON.stringify({ upTo: "2026-09-30T09:30:00.123Z" }),
+    );
     expect(n.items.value.every((i) => i.read)).toBe(true);
     expect(n.count.value).toBe(0);
   });
 
   test("markAllRead leaves rows newer than upTo unread and counts them", async () => {
-    const a = { ...item(3), createdAt: "2026-09-30T09:00:00Z" };
-    const b = { ...item(2), createdAt: "2026-09-30T08:00:00Z" };
+    const a = { ...item(3), createdAt: "2026-09-30T09:00:00.123Z" };
+    const b = { ...item(2), createdAt: "2026-09-30T08:00:00.123Z" };
     const { n } = make({
       "GET /api/v1/notifications/unread": () => reply(200, { count: 2 }),
       "GET /api/v1/notifications?limit=20": () =>
@@ -163,9 +165,31 @@ describe("useNotifications", () => {
     await flush();
     await n.load();
     // Items are newest first; a row inserted out of order is newer than upTo.
-    n.items.value = [a, { ...b, createdAt: "2026-09-30T09:30:00Z" }];
+    n.items.value = [a, { ...b, createdAt: "2026-09-30T09:30:00.123Z" }];
     await n.markAllRead();
     expect(n.items.value.map((i) => i.read)).toEqual([true, false]);
+    expect(n.count.value).toBe(1);
+  });
+
+  test("markAllRead tells rows apart by milliseconds", async () => {
+    const a = { ...item(3), createdAt: "2026-09-30T09:00:00.500Z" };
+    const b = { ...item(2), createdAt: "2026-09-30T09:00:00.100Z" };
+    const later = { ...item(9), createdAt: "2026-09-30T09:00:00.900Z" };
+    const { n, calls } = make({
+      "GET /api/v1/notifications/unread": () => reply(200, { count: 3 }),
+      "GET /api/v1/notifications?limit=20": () =>
+        reply(200, { items: [a, later, b], next: null }),
+      "POST /api/v1/notifications/read-all": () => reply(204),
+    });
+    n.start();
+    await flush();
+    await n.load();
+    await n.markAllRead();
+    const post = calls.find(([, init]) => init.method === "POST")!;
+    expect(post[1].body).toBe(
+      JSON.stringify({ upTo: "2026-09-30T09:00:00.500Z" }),
+    );
+    expect(n.items.value.map((row) => row.read)).toEqual([true, false, true]);
     expect(n.count.value).toBe(1);
   });
 

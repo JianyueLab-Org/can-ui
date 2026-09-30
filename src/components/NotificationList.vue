@@ -8,7 +8,7 @@
  * navigates: same site by path, other sites by full origin. A modified click
  * (new tab) marks it read and lets the browser proceed.
  */
-import { computed } from "vue";
+import { computed, nextTick, ref } from "vue";
 import Icon from "./Icon.vue";
 import type { UseNotificationsReturn } from "../composables/useNotifications";
 import { CHROME_MESSAGES, createTranslator } from "../i18n";
@@ -45,6 +45,22 @@ const { items, loading, next, failed, count } = props.state;
 const canMarkAll = computed(
   () => count.value > 0 || items.value.some((item) => !item.read),
 );
+const heading = ref<HTMLElement | null>(null);
+const markAllButton = ref<HTMLButtonElement | null>(null);
+const moreButton = ref<HTMLButtonElement | null>(null);
+
+/** A focused control that disables or unmounts hands focus to the heading. */
+async function markAll() {
+  await props.state.markAllRead();
+  await nextTick();
+  if (markAllButton.value?.disabled) heading.value?.focus();
+}
+async function loadMore() {
+  await props.state.loadMore();
+  await nextTick();
+  if (!moreButton.value) heading.value?.focus();
+}
+
 // The list mounts when the panel opens, so "now" is fresh per open.
 const now = Date.now();
 
@@ -57,20 +73,11 @@ function rowAttrs(item: NotificationItem): Record<string, string> {
   return href ? { href } : { type: "button" };
 }
 
-function onItemClick(event: MouseEvent, item: NotificationItem) {
-  const href = hrefFor(item);
-  const plain =
-    event.button === 0 &&
-    !event.metaKey &&
-    !event.ctrlKey &&
-    !event.shiftKey &&
-    !event.altKey;
-  // The row is marked read locally at once; the request is `keepalive`, so it
-  // outlives the navigation and the click never waits on the network.
+// The row is marked read locally at once; the request is `keepalive`, so it
+// outlives the navigation. The anchor's own navigation then proceeds, so a
+// site's client-side router still handles same-site links.
+function onItemClick(item: NotificationItem) {
   void props.state.markRead(item.source, item.id);
-  if (!href || !plain) return;
-  event.preventDefault();
-  window.location.assign(href);
 }
 
 /** Middle-click opens a new tab through `auxclick`, not `click`. */
@@ -83,14 +90,19 @@ function onItemAuxClick(event: MouseEvent, item: NotificationItem) {
   <div class="flex flex-col">
     <div class="flex items-center gap-2 px-2.5 pb-2 pt-1">
       <slot name="lead" />
-      <h2 class="text-sm font-semibold text-ink">
+      <h2
+        ref="heading"
+        tabindex="-1"
+        class="text-sm font-semibold text-ink focus:outline-none"
+      >
         {{ t("notifications.title") }}
       </h2>
       <button
+        ref="markAllButton"
         type="button"
         class="focus-ring ml-auto rounded-control px-2 py-1 text-xs font-medium text-can transition-colors hover:bg-surface-raised disabled:opacity-40"
         :disabled="!canMarkAll"
-        @click="state.markAllRead()"
+        @click="markAll"
       >
         {{ t("notifications.markAllRead") }}
       </button>
@@ -143,7 +155,7 @@ function onItemAuxClick(event: MouseEvent, item: NotificationItem) {
           :is="hrefFor(item) ? 'a' : 'button'"
           v-bind="rowAttrs(item)"
           class="focus-ring tap-row flex w-full items-start gap-3 rounded-control px-2.5 py-2 text-left transition-colors hover:bg-surface-raised"
-          @click="onItemClick($event, item)"
+          @click="onItemClick(item)"
           @auxclick="onItemAuxClick($event, item)"
         >
           <span
@@ -179,10 +191,11 @@ function onItemAuxClick(event: MouseEvent, item: NotificationItem) {
 
     <button
       v-if="next"
+      ref="moreButton"
       type="button"
       class="focus-ring tap-row mt-1 w-full rounded-control px-2.5 py-2 text-center text-sm font-medium text-can transition-colors hover:bg-surface-raised disabled:opacity-50"
       :disabled="loading"
-      @click="state.loadMore()"
+      @click="loadMore"
     >
       {{ t("notifications.loadMore") }}
     </button>
