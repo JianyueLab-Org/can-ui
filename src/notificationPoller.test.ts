@@ -195,6 +195,7 @@ describe("createNotificationClient", () => {
       {
         method: "PATCH",
         credentials: "include",
+        keepalive: true,
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ read: true }),
       },

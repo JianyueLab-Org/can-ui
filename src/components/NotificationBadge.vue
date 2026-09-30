@@ -19,7 +19,7 @@ withDefaults(
     v-if="text"
     aria-hidden="true"
     :class="[
-      'rounded-full bg-danger text-center font-semibold text-white',
+      'rounded-full bg-badge text-center font-semibold text-white',
       variant === 'corner'
         ? 'absolute min-w-4 px-1 text-[10px] leading-4'
         : 'min-w-5 px-1.5 text-xs leading-5',

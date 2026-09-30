@@ -1,9 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { LOCALES } from "./i18n";
+import { LOCALES, createTranslator } from "./i18n";
 import {
   NOTIFICATION_MESSAGES,
   NOTIFICATION_UI,
+  notificationAnnouncement,
   notificationChrome,
+  notificationLabel,
   notificationLocale,
   renderNotification,
 } from "./notificationMessages";
@@ -274,5 +276,22 @@ describe("notificationChrome", () => {
       "Notifications",
     );
     expect(notificationChrome("xx").notifications.title).toBe("通知");
+  });
+});
+
+describe("notificationLabel and notificationAnnouncement", () => {
+  const t = createTranslator({}, notificationChrome("en-us"));
+
+  test("the trigger label carries the badge text", () => {
+    expect(notificationLabel(t, 0)).toBe("Notifications");
+    expect(notificationLabel(t, 3)).toBe("Notifications, 3 unread");
+    expect(notificationLabel(t, 99)).toBe("Notifications, 99+ unread");
+  });
+
+  test("the announcement is empty until a count changes", () => {
+    expect(notificationAnnouncement(t, null)).toBe("");
+    expect(notificationAnnouncement(t, 0)).toBe("0 unread notifications");
+    expect(notificationAnnouncement(t, 5)).toBe("5 unread notifications");
+    expect(notificationAnnouncement(t, 120)).toBe("99+ unread notifications");
   });
 });

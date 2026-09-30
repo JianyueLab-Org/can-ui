@@ -127,7 +127,8 @@ function place() {
   const result = placePopover(
     props.placement,
     anchor.getBoundingClientRect(),
-    el.getBoundingClientRect(),
+    // Untransformed: the panel is mid-`materialize` scale on the first place.
+    { width: el.offsetWidth, height: el.offsetHeight },
     { width: window.innerWidth, height: window.innerHeight },
     props.offset,
   );

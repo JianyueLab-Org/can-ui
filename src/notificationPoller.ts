@@ -149,6 +149,8 @@ export function createNotificationClient(
         {
           method: "PATCH",
           credentials: "include",
+          // Survives the navigation the click is about to make.
+          keepalive: true,
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ read: true }),
         },

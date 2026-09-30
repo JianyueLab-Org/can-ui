@@ -123,7 +123,9 @@ export {
 export {
   NOTIFICATION_MESSAGES,
   NOTIFICATION_UI,
+  notificationAnnouncement,
   notificationChrome,
+  notificationLabel,
   notificationLocale,
   renderNotification,
   type NotificationUi,

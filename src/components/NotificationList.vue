@@ -40,8 +40,11 @@ const t = createTranslator(props.messages, {
   ...notificationChrome(props.locale),
 });
 
-const { items, loading, next, failed } = props.state;
-const hasUnread = computed(() => items.value.some((item) => !item.read));
+const { items, loading, next, failed, count } = props.state;
+// Older unread rows may not be loaded, so the count counts too.
+const canMarkAll = computed(
+  () => count.value > 0 || items.value.some((item) => !item.read),
+);
 // The list mounts when the panel opens, so "now" is fresh per open.
 const now = Date.now();
 
@@ -54,7 +57,7 @@ function rowAttrs(item: NotificationItem): Record<string, string> {
   return href ? { href } : { type: "button" };
 }
 
-async function onItemClick(event: MouseEvent, item: NotificationItem) {
+function onItemClick(event: MouseEvent, item: NotificationItem) {
   const href = hrefFor(item);
   const plain =
     event.button === 0 &&
@@ -62,13 +65,17 @@ async function onItemClick(event: MouseEvent, item: NotificationItem) {
     !event.ctrlKey &&
     !event.shiftKey &&
     !event.altKey;
-  if (!href || !plain) {
-    void props.state.markRead(item.source, item.id);
-    return;
-  }
+  // The row is marked read locally at once; the request is `keepalive`, so it
+  // outlives the navigation and the click never waits on the network.
+  void props.state.markRead(item.source, item.id);
+  if (!href || !plain) return;
   event.preventDefault();
-  await props.state.markRead(item.source, item.id);
   window.location.assign(href);
+}
+
+/** Middle-click opens a new tab through `auxclick`, not `click`. */
+function onItemAuxClick(event: MouseEvent, item: NotificationItem) {
+  if (event.button === 1) void props.state.markRead(item.source, item.id);
 }
 </script>
 
@@ -82,7 +89,7 @@ async function onItemClick(event: MouseEvent, item: NotificationItem) {
       <button
         type="button"
         class="focus-ring ml-auto rounded-control px-2 py-1 text-xs font-medium text-can transition-colors hover:bg-surface-raised disabled:opacity-40"
-        :disabled="!hasUnread"
+        :disabled="!canMarkAll"
         @click="state.markAllRead()"
       >
         {{ t("notifications.markAllRead") }}
@@ -137,6 +144,7 @@ async function onItemClick(event: MouseEvent, item: NotificationItem) {
           v-bind="rowAttrs(item)"
           class="focus-ring tap-row flex w-full items-start gap-3 rounded-control px-2.5 py-2 text-left transition-colors hover:bg-surface-raised"
           @click="onItemClick($event, item)"
+          @auxclick="onItemAuxClick($event, item)"
         >
           <span
             class="flex size-8 shrink-0 items-center justify-center rounded-full bg-surface-sunken text-muted"

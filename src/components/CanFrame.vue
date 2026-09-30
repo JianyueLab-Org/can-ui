@@ -65,7 +65,11 @@ import {
   type NavSecondary,
   type Workspace,
 } from "../nav";
-import { notificationChrome } from "../notificationMessages";
+import {
+  notificationAnnouncement,
+  notificationChrome,
+  notificationLabel,
+} from "../notificationMessages";
 import { notificationBadgeText } from "../notifications";
 import { framePaletteItems, type CommandItem } from "../palette";
 import { currentRail, setRail } from "../rail";
@@ -152,19 +156,12 @@ const showBell = computed(
 const notificationBadge = computed(() =>
   notificationBadgeText(notificationState.count.value),
 );
-const notificationLabel = computed(() =>
-  notificationBadge.value
-    ? t("notifications.labelCount", { count: notificationBadge.value })
-    : t("notifications.label"),
+const bellLabel = computed(() =>
+  notificationLabel(t, notificationState.count.value),
 );
-const notificationAnnouncement = computed(() => {
-  const value = notificationState.announcement.value;
-  return value === null
-    ? ""
-    : t("notifications.announce", {
-        count: notificationBadgeText(value) || "0",
-      });
-});
+const bellAnnouncement = computed(() =>
+  notificationAnnouncement(t, notificationState.announcement.value),
+);
 
 /* ⌘K ----------------------------------------------------------------------- */
 const paletteOpen = ref(false);
@@ -229,6 +226,7 @@ const meSheet = useOverlay(meOpen);
 const meView = ref<"menu" | "notifications">("menu");
 const meBack = ref<HTMLButtonElement | null>(null);
 const meNotificationsRow = ref<HTMLButtonElement | null>(null);
+const meTab = ref<HTMLButtonElement | null>(null);
 watch(meOpen, (open) => {
   if (!open) meView.value = "menu";
 });
@@ -241,7 +239,8 @@ async function showMeNotifications() {
 async function showMeMenu() {
   meView.value = "menu";
   await nextTick();
-  meNotificationsRow.value?.focus();
+  // The row is gone when the bell went away (401/404) while the list showed.
+  (meNotificationsRow.value ?? meTab.value)?.focus();
 }
 const isRailWidth = useMediaQuery("(min-width: 768px)");
 watch(isRailWidth, (wide) => {
@@ -521,6 +520,7 @@ function railLinkClass(href: string) {
           <span class="max-w-full truncate px-1">{{ t("search.label") }}</span>
         </button>
         <button
+          ref="meTab"
           type="button"
           class="tab-bar-item"
           aria-haspopup="dialog"
@@ -537,7 +537,7 @@ function railLinkClass(href: string) {
           </span>
           <span class="max-w-full truncate px-1">{{ t("rail.me") }}</span>
           <span v-if="showBell && notificationBadge" class="sr-only">
-            {{ notificationLabel }}
+            {{ bellLabel }}
           </span>
         </button>
       </nav>
@@ -602,7 +602,7 @@ function railLinkClass(href: string) {
               v-if="showBell"
               ref="meNotificationsRow"
               type="button"
-              :aria-label="notificationLabel"
+              :aria-label="bellLabel"
               class="focus-ring tap-row flex items-center gap-3 rounded-control px-3 py-2.5 text-base font-semibold text-ink transition-colors hover:bg-surface-sunken"
               @click="showMeNotifications"
             >
@@ -924,7 +924,7 @@ function railLinkClass(href: string) {
 
     <!-- Unread count changes after the first load. -->
     <span v-if="showBell" class="sr-only" aria-live="polite">
-      {{ notificationAnnouncement }}
+      {{ bellAnnouncement }}
     </span>
 
     <CommandPalette

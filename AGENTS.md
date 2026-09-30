@@ -401,7 +401,11 @@ loaded row> }`, and no body when nothing is loaded. Locally only rows with `crea
   kind lands in can-api and here in the same release.
 - Badge: none at 0, `99+` at 99 (can-api caps the count at 99). The markup is one internal
   component, `NotificationBadge.vue` (`corner` and `pill`), used by the bell, the rail and the Me
-  sheet. It is not exported.
+  sheet. It is not exported. Its fill is `--color-badge` (`#dc2626`, 4.83:1 against white in both
+  themes; `--color-danger` is too light in dark mode).
+- A row click marks the row read locally and sends the PATCH with `keepalive`, then navigates at
+  once. `notificationLabel` and `notificationAnnouncement` give the bell's accessible name and
+  live-region text to `NotificationBell` and `CanFrame`.
 - `Popover` placements: `bottom-start`, `bottom-end`, `top-start`, `top-end`, `right-start`.
   `right-start` flips left when the right has no room and aligns bottom edges near the viewport
   bottom (`popoverPosition.ts`). A ResizeObserver on the open panel re-places it when its content

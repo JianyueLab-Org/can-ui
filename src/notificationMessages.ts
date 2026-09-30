@@ -9,8 +9,12 @@
  * Template syntax: `{name}` is a param. `[…]` is an optional segment, dropped
  * unless every placeholder inside has a non-empty value.
  */
-import { DEFAULT_LOCALE, LOCALES, type Locale } from "./i18n";
-import type { NotificationItem, NotificationKind } from "./notifications";
+import { DEFAULT_LOCALE, LOCALES, type Locale, type Translator } from "./i18n";
+import {
+  notificationBadgeText,
+  type NotificationItem,
+  type NotificationKind,
+} from "./notifications";
 import { ratingShort } from "./ratings";
 
 type Messages = Readonly<Record<NotificationKind, string>>;
@@ -367,4 +371,24 @@ export function renderNotification(
     values.promoted = formatParam("promoted", undefined, lang, options);
   }
   return fill(template, values);
+}
+
+/** The trigger's accessible name: the label, with the unread count when there is one. */
+export function notificationLabel(t: Translator, count: number): string {
+  const badge = notificationBadgeText(count);
+  return badge
+    ? t("notifications.labelCount", { count: badge })
+    : t("notifications.label");
+}
+
+/** The polite live-region text for a changed count; empty when none has changed. */
+export function notificationAnnouncement(
+  t: Translator,
+  value: number | null,
+): string {
+  return value === null
+    ? ""
+    : t("notifications.announce", {
+        count: notificationBadgeText(value) || "0",
+      });
 }

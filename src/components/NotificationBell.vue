@@ -25,7 +25,11 @@ import {
   type UseNotificationsReturn,
 } from "../composables/useNotifications";
 import { CHROME_MESSAGES, createTranslator } from "../i18n";
-import { notificationChrome } from "../notificationMessages";
+import {
+  notificationAnnouncement,
+  notificationChrome,
+  notificationLabel,
+} from "../notificationMessages";
 import { notificationBadgeText } from "../notifications";
 import type { SiteKey, SiteOrigins } from "../sites";
 
@@ -59,17 +63,9 @@ const t = createTranslator(props.messages, {
 });
 
 const badge = computed(() => notificationBadgeText(count.value));
-const label = computed(() =>
-  badge.value
-    ? t("notifications.labelCount", { count: badge.value })
-    : t("notifications.label"),
-);
+const label = computed(() => notificationLabel(t, count.value));
 const announcementText = computed(() =>
-  announcement.value === null
-    ? ""
-    : t("notifications.announce", {
-        count: notificationBadgeText(announcement.value) || "0",
-      }),
+  notificationAnnouncement(t, announcement.value),
 );
 
 const open = ref(false);
