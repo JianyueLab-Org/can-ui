@@ -16,12 +16,24 @@
  * ⌘K trigger, the `notifications` slot, `ThemeLangControls`, `AccountMenu`.
  * ⌘K and Ctrl+K open the palette everywhere.
  *
+ * `notifications` renders `NotificationBell` in part 3 for a signed-in
+ * member; slot content overrides it. One state per frame, so the rail's
+ * desktop row, the phone tab badge and the "Me" sheet poll once.
+ *
  * The frame renders `<main id="main-content">`; the page goes in the default
- * slot. It calls one endpoint, the site's own `/api/v1/auth/signout` (through
- * `AccountMenu`), imports no site module and links to no route it was not
- * handed.
+ * slot. It calls the site's own `/api/v1/auth/signout` (through
+ * `AccountMenu`) and `/api/v1/notifications/*` (when `notifications` is set),
+ * imports no site module and links to no route it was not handed.
  */
-import { computed, onBeforeUnmount, onMounted, ref, watch } from "vue";
+import {
+  computed,
+  nextTick,
+  onBeforeUnmount,
+  onMounted,
+  ref,
+  useSlots,
+  watch,
+} from "vue";
 import AccountMenu from "./AccountMenu.vue";
 import CommandPalette from "./CommandPalette.vue";
 import Drawer from "./Drawer.vue";
@@ -31,8 +43,12 @@ import Icon from "./Icon.vue";
 import Logo from "./Logo.vue";
 import LogoMark from "./LogoMark.vue";
 import NetworkMenu from "./NetworkMenu.vue";
+import NotificationBadge from "./NotificationBadge.vue";
+import NotificationBell from "./NotificationBell.vue";
+import NotificationList from "./NotificationList.vue";
 import SiteFooter from "./SiteFooter.vue";
 import ThemeLangControls from "./ThemeLangControls.vue";
+import { useNotifications } from "../composables/useNotifications";
 import { useOverlay } from "../composables/useOverlay";
 import { useMediaQuery } from "../composables/usePreferences";
 import {
@@ -49,6 +65,8 @@ import {
   type NavSecondary,
   type Workspace,
 } from "../nav";
+import { notificationChrome } from "../notificationMessages";
+import { notificationBadgeText } from "../notifications";
 import { framePaletteItems, type CommandItem } from "../palette";
 import { currentRail, setRail } from "../rail";
 import type { AfterSignOut } from "../signOut";
@@ -86,6 +104,8 @@ const props = withDefaults(
     messages?: Record<string, unknown>;
     /** `originsFromEnv(import.meta.env)`. */
     origins?: SiteOrigins;
+    /** Render the notification bell for a signed-in member. */
+    notifications?: boolean;
   }>(),
   {
     secondary: undefined,
@@ -99,10 +119,14 @@ const props = withDefaults(
     languages: true,
     messages: () => ({}),
     origins: undefined,
+    notifications: false,
   },
 );
 
-const t = createTranslator(props.messages, CHROME_MESSAGES);
+const t = createTranslator(props.messages, {
+  ...CHROME_MESSAGES,
+  ...notificationChrome(props.locale),
+});
 
 const signedIn = computed(() => props.user != null);
 const rating = computed(() => props.user?.rating);
@@ -113,6 +137,34 @@ const links = computed(() => frameLinks(props.nav, { external: true }));
 /** Rail layout on phones: up to three tabs; the rest opens at the top of "Me". */
 const railSplit = computed(() => railTabs(props.nav));
 const tabs = computed(() => railSplit.value.tabs);
+
+/* Notifications. One state for every placement. Slot content overrides. */
+const slots = useSlots();
+const bellEnabled = computed(
+  () => props.notifications && props.user != null && !slots.notifications,
+);
+const notificationState = useNotifications({
+  enabled: () => bellEnabled.value,
+});
+const showBell = computed(
+  () => bellEnabled.value && !notificationState.hidden.value,
+);
+const notificationBadge = computed(() =>
+  notificationBadgeText(notificationState.count.value),
+);
+const notificationLabel = computed(() =>
+  notificationBadge.value
+    ? t("notifications.labelCount", { count: notificationBadge.value })
+    : t("notifications.label"),
+);
+const notificationAnnouncement = computed(() => {
+  const value = notificationState.announcement.value;
+  return value === null
+    ? ""
+    : t("notifications.announce", {
+        count: notificationBadgeText(value) || "0",
+      });
+});
 
 /* ⌘K ----------------------------------------------------------------------- */
 const paletteOpen = ref(false);
@@ -172,6 +224,25 @@ function toggleRail() {
    Closed at 768px, where the rail itself shows those parts. */
 const meOpen = ref(false);
 const meSheet = useOverlay(meOpen);
+
+/* The sheet's first row swaps its content for the notification list. */
+const meView = ref<"menu" | "notifications">("menu");
+const meBack = ref<HTMLButtonElement | null>(null);
+const meNotificationsRow = ref<HTMLButtonElement | null>(null);
+watch(meOpen, (open) => {
+  if (!open) meView.value = "menu";
+});
+async function showMeNotifications() {
+  meView.value = "notifications";
+  void notificationState.load();
+  await nextTick();
+  meBack.value?.focus();
+}
+async function showMeMenu() {
+  meView.value = "menu";
+  await nextTick();
+  meNotificationsRow.value?.focus();
+}
 const isRailWidth = useMediaQuery("(min-width: 768px)");
 watch(isRailWidth, (wide) => {
   if (wide) meOpen.value = false;
@@ -329,8 +400,19 @@ function railLinkClass(href: string) {
           />
 
           <!-- 3. Notifications -->
-          <div v-if="$slots.notifications" class="rail-item flex">
-            <slot name="notifications" />
+          <div v-if="$slots.notifications || showBell" class="rail-item flex">
+            <slot name="notifications">
+              <NotificationBell
+                v-if="showBell"
+                variant="rail"
+                :collapsed="collapsed"
+                :state="notificationState"
+                :locale="locale"
+                :current="current"
+                :origins="origins"
+                :messages="messages"
+              />
+            </slot>
           </div>
 
           <slot name="sidebar" :collapsed="collapsed">
@@ -445,8 +527,18 @@ function railLinkClass(href: string) {
           :aria-expanded="meOpen"
           @click="meOpen = true"
         >
-          <Icon name="userCircle" class="size-6" />
+          <span class="relative flex">
+            <Icon name="userCircle" class="size-6" />
+            <NotificationBadge
+              v-if="showBell"
+              :text="notificationBadge"
+              class="-right-2 -top-1"
+            />
+          </span>
           <span class="max-w-full truncate px-1">{{ t("rail.me") }}</span>
+          <span v-if="showBell && notificationBadge" class="sr-only">
+            {{ notificationLabel }}
+          </span>
         </button>
       </nav>
 
@@ -483,70 +575,110 @@ function railLinkClass(href: string) {
             </button>
           </div>
 
-          <!-- The site's nav leaves that are not tabs, flattened. -->
-          <nav
-            v-if="railSplit.overflow.length"
-            :aria-label="t('siteNavigation')"
-            class="flex flex-col gap-0.5"
-          >
-            <a
-              v-for="link in railSplit.overflow"
-              :key="link.href"
-              :href="link.href"
-              :aria-current="
-                isCurrentPath(link.href, pathname) ? 'page' : undefined
-              "
-              :class="drawerLinkClass(link.href)"
-            >
-              <Icon :name="link.icon" class="size-5 shrink-0" />
-              {{ link.name }}
-            </a>
-          </nav>
-
-          <!-- 1. NetworkMenu -->
-          <NetworkMenu
+          <NotificationList
+            v-if="meView === 'notifications'"
+            :state="notificationState"
             :locale="locale"
             :current="current"
-            :rating="rating"
-            :signed-in="signedIn"
             :origins="origins"
-            placement="top-start"
-          />
-
-          <!-- 3. Notifications -->
-          <div v-if="$slots.notifications" class="flex">
-            <slot name="notifications" />
-          </div>
-
-          <!-- 4. Theme and language -->
-          <ThemeLangControls
-            :locale="locale"
-            :languages="languages"
             :messages="messages"
-          />
-
-          <!-- 5. Account -->
-          <AccountMenu
-            v-if="user"
-            variant="rail"
-            :user="user"
-            :profile-items="profileItems"
-            :after-sign-out="afterSignOut"
-            :messages="messages"
-            :origins="origins"
           >
-            <template v-if="$slots.profileMenu" #profileMenu>
-              <slot name="profileMenu" />
+            <template #lead>
+              <button
+                ref="meBack"
+                type="button"
+                class="focus-ring -ml-1 inline-flex size-9 shrink-0 items-center justify-center rounded-control text-muted transition-colors hover:bg-surface-sunken hover:text-ink"
+                :aria-label="t('notifications.back')"
+                @click="showMeMenu"
+              >
+                <Icon name="chevronLeft" class="size-5" />
+              </button>
             </template>
-          </AccountMenu>
-          <a
-            v-else-if="signInHref"
-            :href="signInHref"
-            class="btn btn-primary w-full px-4 py-2.5"
-          >
-            {{ t("signIn") }}
-            <Icon name="arrowRight" class="size-4" />
-          </a>
+          </NotificationList>
+
+          <template v-else>
+            <!-- 3. Notifications, first: label and count. -->
+            <button
+              v-if="showBell"
+              ref="meNotificationsRow"
+              type="button"
+              :aria-label="notificationLabel"
+              class="focus-ring tap-row flex items-center gap-3 rounded-control px-3 py-2.5 text-base font-semibold text-ink transition-colors hover:bg-surface-sunken"
+              @click="showMeNotifications"
+            >
+              <Icon name="bell" class="size-5 shrink-0" />
+              <span class="flex-1 text-left">{{
+                t("notifications.label")
+              }}</span>
+              <NotificationBadge :text="notificationBadge" variant="pill" />
+              <Icon name="chevronRight" class="size-4 shrink-0 text-faint" />
+            </button>
+
+            <!-- The site's nav leaves that are not tabs, flattened. -->
+            <nav
+              v-if="railSplit.overflow.length"
+              :aria-label="t('siteNavigation')"
+              class="flex flex-col gap-0.5"
+            >
+              <a
+                v-for="link in railSplit.overflow"
+                :key="link.href"
+                :href="link.href"
+                :aria-current="
+                  isCurrentPath(link.href, pathname) ? 'page' : undefined
+                "
+                :class="drawerLinkClass(link.href)"
+              >
+                <Icon :name="link.icon" class="size-5 shrink-0" />
+                {{ link.name }}
+              </a>
+            </nav>
+
+            <!-- 1. NetworkMenu -->
+            <NetworkMenu
+              :locale="locale"
+              :current="current"
+              :rating="rating"
+              :signed-in="signedIn"
+              :origins="origins"
+              placement="top-start"
+            />
+
+            <!-- 3. Notifications -->
+            <div v-if="$slots.notifications" class="flex">
+              <slot name="notifications" />
+            </div>
+
+            <!-- 4. Theme and language -->
+            <ThemeLangControls
+              :locale="locale"
+              :languages="languages"
+              :messages="messages"
+            />
+
+            <!-- 5. Account -->
+            <AccountMenu
+              v-if="user"
+              variant="rail"
+              :user="user"
+              :profile-items="profileItems"
+              :after-sign-out="afterSignOut"
+              :messages="messages"
+              :origins="origins"
+            >
+              <template v-if="$slots.profileMenu" #profileMenu>
+                <slot name="profileMenu" />
+              </template>
+            </AccountMenu>
+            <a
+              v-else-if="signInHref"
+              :href="signInHref"
+              class="btn btn-primary w-full px-4 py-2.5"
+            >
+              {{ t("signIn") }}
+              <Icon name="arrowRight" class="size-4" />
+            </a>
+          </template>
         </div>
       </div>
 
@@ -631,7 +763,16 @@ function railLinkClass(href: string) {
             />
 
             <!-- 3. Notifications -->
-            <slot name="notifications" />
+            <slot name="notifications">
+              <NotificationBell
+                v-if="showBell"
+                :state="notificationState"
+                :locale="locale"
+                :current="current"
+                :origins="origins"
+                :messages="messages"
+              />
+            </slot>
 
             <!-- 4. Theme and language -->
             <ThemeLangControls
@@ -780,6 +921,11 @@ function railLinkClass(href: string) {
         </SiteFooter>
       </template>
     </template>
+
+    <!-- Unread count changes after the first load. -->
+    <span v-if="showBell" class="sr-only" aria-live="polite">
+      {{ notificationAnnouncement }}
+    </span>
 
     <CommandPalette
       v-model:open="paletteOpen"
