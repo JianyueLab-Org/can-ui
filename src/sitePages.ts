@@ -397,6 +397,7 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
         "ja-jp": "ランキング",
       },
       keywords: ["ranking"],
+      signedIn: true,
     },
     {
       key: "activities",
