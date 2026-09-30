@@ -549,7 +549,11 @@ function railLinkClass(href: string) {
         </div>
       </div>
 
-      <main id="main-content" tabindex="-1" class="focus:outline-none">
+      <main
+        id="main-content"
+        tabindex="-1"
+        class="focus:outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-can"
+      >
         <slot />
       </main>
     </template>
@@ -731,7 +735,7 @@ function railLinkClass(href: string) {
           <main
             id="main-content"
             tabindex="-1"
-            class="flex-1 py-8 focus:outline-none lg:py-10"
+            class="flex-1 py-8 focus:outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-can lg:py-10"
           >
             <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
               <slot />
@@ -749,13 +753,17 @@ function railLinkClass(href: string) {
         v-else-if="layout === 'map'"
         id="main-content"
         tabindex="-1"
-        class="relative min-h-0 flex-1 focus:outline-none"
+        class="relative min-h-0 flex-1 focus:outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-can"
       >
         <slot />
       </main>
 
       <template v-else>
-        <main id="main-content" tabindex="-1" class="flex-1 focus:outline-none">
+        <main
+          id="main-content"
+          tabindex="-1"
+          class="flex-1 focus:outline-none focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-solid focus-visible:outline-can"
+        >
           <slot />
         </main>
         <SiteFooter

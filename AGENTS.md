@@ -318,6 +318,8 @@ Every site renders `CanFrame` from one `src/components/Frame.vue`. It replaces `
 - Five parts, in this order, in every layout: brand and `NetworkMenu`, ⌘K, the `notifications`
   slot, `ThemeLangControls`, `AccountMenu`.
 - The frame renders `<main id="main-content">`. A site does not render its own.
+  The skip link targets it; every layout's `<main>` draws a 2px inset `--color-can` ring on
+  `focus-visible` and none on mouse focus.
 - ⌘K lists the site's own nav, then other sites' `pages` (`sitePages.ts`), grouped by site.
   `palette.ts` filters by `visibleSites` plus each page's `minRating` and `signedIn`. This is
   presentation only; access stays with each site and can-api.
