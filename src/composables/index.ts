@@ -7,3 +7,10 @@ export {
   useHighContrast,
   useCoarsePointer,
 } from "./usePreferences";
+
+export {
+  NOTIFICATION_FETCH_KEY,
+  useNotifications,
+  type UseNotificationsOptions,
+  type UseNotificationsReturn,
+} from "./useNotifications";
