@@ -157,6 +157,8 @@ function onViewportChange() {
   });
 }
 
+let resizeObserver: ResizeObserver | null = null;
+
 watch(isOpen, async (open) => {
   if (open) {
     await nextTick();
@@ -164,7 +166,14 @@ watch(isOpen, async (open) => {
     document.addEventListener("pointerdown", onDocumentPointerDown, true);
     window.addEventListener("scroll", onViewportChange, true);
     window.addEventListener("resize", onViewportChange);
+    // The panel grows when its content arrives (a list loading in).
+    if (panel.value && typeof ResizeObserver !== "undefined") {
+      resizeObserver = new ResizeObserver(onViewportChange);
+      resizeObserver.observe(panel.value);
+    }
   } else {
+    resizeObserver?.disconnect();
+    resizeObserver = null;
     document.removeEventListener("pointerdown", onDocumentPointerDown, true);
     window.removeEventListener("scroll", onViewportChange, true);
     window.removeEventListener("resize", onViewportChange);
@@ -175,6 +184,7 @@ onMounted(() => (mounted.value = true));
 
 onBeforeUnmount(() => {
   if (frame) cancelAnimationFrame(frame);
+  resizeObserver?.disconnect();
   if (typeof document === "undefined") return;
   document.removeEventListener("pointerdown", onDocumentPointerDown, true);
   window.removeEventListener("scroll", onViewportChange, true);
