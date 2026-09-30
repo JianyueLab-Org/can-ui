@@ -95,8 +95,7 @@ Plus `ThemeScript.astro` (the no-flash inline script), the motion layer — `use
 
 **The chrome components are the site frame.** `CanFrame` is the one frame every site renders:
 four layouts, the same five parts in the same order. It takes data and messages as props and
-calls one endpoint, the site's own `/api/v1/auth/signout`. `AppShell` and `SiteHeader` are
-deprecated and removed in 27.2.0.
+calls one endpoint, the site's own `/api/v1/auth/signout`.
 
 **The identity lives here too.** `src/assets/logo/` carries the twelve official files —
 horizontal/vertical × black/white × Chinese/Chinese+English/English — plus six generated

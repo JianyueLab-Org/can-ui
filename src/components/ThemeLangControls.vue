@@ -17,8 +17,9 @@
  * `prefers-color-scheme` but offers no way to override it is a site whose dark
  * mode you cannot turn off.
  */
-import { computed, onBeforeUnmount, onMounted, ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 import Icon from "./Icon.vue";
+import Popover, { type PopoverPlacement } from "./Popover.vue";
 import { useTheme, THEME_ICONS } from "../composables/useTheme";
 import {
   createTranslator,
@@ -61,13 +62,25 @@ const props = withDefaults(
      */
     cookieDomain?: string;
     messages?: Record<string, unknown>;
+    /**
+     * Where the language menu opens. Defaults per variant: `bottom-end` inline,
+     * `top-end` floating. A rail at the foot of a sidebar passes `top-start`.
+     */
+    placement?: PopoverPlacement;
   }>(),
   {
     variant: "inline",
     languages: true,
     cookieName: "NEXT_LOCALE",
     messages: () => ({}),
+    placement: undefined,
   },
+);
+
+const menuPlacement = computed<PopoverPlacement>(
+  () =>
+    props.placement ??
+    (props.variant === "floating" ? "top-end" : "bottom-end"),
 );
 
 const emit = defineEmits<{
@@ -92,7 +105,6 @@ const current = computed(
 
 const mounted = ref(false);
 const menuOpen = ref(false);
-const root = ref<HTMLElement | null>(null);
 
 function onCycleTheme(event: MouseEvent) {
   cycle(event);
@@ -134,21 +146,8 @@ function changeLanguage(next: string) {
   window.location.reload();
 }
 
-function onDocumentClick(event: MouseEvent) {
-  if (!root.value?.contains(event.target as Node)) menuOpen.value = false;
-}
-function onKeydown(event: KeyboardEvent) {
-  if (event.key === "Escape") menuOpen.value = false;
-}
-
 onMounted(() => {
   mounted.value = true;
-  document.addEventListener("click", onDocumentClick);
-  document.addEventListener("keydown", onKeydown);
-});
-onBeforeUnmount(() => {
-  document.removeEventListener("click", onDocumentClick);
-  document.removeEventListener("keydown", onKeydown);
 });
 
 // `.icon-button` carries the size, the hover and — on a coarse pointer —
@@ -163,10 +162,9 @@ const buttonClass = "icon-button";
        `.fixed`, so `relative` wins: the "floating" control lands in normal
        flow and adds its own height to the document. On the credential pages
        that scrolled the page by ~46px and opened a strip of bare surface under
-       the full-height artwork. Either value establishes a containing block, so
-       the menu below still anchors correctly. -->
+       the full-height artwork. The language menu is a teleported `Popover`,
+       so it needs no containing block. -->
   <div
-    ref="root"
     :class="[
       'flex items-center',
       variant === 'floating'
@@ -193,57 +191,57 @@ const buttonClass = "icon-button";
       {{ mounted ? themeLabel : "" }}
     </span>
 
-    <button
+    <Popover
       v-if="languages"
-      type="button"
-      :class="[buttonClass, menuOpen ? 'bg-surface-sunken text-ink' : '']"
-      :aria-label="t('language.label')"
-      :aria-expanded="menuOpen"
-      aria-haspopup="menu"
-      @click="menuOpen = !menuOpen"
+      v-model:open="menuOpen"
+      :placement="menuPlacement"
+      width="10rem"
+      :label="t('language.label')"
     >
-      <span class="text-xs font-semibold tracking-tight">
-        {{ current?.short }}
-      </span>
-    </button>
+      <template #trigger="{ toggle, open }">
+        <button
+          type="button"
+          :class="[buttonClass, open ? 'bg-surface-sunken text-ink' : '']"
+          :aria-label="t('language.label')"
+          :aria-expanded="open"
+          aria-haspopup="menu"
+          @click="toggle"
+        >
+          <span class="text-xs font-semibold tracking-tight">
+            {{ current?.short }}
+          </span>
+        </button>
+      </template>
 
-    <div
-      v-if="languages && menuOpen"
-      role="menu"
-      :class="[
-        'animate-panel-in absolute right-0 z-50 w-40 overflow-hidden rounded-card border border-subtle bg-surface-overlay py-1 shadow-popover',
-        variant === 'floating' ? 'bottom-full mb-2' : 'top-full mt-2',
-      ]"
-      :style="{
-        '--origin-x': '100%',
-        '--origin-y': variant === 'floating' ? '100%' : '0%',
-      }"
-    >
-      <button
-        v-for="language in offered"
-        :key="language.code"
-        role="menuitem"
-        :class="[
-          'tap-row flex w-full items-center gap-3 px-3 py-2 text-left text-sm transition-colors',
-          language.code === locale
-            ? 'font-semibold text-can'
-            : 'text-muted hover:bg-surface-sunken hover:text-ink',
-        ]"
-        @click="changeLanguage(language.code)"
-      >
-        <!-- Language names are endonyms and are never translated: somebody
-             looking for their own language is looking for the word they would
-             write, not for its name in a language they cannot read. -->
-        <span class="w-6 shrink-0 text-center text-xs font-semibold text-faint">
-          {{ language.short }}
-        </span>
-        <span class="truncate">{{ language.name }}</span>
-        <Icon
-          v-if="language.code === locale"
-          name="checkCircle"
-          class="ml-auto size-4"
-        />
-      </button>
-    </div>
+      <div role="menu">
+        <button
+          v-for="language in offered"
+          :key="language.code"
+          role="menuitem"
+          :class="[
+            'tap-row flex w-full items-center gap-3 rounded-control px-3 py-2 text-left text-sm transition-colors',
+            language.code === locale
+              ? 'font-semibold text-can'
+              : 'text-muted hover:bg-surface-sunken hover:text-ink',
+          ]"
+          @click="changeLanguage(language.code)"
+        >
+          <!-- Language names are endonyms and are never translated: somebody
+               looking for their own language is looking for the word they would
+               write, not for its name in a language they cannot read. -->
+          <span
+            class="w-6 shrink-0 text-center text-xs font-semibold text-faint"
+          >
+            {{ language.short }}
+          </span>
+          <span class="truncate">{{ language.name }}</span>
+          <Icon
+            v-if="language.code === locale"
+            name="checkCircle"
+            class="ml-auto size-4"
+          />
+        </button>
+      </div>
+    </Popover>
   </div>
 </template>

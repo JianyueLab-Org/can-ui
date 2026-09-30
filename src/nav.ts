@@ -118,7 +118,7 @@ export interface Workspace {
  * opt-out, and the character check after the prefix is what stops `/exam`
  * matching `/examples`.
  *
- * Shared by `SidebarNav`, `SiteHeader` and can-efb's rail. It used to be three
+ * Shared by `SidebarNav` and `CanFrame`. It used to be three
  * copies — SidebarNav's, can-efb's `lib/nav.ts`, and an `isActive` in each
  * page site's header — which agreed only by accident.
  */
@@ -138,7 +138,7 @@ export function isCurrentPath(
   return false;
 }
 
-/** The three sections. Keys are what `AppShell`'s `activeWorkspace` compares. */
+/** The three sections. Keys are what `CanFrame`'s `activeWorkspace` compares. */
 export type WorkspaceKey = "pilots" | "controllers" | "exams";
 
 export interface WorkspaceOptions {
@@ -210,7 +210,7 @@ export function workspaceVisible(site: NetworkSite, rating?: number): boolean {
 }
 
 /**
- * The section switcher every `AppShell` site draws.
+ * The section switcher every `CanFrame layout="tool"` site draws.
  *
  * It replaces four copies — can-web's `lib/workspaces.ts` and the
  * `buildWorkspaces` in can-controller, can-portal and can-database — which had

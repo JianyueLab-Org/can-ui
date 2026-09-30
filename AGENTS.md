@@ -68,7 +68,7 @@ src/
   styles/        tokens.css · base.css · components.css · frame.css · motion.css → index.css
   motion/        the spring engine, momentum projection, gesture tracking
   composables/   useOverlay · usePress · usePreferences · useTheme · haptics
-  components/    40 Vue components + ThemeScript.astro + RailScript.astro
+  components/    38 Vue components + ThemeScript.astro + RailScript.astro
   assets/logo/   the identity — 12 official files + 6 generated adaptive ones
   icons.ts       the union of all six sites' icon tables, plus what the chrome needed
   i18n.ts        createTranslator, createSiteI18n, the chrome's own string keys
@@ -83,7 +83,7 @@ src/
   frameEntry.ts  @jianyuelab-org/can-ui/frame — frame, sign-out and rail helpers, no Vue
   checkPages.ts  check:pages — Bun only (server side), not in the barrel
   demo/          the gallery's islands (not exported)
-  pages/         the gallery: / · /motion · /tokens · /brand · /shell · /header · /frame
+  pages/         the gallery: / · /motion · /tokens · /brand · /frame
 bin/             can-ui-check-pages
 test/fixtures/   a fixture src/pages tree for checkPages.test.ts
 ```
@@ -274,10 +274,11 @@ Revisit when `@astrojs/check` and `vue-tsc` ship TS 7 support — not because a 
 
 ## The chrome layer
 
-`AppShell`, `SidebarNav`, `ThemeLangControls`, `CommandPalette`, `Drawer` and `Avatar` are the
-site frame. They were the last things lifted because they were the only ones with real couplings
-rather than merely large ones, and the couplings are worth naming — the next shell somebody tries
-to share will have the same four:
+`CanFrame`, `SidebarNav`, `ThemeLangControls`, `CommandPalette`, `Drawer` and `Avatar` are the
+site frame. The four couplings below were found lifting `AppShell`, which 27.2.0 removed. They
+were the last things lifted because they were the only ones with real couplings rather than
+merely large ones, and the couplings are worth naming — the next shell somebody tries to share
+will have the same four:
 
 1. **`AppShell` called can-api.** Sign-out was `api("/api/v1/auth/signout")` inline. A design
    system that knows the network's auth endpoint is not a design system. It is now an `@signout`
@@ -297,6 +298,8 @@ migration becomes a redesign nobody asked for.
 byte identical in all six sites. It is also the one nobody would notice drifting, because a
 language menu offering three locales on one site and four on another is only visible to somebody
 who opens both.
+
+The language menu is a `Popover` (teleported, `fixed`), so no scroll container clips it; `placement` (Popover's `Placement`) sets where it opens — default `bottom-end` inline, `top-end` floating, and CanFrame's rail passes `top-start`.
 
 Two fixes went in on the way, both real bugs rather than tidying:
 
@@ -318,6 +321,8 @@ Every site renders `CanFrame` from one `src/components/Frame.vue`. It replaces `
 - Five parts, in this order, in every layout: brand and `NetworkMenu`, ⌘K, the `notifications`
   slot, `ThemeLangControls`, `AccountMenu`.
 - The frame renders `<main id="main-content">`. A site does not render its own.
+  The skip link targets it; every layout's `<main>` carries `.focus-ring`, so keyboard focus
+  draws base.css's 2px `--color-can` outline inset by 2px, and mouse focus draws none.
 - ⌘K lists the site's own nav, then other sites' `pages` (`sitePages.ts`), grouped by site.
   `palette.ts` filters by `visibleSites` plus each page's `minRating` and `signedIn`. This is
   presentation only; access stays with each site and can-api.
@@ -352,28 +357,10 @@ Every site renders `CanFrame` from one `src/components/Frame.vue`. It replaces `
 - Each site runs `check:pages` (`bin/check-pages.ts`) in CI. It fails when a `sitePages.ts` entry
   has no route in that site's `src/pages`. Catch-all routes do not count. can-docs has no check.
 
-`SiteHeader` and `AppShell` are deprecated through 27.1.x: JSDoc `@deprecated` on the barrel
-exports, no runtime warning. 27.2.0 deletes them with `siteHeader.ts` and `headerNetworkSites`.
+27.2.0 removed `SiteHeader`, `AppShell`, `siteHeader.ts` and `headerNetworkSites`.
 
-### `SiteHeader` — deprecated, removed in 27.2.0
-
-can-web, can-dev, can-exam and can-radar render `SiteHeader`. Props: `current`, `locale`,
-`pathname`, `nav` (`NavChild[]`, the site's own pages), `signedIn`, `rating`, `homeHref`,
-`signInHref`, `variant`, `labels`. Emits `signout`. Slots: `brand`, `actions`, `account`,
-`drawer-extra`.
-
-- The network menu and the drawer's site list both come from `visibleSites` with
-  `excludeCurrent`; the drawer's goes through `headerNetworkSites` in `src/siteHeader.ts`.
-- The drawer is a sibling of `<header>`, never a child and never teleported: `bg-chrome` sets a
-  backdrop-filter, which makes `<header>` the containing block for fixed descendants.
-- `variant="compact"` is can-radar's: 56px, not sticky, hairline border, underlined active item.
-- Active matching is `isCurrentPath` in `src/nav.ts`, shared with `SidebarNav` and can-efb's rail.
-
-`buildWorkspaces` in `src/nav.ts` is the section switcher for every `AppShell` site. Its two
+`buildWorkspaces` in `src/nav.ts` is the section switcher for every tool-layout site. Its two
 off-main-site entries are `WORKSPACE_SITE_KEYS`; the calling site's own entry links by path.
-
-`AppShell`'s footer is `SiteFooter compact`. Its `#footer` slot renders in `SiteFooter`'s
-`#services`.
 
 `.focus-ring` (`src/styles/base.css`) draws the focus outline inside the element. Chrome controls
 inside a clipping or scrolling container carry it.
@@ -412,9 +399,9 @@ SiteOrigins` — a dev/staging override, since a site running on a dev box alrea
 env-configured origin and needs a way to hand it to another site's link. It never decides which
 sites show, only where a shown one points; the registry origin is still the default.
 
-`SiteHeader`, `NetworkMenu`, `SiteFooter` and `AppShell` all take the same optional `origins` prop
-and pass it straight through to whichever of the above they call, so a dev box's network menu and
-drawer link to other sites' dev origins instead of production.
+`CanFrame`, `NetworkMenu`, `SiteFooter`, `AccountMenu` and `NoAccess` all take the same optional
+`origins` prop and pass it straight through to whichever of the above they call, so a dev box's
+links point at other sites' dev origins instead of production.
 
 ### Still not here
 
@@ -494,7 +481,7 @@ needed: `astro check` diagnoses `.astro` and `.ts` and _silently ignores `.vue`_
 `tsconfig.vue.json` as well via `scripts/typecheck-vue.mjs`.
 
 `bun test` covers the pure modules: `src/motion/spring.ts`, `src/sites.ts`, `src/sitePages.ts`,
-`src/nav.ts`, `src/siteHeader.ts`, `src/i18n.ts`, `src/palette.ts`, `src/frame.ts`,
+`src/nav.ts`, `src/i18n.ts`, `src/palette.ts`, `src/frame.ts`,
 `src/rail.ts`, `src/signOut.ts` and `src/checkPages.ts`. Each can be wrong with nothing on screen
 looking wrong. Components have no test stack; they are covered by the type gate, the build and
 the gallery.

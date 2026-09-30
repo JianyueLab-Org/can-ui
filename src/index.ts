@@ -11,8 +11,6 @@
  * A deep import is available for the rare case where one component is wanted
  * without the barrel — `can-ui/components/Button.vue`.
  */
-import AppShellComponent from "./components/AppShell.vue";
-import SiteHeaderComponent from "./components/SiteHeader.vue";
 
 /* Brand */
 export { default as Logo } from "./components/Logo.vue";
@@ -61,22 +59,6 @@ export { default as ThemeLangControls } from "./components/ThemeLangControls.vue
 export { default as ThemeToggle } from "./components/ThemeToggle.vue";
 export { default as NetworkMenu } from "./components/NetworkMenu.vue";
 export { default as SiteFooter } from "./components/SiteFooter.vue";
-
-/** @deprecated Use `CanFrame` with `layout="tool"`. Removed in 27.2.0. */
-export const AppShell = AppShellComponent;
-
-/**
- * @deprecated Use `CanFrame` with `layout="content"` or `layout="map"`.
- * Removed in 27.2.0.
- */
-export const SiteHeader = SiteHeaderComponent;
-
-/* Removed with SiteHeader in 27.2.0. */
-export {
-  headerNetworkSites,
-  type SiteHeaderLabels,
-  type HeaderNetworkOptions,
-} from "./siteHeader";
 
 /* Frame helpers */
 export {

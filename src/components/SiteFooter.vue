@@ -54,7 +54,7 @@ const props = withDefaults(
     /**
      * One line: whatever the site passes as `#services`, the community links
      * and the ICP filing. For frames that already carry the network — an
-     * `AppShell` rail, a credential page — where the full footer's columns
+     * `CanFrame` tool layout, a credential page — where the full footer's columns
      * would repeat the menu one scroll away.
      */
     compact?: boolean;

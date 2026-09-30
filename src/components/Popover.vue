@@ -1,3 +1,8 @@
+<script lang="ts">
+export type PopoverPlacement =
+  "bottom-start" | "bottom-end" | "top-start" | "top-end";
+</script>
+
 <script setup lang="ts">
 /**
  * A panel anchored to the control that opened it — a menu, a filter, a detail
@@ -33,7 +38,7 @@ import {
 } from "vue";
 import { useOverlay } from "../composables/useOverlay";
 
-type Placement = "bottom-start" | "bottom-end" | "top-start" | "top-end";
+type Placement = PopoverPlacement;
 
 const props = withDefaults(
   defineProps<{
