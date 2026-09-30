@@ -144,6 +144,7 @@ const origins = originsFromEnv(import.meta.env);
     :messages="messages"
     :origins="origins"
     after-sign-out="web"
+    notifications
   >
     <slot />
   </CanFrame>
@@ -157,6 +158,22 @@ Each site checks its ⌘K registry entries against its own routes:
 ```json
 "check:pages": "can-ui-check-pages controller"
 ```
+
+## Notifications
+
+`notifications` on `CanFrame` shows the bell for a signed-in member. The site's same-origin proxy
+forwards these to can-api:
+
+| Method | Path                                                   |
+| ------ | ------------------------------------------------------ |
+| GET    | `/api/v1/notifications`                                |
+| GET    | `/api/v1/notifications/unread`                         |
+| POST   | `/api/v1/notifications/read-all` (JSON body forwarded) |
+| PATCH  | `/api/v1/notifications/member/{id}`                    |
+| PATCH  | `/api/v1/notifications/broadcast/{id}`                 |
+
+A site whose proxy answers 404 shows no bell. Message text ships in can-ui in four locales; sites
+add no translations. `messages.notifications.*` overrides the bell's own strings.
 
 ## Versions
 

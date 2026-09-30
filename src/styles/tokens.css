@@ -108,6 +108,9 @@
      Light values here; :root.dark overrides below. */
   --color-success: #059669;
   --color-danger: #dc2626;
+  /* Fill for white text (the unread badge). #dc2626 on white is 4.83:1 in
+     both themes; dark mode's --color-danger is lighter and only 2.77:1. */
+  --color-badge: #dc2626;
   --color-warning: #d97706;
   --color-info: #3a7ba8;
 

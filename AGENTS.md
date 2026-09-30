@@ -67,15 +67,19 @@ narrow only when something in `files` actually breaks on the older major.
 src/
   styles/        tokens.css · base.css · components.css · frame.css · motion.css → index.css
   motion/        the spring engine, momentum projection, gesture tracking
-  composables/   useOverlay · usePress · usePreferences · useTheme · haptics
-  components/    38 Vue components + ThemeScript.astro + RailScript.astro
+  composables/   useOverlay · usePress · usePreferences · useTheme · useNotifications · haptics
+  components/    41 Vue components + ThemeScript.astro + RailScript.astro
   assets/logo/   the identity — 12 official files + 6 generated adaptive ones
   icons.ts       the union of all six sites' icon tables, plus what the chrome needed
   i18n.ts        createTranslator, createSiteI18n, the chrome's own string keys
   nav.ts         NavItem / NavSecondary / Workspace — the shell's data shapes
   sites.ts       the nine sites, their labels, who may see each, originsFromEnv
   sitePages.ts   every site's ⌘K pages
-  ratings.ts     RATING_INSTRUCTOR · RATING_SUP · RATING_ADMIN
+  ratings.ts     RATING_INSTRUCTOR · RATING_SUP · RATING_ADMIN · RATING_SHORT
+  notifications.ts         kinds, params, paths, row link, icon, badge, relative time
+  notificationMessages.ts  NOTIFICATION_MESSAGES · NOTIFICATION_UI · renderNotification
+  notificationPoller.ts    the bell's requests and polling loop
+  popoverPosition.ts       Popover placement, flip and clamp
   palette.ts     ⌘K items and the matcher
   frame.ts       CanFrame's pure helpers
   rail.ts        the rail's data-rail state
@@ -330,8 +334,8 @@ Every site renders `CanFrame` from one `src/components/Frame.vue`. It replaces `
   site name.
 - `navLeaves` in `nav.ts` is the one flattener shared by the palette, `frameLinks` and `railTabs`.
 - `AccountMenu` posts to the site's own `POST /api/v1/auth/signout`, which every site serves and
-  forwards to can-api. This path is the one endpoint can-ui knows. `afterSignOut` is `reload` on
-  public sites and `web` (can-web `/`) on gated ones.
+  forwards to can-api. That path and `/api/v1/notifications/*` are the endpoints can-ui knows.
+  `afterSignOut` is `reload` on public sites and `web` (can-web `/`) on gated ones.
 - `signOut` returns `Promise<boolean>`. On a failed request it does not navigate, and
   `AccountMenu` shows the chrome key `signOutFailed` inline. Sites translate `signOutFailed` with
   the other chrome keys.
@@ -344,7 +348,8 @@ Every site renders `CanFrame` from one `src/components/Frame.vue`. It replaces `
   flagged `phoneTab`, or the first three internal leaves. "Me" opens a bottom sheet (via
   `useOverlay`) with the remaining leaves, then `NetworkMenu`, the
   `notifications` slot, `ThemeLangControls` and `AccountMenu`, so the frame carries all five parts
-  without a settings page. can-efb's settings page may keep its own controls.
+  without a settings page. can-efb's settings page may keep its own controls. With the bell on,
+  the Me tab carries the unread badge and the sheet's first row opens the notification list.
 - `CanFrame` computes `isPhone` only after mount, and ignores ⌘K when `event.defaultPrevented`.
 - `FrameSearchButton` and `FrameSidebar` are `CanFrame` internals, not exported from the barrel.
 - `@jianyuelab-org/can-ui/frame` (`frameEntry.ts`) exports the frame's pure half with no Vue in
@@ -364,6 +369,48 @@ off-main-site entries are `WORKSPACE_SITE_KEYS`; the calling site's own entry li
 
 `.focus-ring` (`src/styles/base.css`) draws the focus outline inside the element. Chrome controls
 inside a clipping or scrolling container carry it.
+
+### Notifications
+
+- `CanFrame` `notifications` (default `false`) renders `NotificationBell` in part 3 when `user` is
+  set. Slot content overrides it. One `useNotifications` state per frame.
+- Placement: bar layouts between ⌘K and `ThemeLangControls`, panel `bottom-end`. Rail desktop: a
+  row after ⌘K, panel `right-start`. Rail phone: badge on the Me tab; the sheet's first row swaps
+  the sheet to the list, with a back button.
+- Requests are same-origin with `credentials: "include"`: `GET /api/v1/notifications/unread`,
+  `GET /api/v1/notifications?before=&limit=20`, `PATCH /api/v1/notifications/{member|broadcast}/{id}`,
+  `POST /api/v1/notifications/read-all`. Each site forwards them to can-api.
+- Count: on mount, on becoming visible, every 60 s while visible; none while hidden. Three
+  consecutive failures → 5 min. No error badge. 401 or 404 on the count or the list hides the
+  bell until reload, so a site without the proxy entries shows no bell.
+- Opening the panel marks nothing read. A click marks the row read, then navigates: same site by
+  path, other sites by `siteUrl` with `origins`. An unknown `site` renders an unlinked row.
+- Mark all read: `markAllRead(upTo)` sends `POST read-all` with `{ "upTo": <createdAt of the newest
+loaded row> }`, and no body when nothing is loaded. Locally only rows with `createdAt <= upTo`
+  become read; newer rows stay unread and the count is what remains of them. The next poll
+  corrects the count.
+- Text: `renderNotification(item, locale)`. can-ui carries `NOTIFICATION_MESSAGES` (25 kinds ×
+  four locales) and the bell's strings (`NOTIFICATION_UI`, read as `notifications.*`), as
+  `sites.ts` carries site names. Sites add no translations. A site may override `notifications.*`
+  through `messages`. Unknown locale → zh-cn; unknown kind → `notifications.generic`.
+- Template syntax: `{name}` is a param; `[…]` is dropped unless every placeholder inside has a
+  value. `redemption.cancelled` puts the refund in such a segment: no `points`, no refund clause.
+  Ratings render as codes (`RATING_SHORT`).
+- `NOTIFICATION_KINDS` copies can-api's `notify` constants. `notificationMessages.test.ts` fails
+  when a kind lacks a message in any locale or a placeholder names a param the kind lacks. A new
+  kind lands in can-api and here in the same release.
+- Badge: none at 0, `99+` at 99 (can-api caps the count at 99). The markup is one internal
+  component, `NotificationBadge.vue` (`corner` and `pill`), used by the bell, the rail and the Me
+  sheet. It is not exported. Its fill is `--color-badge` (`#dc2626`, 4.83:1 against white in both
+  themes; `--color-danger` is too light in dark mode).
+- A row click marks the row read locally and sends the PATCH with `keepalive`; the anchor
+  then navigates by itself, so a site's client router still handles same-site links. `notificationLabel` and `notificationAnnouncement` give the bell's accessible name and
+  live-region text to `NotificationBell` and `CanFrame`.
+- `Popover` placements: `bottom-start`, `bottom-end`, `top-start`, `top-end`, `right-start`.
+  `right-start` flips left when the right has no room and aligns bottom edges near the viewport
+  bottom (`popoverPosition.ts`). A ResizeObserver on the open panel re-places it when its content
+  resizes. The rail bell passes `offset` 21 so the panel clears the rail border.
+- `/frame?bell=on|empty|off` shows the bell with fixtures, via `NOTIFICATION_FETCH_KEY`.
 
 ### `sites.ts` — the network's map of itself, and the one place strings live
 
@@ -482,9 +529,10 @@ needed: `astro check` diagnoses `.astro` and `.ts` and _silently ignores `.vue`_
 
 `bun test` covers the pure modules: `src/motion/spring.ts`, `src/sites.ts`, `src/sitePages.ts`,
 `src/nav.ts`, `src/i18n.ts`, `src/palette.ts`, `src/frame.ts`,
-`src/rail.ts`, `src/signOut.ts` and `src/checkPages.ts`. Each can be wrong with nothing on screen
-looking wrong. Components have no test stack; they are covered by the type gate, the build and
-the gallery.
+`src/rail.ts`, `src/signOut.ts`, `src/checkPages.ts`, `src/popoverPosition.ts`,
+`src/notifications.ts`, `src/notificationMessages.ts`, `src/notificationPoller.ts` and
+`src/composables/useNotifications.ts`. Each can be wrong with nothing on screen looking wrong.
+Components have no test stack; they are covered by the type gate, the build and the gallery.
 
 ## The gallery is part of the work
 
