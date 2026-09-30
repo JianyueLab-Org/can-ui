@@ -298,6 +298,8 @@ byte identical in all six sites. It is also the one nobody would notice drifting
 language menu offering three locales on one site and four on another is only visible to somebody
 who opens both.
 
+The language menu is a `Popover` (teleported, `fixed`), so no scroll container clips it; `placement` (Popover's `Placement`) sets where it opens — default `bottom-end` inline, `top-end` floating, and CanFrame's rail passes `top-start`.
+
 Two fixes went in on the way, both real bugs rather than tidying:
 
 - **`SidebarNav` derived which sections start open exactly once, during setup.** A `navigation`

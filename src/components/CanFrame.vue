@@ -371,6 +371,7 @@ function railLinkClass(href: string) {
                 :locale="locale"
                 :languages="languages"
                 :messages="messages"
+                placement="top-start"
               />
               <button
                 type="button"
