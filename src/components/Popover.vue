@@ -1,6 +1,5 @@
 <script lang="ts">
-export type PopoverPlacement =
-  "bottom-start" | "bottom-end" | "top-start" | "top-end";
+export type { PopoverPlacement } from "../popoverPosition";
 </script>
 
 <script setup lang="ts">
@@ -37,6 +36,12 @@ import {
   watch,
 } from "vue";
 import { useOverlay } from "../composables/useOverlay";
+import {
+  placePopover,
+  popoverOrigin,
+  type PopoverPlacement,
+  type ResolvedPlacement,
+} from "../popoverPosition";
 
 type Placement = PopoverPlacement;
 
@@ -106,61 +111,28 @@ const sizing = computed(() => ({
 }));
 
 /** Which corner of the panel sits against the trigger. */
-const resolved = ref<Placement>(props.placement);
+const resolved = ref<ResolvedPlacement>(props.placement);
 
 const origin = computed(() => {
-  const [side, align] = resolved.value.split("-") as [
-    "bottom" | "top",
-    "start" | "end",
-  ];
-  return {
-    "--origin-x": align === "start" ? "0%" : "100%",
-    "--origin-y": side === "bottom" ? "0%" : "100%",
-  };
+  const { x, y } = popoverOrigin(resolved.value);
+  return { "--origin-x": x, "--origin-y": y };
 });
 
+// Flip rather than clip, and keep inside the viewport: `popoverPosition.ts`.
 function place() {
   const anchor = trigger.value;
   const el = panel.value;
   if (!anchor || !el) return;
 
-  const rect = anchor.getBoundingClientRect();
-  const panelRect = el.getBoundingClientRect();
-  const vw = window.innerWidth;
-  const vh = window.innerHeight;
-
-  let [side, align] = props.placement.split("-") as [
-    "bottom" | "top",
-    "start" | "end",
-  ];
-
-  // Flip rather than clip. A panel that runs off the bottom of the screen and
-  // scrolls internally is worse than one that opens upward: the member cannot
-  // see that there is more, and the trigger they just pressed is off-screen.
-  if (side === "bottom" && rect.bottom + props.offset + panelRect.height > vh) {
-    if (rect.top - props.offset - panelRect.height > 0) side = "top";
-  } else if (side === "top" && rect.top - props.offset - panelRect.height < 0) {
-    if (rect.bottom + props.offset + panelRect.height < vh) side = "bottom";
-  }
-  if (align === "start" && rect.left + panelRect.width > vw) align = "end";
-  else if (align === "end" && rect.right - panelRect.width < 0) align = "start";
-
-  resolved.value = `${side}-${align}` as Placement;
-
-  const top =
-    side === "bottom"
-      ? rect.bottom + props.offset
-      : rect.top - props.offset - panelRect.height;
-  const left = align === "start" ? rect.left : rect.right - panelRect.width;
-
-  style.value = {
-    top: `${Math.round(top)}px`,
-    // Kept inside the viewport with an 8px margin, so a panel anchored to a
-    // control at the very edge is still fully readable. `Math.max` runs last so
-    // that a panel too wide to satisfy both bounds is pinned to the left margin
-    // rather than pushed off-screen by a negative result.
-    left: `${Math.round(Math.max(Math.min(left, vw - panelRect.width - 8), 8))}px`,
-  };
+  const result = placePopover(
+    props.placement,
+    anchor.getBoundingClientRect(),
+    el.getBoundingClientRect(),
+    { width: window.innerWidth, height: window.innerHeight },
+    props.offset,
+  );
+  resolved.value = result.resolved;
+  style.value = { top: `${result.top}px`, left: `${result.left}px` };
 }
 
 function toggle() {
