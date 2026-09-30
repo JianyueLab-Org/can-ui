@@ -172,6 +172,11 @@ describe("notificationTime", () => {
     expect(notificationTime(ago(30 * 3600), now, "en-us")).toBe("yesterday");
   });
 
+  test("a time in the future (clock skew) reads as now", () => {
+    expect(notificationTime(ago(-5 * 60), now, "en-us")).toBe("now");
+    expect(notificationTime(ago(-3 * 86400), now, "en-us")).toBe("now");
+  });
+
   test("a date after a week", () => {
     const then = now - 10 * 86400 * 1000;
     expect(notificationTime(new Date(then).toISOString(), now, "en-us")).toBe(

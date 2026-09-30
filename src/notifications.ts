@@ -180,7 +180,8 @@ export function notificationTime(
   const then = Date.parse(iso);
   if (Number.isNaN(then)) return "";
   const lang = intlLocale(locale);
-  const seconds = (then - now) / 1000;
+  // A createdAt ahead of this clock is skew, not the future.
+  const seconds = Math.min((then - now) / 1000, 0);
   const abs = Math.abs(seconds);
   const rtf = new Intl.RelativeTimeFormat(lang, { numeric: "auto" });
   if (abs < 60) return rtf.format(0, "second");

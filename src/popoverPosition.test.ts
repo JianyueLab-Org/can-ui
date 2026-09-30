@@ -69,6 +69,30 @@ describe("vertical placements (unchanged behaviour)", () => {
     ).toEqual({ top: 148, left: 640, resolved: "bottom-end" });
   });
 
+  test("top flips to bottom when it runs off the top and bottom fits", () => {
+    expect(
+      placePopover(
+        "top-start",
+        anchor(100, 140, 200, 240),
+        { width: 300, height: 200 },
+        viewport,
+        OFFSET,
+      ),
+    ).toEqual({ top: 148, left: 200, resolved: "bottom-start" });
+  });
+
+  test("end flips to start when it runs off the left", () => {
+    expect(
+      placePopover(
+        "bottom-end",
+        anchor(100, 140, 60, 100),
+        { width: 300, height: 200 },
+        viewport,
+        OFFSET,
+      ),
+    ).toEqual({ top: 148, left: 60, resolved: "bottom-start" });
+  });
+
   test("a panel wider than the viewport is pinned to the 8px margin", () => {
     expect(
       placePopover(
