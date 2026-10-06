@@ -389,13 +389,15 @@ inside a clipping or scrolling container carry it.
 loaded row> }`, and no body when nothing is loaded. Locally only rows with `createdAt <= upTo`
   become read; newer rows stay unread and the count is what remains of them. The next poll
   corrects the count.
-- Text: `renderNotification(item, locale)`. can-ui carries `NOTIFICATION_MESSAGES` (25 kinds ×
+- Text: `renderNotification(item, locale)`. can-ui carries `NOTIFICATION_MESSAGES` (26 kinds ×
   four locales) and the bell's strings (`NOTIFICATION_UI`, read as `notifications.*`), as
   `sites.ts` carries site names. Sites add no translations. A site may override `notifications.*`
   through `messages`. Unknown locale → zh-cn; unknown kind → `notifications.generic`.
 - Template syntax: `{name}` is a param; `[…]` is dropped unless every placeholder inside has a
   value. `redemption.cancelled` puts the refund in such a segment: no `points`, no refund clause.
   Ratings render as codes (`RATING_SHORT`).
+- `amount` renders signed (`+500`, `-500`) through `Intl.NumberFormat` with `signDisplay:
+"exceptZero"`. `points.adjusted` uses it.
 - `NOTIFICATION_KINDS` copies can-api's `notify` constants. `notificationMessages.test.ts` fails
   when a kind lacks a message in any locale or a placeholder names a param the kind lacks. A new
   kind lands in can-api and here in the same release.
