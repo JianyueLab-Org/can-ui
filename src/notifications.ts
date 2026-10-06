@@ -35,6 +35,7 @@ export const NOTIFICATION_KINDS = [
   "access.developerRevoked",
   "access.aipGranted",
   "access.aipRevoked",
+  "points.adjusted",
 ] as const;
 
 export type NotificationKind = (typeof NOTIFICATION_KINDS)[number];
@@ -68,6 +69,7 @@ export const NOTIFICATION_PARAMS: Readonly<
   "access.developerRevoked": [],
   "access.aipGranted": [],
   "access.aipRevoked": [],
+  "points.adjusted": ["amount", "detail"],
 };
 
 export type NotificationSource = "member" | "broadcast";
@@ -146,6 +148,7 @@ const CATEGORY_ICONS: Readonly<Record<string, IconName>> = {
   lottery: "gift",
   redemption: "gift",
   leaderboard: "chartBar",
+  points: "adjustments",
   security: "shieldCheck",
   oauth: "key",
   access: "key",
