@@ -197,6 +197,44 @@ describe("renderNotification", () => {
     }
   });
 
+  test("points.adjusted signs the amount in every locale", () => {
+    const grant = {
+      kind: "points.adjusted",
+      params: { amount: 500, detail: "国庆联飞补发" },
+    };
+    const deduct = {
+      kind: "points.adjusted",
+      params: { amount: -1000000, detail: "撤销：国庆联飞补发" },
+    };
+    expect(renderNotification(grant, "zh-cn")).toBe(
+      "你的积分已调整 +500：国庆联飞补发",
+    );
+    expect(renderNotification(grant, "zh-tw")).toBe(
+      "你的積分已調整 +500：国庆联飞补发",
+    );
+    expect(renderNotification(grant, "en-us")).toBe(
+      "Your points were adjusted by +500: 国庆联飞补发",
+    );
+    expect(renderNotification(grant, "ja-jp")).toBe(
+      "ポイントが +500 調整されました：国庆联飞补发",
+    );
+    expect(renderNotification(deduct, "zh-cn")).toBe(
+      "你的积分已调整 -1,000,000：撤销：国庆联飞补发",
+    );
+    expect(renderNotification(deduct, "en-us")).toBe(
+      "Your points were adjusted by -1,000,000: 撤销：国庆联飞补发",
+    );
+  });
+
+  test("points.adjusted keeps a non-numeric amount as given", () => {
+    expect(
+      renderNotification(
+        { kind: "points.adjusted", params: { amount: "500", detail: "补发" } },
+        "zh-cn",
+      ),
+    ).toBe("你的积分已调整 500：补发");
+  });
+
   test("placeholders read own params only", () => {
     expect(
       renderNotification(
@@ -218,8 +256,8 @@ describe("renderNotification", () => {
     for (const locale of ["zh-cn", "zh-tw"] as const) {
       for (const kind of NOTIFICATION_KINDS) {
         const message = NOTIFICATION_MESSAGES[locale][kind];
-        expect(message).not.toMatch(/ \{(prize|title|app|paper)\}/);
-        expect(message).not.toMatch(/\{(prize|title|app|paper)\} /);
+        expect(message).not.toMatch(/ \{(prize|title|app|paper|detail)\}/);
+        expect(message).not.toMatch(/\{(prize|title|app|paper|detail)\} /);
       }
     }
   });

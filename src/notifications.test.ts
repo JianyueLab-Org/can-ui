@@ -41,6 +41,7 @@ const CONTRACT_KINDS = [
   "access.developerRevoked",
   "access.aipGranted",
   "access.aipRevoked",
+  "points.adjusted",
 ];
 
 describe("kinds", () => {
@@ -70,6 +71,10 @@ describe("kinds", () => {
       "ipPrefix",
     ]);
     expect(NOTIFICATION_PARAMS["access.aipGranted"]).toEqual([]);
+    expect(NOTIFICATION_PARAMS["points.adjusted"]).toEqual([
+      "amount",
+      "detail",
+    ]);
   });
 });
 
@@ -136,6 +141,7 @@ describe("notificationIcon", () => {
     expect(notificationIcon("promotion.approved")).toBe("star");
     expect(notificationIcon("exam.failed")).toBe("academicCap");
     expect(notificationIcon("security.newSignIn")).toBe("shieldCheck");
+    expect(notificationIcon("points.adjusted")).toBe("adjustments");
   });
 
   test("unknown categories get the bell", () => {

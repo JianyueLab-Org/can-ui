@@ -2,7 +2,7 @@
  * Notification text, in the four locales the network ships.
  *
  * can-ui carries these strings, as `sites.ts` carries site names: every site
- * renders the same rows, and 25 kinds × four locales × nine sites is not a
+ * renders the same rows, and 26 kinds × four locales × nine sites is not a
  * table to keep in step by hand. A site may still override any bell string
  * through `messages.notifications.*`, and any kind through `overrides`.
  *
@@ -47,6 +47,7 @@ const ZH_CN: Messages = {
   "access.developerRevoked": "你的开发者权限已被撤销",
   "access.aipGranted": "你已获得航行资料库访问权限",
   "access.aipRevoked": "你的航行资料库访问权限已被撤销",
+  "points.adjusted": "你的积分已调整 {amount}：{detail}",
 };
 
 const ZH_TW: Messages = {
@@ -78,6 +79,7 @@ const ZH_TW: Messages = {
   "access.developerRevoked": "你的開發者權限已被撤銷",
   "access.aipGranted": "你已獲得航行資料庫存取權限",
   "access.aipRevoked": "你的航行資料庫存取權限已被撤銷",
+  "points.adjusted": "你的積分已調整 {amount}：{detail}",
 };
 
 const EN_US: Messages = {
@@ -115,6 +117,7 @@ const EN_US: Messages = {
   "access.developerRevoked": "Your developer access was revoked",
   "access.aipGranted": "You now have access to the aeronautical database",
   "access.aipRevoked": "Your access to the aeronautical database was revoked",
+  "points.adjusted": "Your points were adjusted by {amount}: {detail}",
 };
 
 const JA_JP: Messages = {
@@ -152,6 +155,7 @@ const JA_JP: Messages = {
   "access.developerRevoked": "開発者権限が取り消されました",
   "access.aipGranted": "航空情報データベースへのアクセス権が付与されました",
   "access.aipRevoked": "航空情報データベースへのアクセス権が取り消されました",
+  "points.adjusted": "ポイントが {amount} 調整されました：{detail}",
 };
 
 export const NOTIFICATION_MESSAGES: Readonly<Record<Locale, Messages>> = {
@@ -311,6 +315,11 @@ function formatParam(
       month: "long",
       timeZone: "UTC",
     }).format(time);
+  }
+  if (key === "amount" && typeof value === "number") {
+    return new Intl.NumberFormat(locale, { signDisplay: "exceptZero" }).format(
+      value,
+    );
   }
   if (typeof value === "string" || typeof value === "number") {
     return String(value);
