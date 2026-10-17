@@ -22,8 +22,8 @@ export type NetworkGroupKey =
 
 /** The pilot panel's home. */
 export const PILOT_PANEL_PATH = "/pilots/";
-/** The account page. Moves to `/account` with can-web's account pages. */
-export const ACCOUNT_PATH = "/pilots/account";
+/** The account page. */
+export const ACCOUNT_PATH = "/account";
 
 interface EntrySpec {
   site: SiteKey;

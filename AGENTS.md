@@ -316,6 +316,8 @@ Two fixes went in on the way, both real bugs rather than tidying:
 Every site renders `CanFrame` from one `src/components/Frame.vue`. It replaces `SiteHeader`,
 `AppShell` and can-efb's `AppRail`.
 
+Since 27.6.0: the content bar opens a nav group (an item with children and no href) as a menu.
+
 - `layout`: `content` (top bar, own nav, full `SiteFooter`), `tool` (top bar, sidebar below it,
   compact footer), `rail` (side rail, bottom tabs under 768px), `map` (56px bar, full-bleed, no
   footer).

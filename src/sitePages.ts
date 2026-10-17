@@ -349,8 +349,21 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
       signedIn: true,
     },
     {
+      key: "statistics",
+      path: "/pilots/status",
+      icon: "chartBar",
+      title: {
+        "zh-cn": "统计",
+        "zh-tw": "統計",
+        "en-us": "Statistics",
+        "ja-jp": "統計",
+      },
+      keywords: ["stats"],
+      signedIn: true,
+    },
+    {
       key: "account",
-      path: "/pilots/account",
+      path: "/account",
       icon: "userCircle",
       title: {
         "zh-cn": "账号",
@@ -363,7 +376,7 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
     },
     {
       key: "authorizedApps",
-      path: "/pilots/apps",
+      path: "/account/apps",
       icon: "key",
       title: {
         "zh-cn": "已授权应用",
@@ -372,6 +385,19 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
         "ja-jp": "許可済みアプリ",
       },
       keywords: ["oauth"],
+      signedIn: true,
+    },
+    {
+      key: "botBindings",
+      path: "/account/bots",
+      icon: "key",
+      title: {
+        "zh-cn": "机器人绑定",
+        "zh-tw": "機器人綁定",
+        "en-us": "Bot binding",
+        "ja-jp": "ボット連携",
+      },
+      keywords: ["discord", "qq"],
       signedIn: true,
     },
     {
@@ -385,6 +411,7 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
         "ja-jp": "管制員名簿",
       },
       keywords: ["controllers"],
+      signedIn: true,
     },
     {
       key: "leaderboard",
@@ -446,6 +473,18 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
         "ja-jp": "抽選",
       },
       keywords: ["draw"],
+      signedIn: true,
+    },
+    {
+      key: "feedback",
+      path: "/feedback",
+      icon: "megaphone",
+      title: {
+        "zh-cn": "处理结果公示",
+        "zh-tw": "處理結果公示",
+        "en-us": "Feedback outcomes",
+        "ja-jp": "対応結果の公示",
+      },
       signedIn: true,
     },
     {
