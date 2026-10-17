@@ -1,6 +1,7 @@
 import { describe, expect, test } from "bun:test";
 import { ICON_PATHS } from "./icons";
 import {
+  ACCOUNT_PATH,
   accountLinks,
   currentEntryName,
   networkGroups,
@@ -119,6 +120,12 @@ describe("currentEntryName", () => {
   });
 });
 
+describe("ACCOUNT_PATH", () => {
+  test("the account page lives at /account", () => {
+    expect(ACCOUNT_PATH).toBe("/account");
+  });
+});
+
 describe("accountLinks", () => {
   test("pilot panel then account, on the main site", () => {
     expect(accountLinks("en-us")).toEqual([
@@ -131,7 +138,7 @@ describe("accountLinks", () => {
       {
         key: "account",
         name: "Account",
-        href: "https://ceruleanavi.net/pilots/account",
+        href: "https://ceruleanavi.net/account",
         icon: "userCircle",
       },
     ]);
@@ -140,7 +147,7 @@ describe("accountLinks", () => {
   test("origin overrides reach the links", () => {
     expect(
       accountLinks("en-us", { web: "http://localhost:4321" })[1].href,
-    ).toBe("http://localhost:4321/pilots/account");
+    ).toBe("http://localhost:4321/account");
   });
 });
 

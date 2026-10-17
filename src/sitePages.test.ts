@@ -74,3 +74,35 @@ describe("SITE_PAGES", () => {
     expect(approval?.minRating).toBe(RATING_SUP);
   });
 });
+
+describe("SITE_PAGES.web", () => {
+  const byKey = new Map(SITE_PAGES.web.map((page) => [page.key, page]));
+
+  test("account pages live under /account", () => {
+    expect(byKey.get("account")?.path).toBe("/account");
+    expect(byKey.get("authorizedApps")?.path).toBe("/account/apps");
+    expect(byKey.get("botBindings")?.path).toBe("/account/bots");
+  });
+
+  test("nothing points at the old /pilots account paths", () => {
+    const paths = SITE_PAGES.web.map((page) => page.path);
+    for (const old of [
+      "/pilots/account",
+      "/pilots/apps",
+      "/pilots/bot-bindings",
+    ]) {
+      expect(paths).not.toContain(old);
+    }
+  });
+
+  test("statistics and feedback are listed and need sign-in", () => {
+    expect(byKey.get("statistics")?.path).toBe("/pilots/status");
+    expect(byKey.get("statistics")?.signedIn).toBe(true);
+    expect(byKey.get("feedback")?.path).toBe("/feedback");
+    expect(byKey.get("feedback")?.signedIn).toBe(true);
+  });
+
+  test("roster needs sign-in", () => {
+    expect(byKey.get("roster")?.signedIn).toBe(true);
+  });
+});
