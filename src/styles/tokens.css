@@ -33,25 +33,25 @@
      Brand is `can`. Do NOT borrow Tailwind blue or indigo for brand UI —
      they are a different hue and the mix shows instantly on a page carrying
      both. */
-  --color-can: #4c92c1;
-  --color-can-dark: #3a7ba8;
+  --color-can: #1a73b5;
+  --color-can-dark: #155d93;
   --color-green-500: #10b981;
   --color-red-500: #ef4444;
   --color-yellow-500: #f59e0b;
 
-  --color-can-hex: #4c92c1;
-  --color-can-dark-hex: #3a7ba8;
+  --color-can-hex: #1a73b5;
+  --color-can-dark-hex: #155d93;
 
-  --color-can-50: #f0f6fa;
-  --color-can-100: #dceaf3;
-  --color-can-200: #bdd9ea;
-  --color-can-300: #93c0db;
-  --color-can-400: #6aa8cd;
-  --color-can-500: #4c92c1;
-  --color-can-600: #3a7ba8;
-  --color-can-700: #2f6488;
-  --color-can-800: #274f6b;
-  --color-can-900: #1e3c52;
+  --color-can-50: #eef7fe;
+  --color-can-100: #d8edfd;
+  --color-can-200: #b0dbfb;
+  --color-can-300: #7fc5f9;
+  --color-can-400: #47b5fa;
+  --color-can-500: #1a73b5;
+  --color-can-600: #155d93;
+  --color-can-700: #114a75;
+  --color-can-800: #0e3a5c;
+  --color-can-900: #0b2c45;
 
   /* ── The logo's two blues ──────────────────────────────────────────────
      These are the colours in the mark itself (src/assets/logo), and they are
@@ -92,27 +92,27 @@
   /* ── Radii ─────────────────────────────────────────────────────────────
      Four steps, nested consistently: a control inside a card must have a
      smaller radius than the card, or the corners visibly disagree. */
-  --radius-control: 0.5rem; /* buttons, inputs, list rows */
-  --radius-card: 0.875rem; /* cards, panels, alerts */
-  --radius-sheet: 1.25rem; /* sheets, dialogs, popovers */
-  --radius-inset: 0.75rem; /* inset grouped lists */
+  --radius-control: 0.125rem; /* buttons, inputs, list rows */
+  --radius-card: 0.125rem; /* cards, panels, alerts */
+  --radius-sheet: 0.25rem; /* sheets, dialogs, popovers */
+  --radius-inset: 0.125rem; /* inset grouped lists */
 
   /* ── Text hierarchy ────────────────────────────────────────────────────
      Three steps, both themes, no `dark:` pair needed at the call site. */
-  --color-ink: #101828;
-  --color-muted: #556070;
-  --color-faint: #8a94a6;
+  --color-ink: #1a232d;
+  --color-muted: #4f5b67;
+  --color-faint: #7d8894;
 
   /* ── Semantic status ───────────────────────────────────────────────────
      Declared in @theme so the text-, bg- and ring- utilities are generated.
      Light values here; :root.dark overrides below. */
-  --color-success: #059669;
-  --color-danger: #dc2626;
+  --color-success: #1f8a4c;
+  --color-danger: #c62828;
   /* Fill for white text (the unread badge). #dc2626 on white is 4.83:1 in
      both themes; dark mode's --color-danger is lighter and only 2.77:1. */
   --color-badge: #dc2626;
-  --color-warning: #d97706;
-  --color-info: #3a7ba8;
+  --color-warning: #b26b00;
+  --color-info: #1a73b5;
 
   --color-success-bg: #ecfdf5;
   --color-success-fg: #047857;
@@ -120,8 +120,8 @@
   --color-danger-fg: #b91c1c;
   --color-warning-bg: #fffbeb;
   --color-warning-fg: #b45309;
-  --color-info-bg: #f0f6fa;
-  --color-info-fg: #2f6488;
+  --color-info-bg: #eef7fe;
+  --color-info-fg: #114a75;
   --color-neutral-bg: #f2f4f7;
   --color-neutral-fg: #344054;
 }
@@ -155,42 +155,30 @@
   --leading-caption: 1.4;
 
   /* ── Light theme surfaces ────────────────────────────────────────────── */
-  --background: #ffffff;
-  --foreground: #101828;
+  --background: #f4f6f8;
+  --foreground: #1a232d;
 
   --surface: #ffffff;
   --surface-raised: #ffffff;
-  --surface-sunken: #f7f8fa;
+  --surface-sunken: #eef1f4;
   --surface-overlay: #ffffff;
-  --chrome: rgb(255 255 255 / 0.82);
-  --border-subtle: #e7eaee;
-  --border-strong: #d3d8e0;
+  --chrome: #ffffff;
+  --border-subtle: #d5dbe1;
+  --border-strong: #b8c2cc;
   --ring-brand: color-mix(in srgb, var(--color-can) 28%, transparent);
 
-  /* ── Materials ─────────────────────────────────────────────────────────
-     Translucency is how hierarchy is expressed without drawing another box.
-     Three weights, and the weight is not decorative: a heavier material
-     separates a structural region (a sidebar, a sheet), a lighter one draws
-     attention to something interactive (a floating toolbar, a chip).
-
-     The rule that keeps this legible: NEVER stack a light material on another
-     material. Two blurs of the same backdrop compound into mud and the text
-     on top loses its ground. A material goes on the page, and solid surfaces
-     go on the material.
-
-     Blur radius scales with the surface, for the same reason the shadow does —
-     a large pane of glass is visibly thicker than a chip of it. */
-  --material-thin: rgb(255 255 255 / 0.62);
-  --material-regular: rgb(255 255 255 / 0.78);
-  --material-thick: rgb(255 255 255 / 0.9);
-  --material-blur-thin: 12px;
-  --material-blur-regular: 20px;
-  --material-blur-thick: 32px;
+  /* Avionics look: materials are solid panels. Names stay for the adoption contract. */
+  --material-thin: #ffffff;
+  --material-regular: #ffffff;
+  --material-thick: #ffffff;
+  --material-blur-thin: 0px;
+  --material-blur-regular: 0px;
+  --material-blur-thick: 0px;
   /* The bright hairline along a material's leading edge is light catching its
      thickness. It is a small thing that does most of the work of making the
      surface read as glass rather than as a tinted rectangle. */
-  --material-edge: rgb(255 255 255 / 0.5);
-  --material-saturate: 180%;
+  --material-edge: #d5dbe1;
+  --material-saturate: 100%;
 
   /* Scrims. The modal one dims to focus; the sheet one is lighter because a
      sheet does not take the whole screen and its parent stays in play. */
@@ -199,43 +187,48 @@
 }
 
 :root.dark {
-  --background: #0d1219;
-  --foreground: #f2f5f9;
+  /* The logo's sky blue is the dark-theme brand; light uses a deeper step of it
+     for AA contrast on white. */
+  --color-can: #47b5fa;
+  --color-can-hex: #47b5fa;
+  --color-can-dark: #2a9de6;
+  --color-can-dark-hex: #2a9de6;
 
-  --surface: #0d1219;
-  --surface-raised: #151c25;
-  --surface-sunken: #0a0f15;
-  --surface-overlay: #1b232e;
-  --chrome: rgb(13 18 25 / 0.82);
-  --border-subtle: #232c38;
-  --border-strong: #33404f;
+  --background: #0b0f14;
+  --foreground: #dce4ec;
 
-  --color-ink: #f2f5f9;
-  --color-muted: #9aa6b6;
-  --color-faint: #6b7889;
+  --surface: #0b0f14;
+  --surface-raised: #111820;
+  --surface-sunken: #080b0f;
+  --surface-overlay: #151d26;
+  --chrome: #0e141b;
+  --border-subtle: #1e2832;
+  --border-strong: #2c3a48;
 
-  --color-success: #34d399;
+  --color-ink: #dce4ec;
+  --color-muted: #8a97a4;
+  --color-faint: #5f6c79;
+
+  --color-success: #5fd38d;
   --color-success-bg: color-mix(in srgb, #10b981 16%, transparent);
   --color-success-fg: #6ee7b7;
   --color-danger: #f87171;
   --color-danger-bg: color-mix(in srgb, #ef4444 16%, transparent);
   --color-danger-fg: #fca5a5;
-  --color-warning: #fbbf24;
+  --color-warning: #f5b041;
   --color-warning-bg: color-mix(in srgb, #f59e0b 16%, transparent);
   --color-warning-fg: #fcd34d;
-  --color-info: #6aa8cd;
-  --color-info-bg: color-mix(in srgb, #4c92c1 16%, transparent);
-  --color-info-fg: #93c0db;
+  --color-info: #47b5fa;
+  --color-info-bg: color-mix(in srgb, #47b5fa 16%, transparent);
+  --color-info-fg: #7fc5f9;
   --color-neutral-bg: #202936;
   --color-neutral-fg: #d3dae3;
 
-  /* Dark materials are *darker* than the page, not lighter. A translucent
-     white panel over a dark page reads as a light leak; the glass in a dark
-     interface is smoked, and what shows through is the colour beneath it. */
-  --material-thin: rgb(21 28 37 / 0.62);
-  --material-regular: rgb(21 28 37 / 0.78);
-  --material-thick: rgb(21 28 37 / 0.9);
-  --material-edge: rgb(255 255 255 / 0.08);
+  /* Avionics look: materials are solid panels. Names stay for the adoption contract. */
+  --material-thin: #111820;
+  --material-regular: #111820;
+  --material-thick: #151d26;
+  --material-edge: #1e2832;
 
   /* Elevation in the dark is carried by the surface stepping lighter, not by
      a shadow nobody can see against #0d1219 — but the shadow still separates
