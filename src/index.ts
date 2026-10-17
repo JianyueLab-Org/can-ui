@@ -63,7 +63,9 @@ export { default as NotificationBell } from "./components/NotificationBell.vue";
 
 /* Frame helpers */
 export {
+  barEntries,
   frameLinks,
+  type BarEntry,
   noAccessText,
   railTabs,
   reachableSites,

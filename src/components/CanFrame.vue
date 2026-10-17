@@ -42,6 +42,7 @@ import FrameSidebar from "./FrameSidebar.vue";
 import Icon from "./Icon.vue";
 import Logo from "./Logo.vue";
 import LogoMark from "./LogoMark.vue";
+import NavGroupMenu from "./NavGroupMenu.vue";
 import NetworkMenu from "./NetworkMenu.vue";
 import NotificationBadge from "./NotificationBadge.vue";
 import NotificationBell from "./NotificationBell.vue";
@@ -52,6 +53,7 @@ import { useNotifications } from "../composables/useNotifications";
 import { useOverlay } from "../composables/useOverlay";
 import { useMediaQuery } from "../composables/usePreferences";
 import {
+  barEntries,
   frameLinks,
   railTabs,
   type FrameLayout,
@@ -139,6 +141,8 @@ const siteName = computed(() => siteLabel(props.locale, props.current).name);
 
 /** Bar and drawer links. Absolute links stay. */
 const links = computed(() => frameLinks(props.nav, { external: true }));
+/** Content bar: links and group menus. Map keeps the flat `links`. */
+const barItems = computed(() => barEntries(props.nav, { external: true }));
 /** Rail layout on phones: up to three tabs; the rest opens at the top of "Me". */
 const railSplit = computed(() => railTabs(props.nav));
 const tabs = computed(() => railSplit.value.tabs);
@@ -743,17 +747,39 @@ function railLinkClass(href: string) {
               layout === 'map' ? 'lg:self-stretch' : 'lg:items-center',
             ]"
           >
-            <a
-              v-for="link in links"
-              :key="link.href"
-              :href="link.href"
-              :aria-current="
-                isCurrentPath(link.href, pathname) ? 'page' : undefined
-              "
-              :class="barLinkClass(link.href)"
-            >
-              {{ link.name }}
-            </a>
+            <template v-if="layout === 'content'">
+              <template v-for="entry in barItems" :key="entry.name">
+                <NavGroupMenu
+                  v-if="entry.kind === 'group'"
+                  :name="entry.name"
+                  :items="entry.children"
+                  :pathname="pathname"
+                />
+                <a
+                  v-else
+                  :href="entry.href"
+                  :aria-current="
+                    isCurrentPath(entry.href, pathname) ? 'page' : undefined
+                  "
+                  :class="barLinkClass(entry.href)"
+                >
+                  {{ entry.name }}
+                </a>
+              </template>
+            </template>
+            <template v-else>
+              <a
+                v-for="link in links"
+                :key="link.href"
+                :href="link.href"
+                :aria-current="
+                  isCurrentPath(link.href, pathname) ? 'page' : undefined
+                "
+                :class="barLinkClass(link.href)"
+              >
+                {{ link.name }}
+              </a>
+            </template>
           </nav>
 
           <div class="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
@@ -839,18 +865,38 @@ function railLinkClass(href: string) {
           :aria-label="t('siteNavigation')"
           class="flex flex-col gap-1"
         >
-          <a
-            v-for="link in links"
-            :key="link.href"
-            :href="link.href"
-            :aria-current="
-              isCurrentPath(link.href, pathname) ? 'page' : undefined
-            "
-            :class="drawerLinkClass(link.href)"
-          >
-            <Icon :name="link.icon" class="size-5 shrink-0" />
-            {{ link.name }}
-          </a>
+          <template v-for="entry in barItems" :key="entry.name">
+            <template v-if="entry.kind === 'group'">
+              <p
+                class="px-3 pb-1 pt-3 text-[11px] font-semibold uppercase tracking-widest text-faint"
+              >
+                {{ entry.name }}
+              </p>
+              <a
+                v-for="child in entry.children"
+                :key="child.href"
+                :href="child.href"
+                :aria-current="
+                  isCurrentPath(child.href, pathname) ? 'page' : undefined
+                "
+                :class="drawerLinkClass(child.href)"
+              >
+                <Icon :name="child.icon" class="size-5 shrink-0" />
+                {{ child.name }}
+              </a>
+            </template>
+            <a
+              v-else
+              :href="entry.href"
+              :aria-current="
+                isCurrentPath(entry.href, pathname) ? 'page' : undefined
+              "
+              :class="drawerLinkClass(entry.href)"
+            >
+              <Icon :name="entry.icon" class="size-5 shrink-0" />
+              {{ entry.name }}
+            </a>
+          </template>
         </nav>
       </Drawer>
 

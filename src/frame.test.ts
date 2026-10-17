@@ -1,5 +1,11 @@
 import { describe, expect, test } from "bun:test";
-import { frameLinks, noAccessText, railTabs, reachableSites } from "./frame";
+import {
+  barEntries,
+  frameLinks,
+  noAccessText,
+  railTabs,
+  reachableSites,
+} from "./frame";
 import { CHROME_MESSAGES, createTranslator } from "./i18n";
 import type { NavItem } from "./nav";
 
@@ -163,5 +169,51 @@ describe("railTabs", () => {
 
   test("an empty nav", () => {
     expect(railTabs([])).toEqual({ tabs: [], overflow: [] });
+  });
+});
+
+describe("barEntries", () => {
+  const nav = [
+    { name: "Home", href: "/", icon: "home" as const },
+    {
+      name: "Services",
+      icon: "gift" as const,
+      children: [
+        { name: "Store", href: "/rewards" },
+        { name: "Draws", href: "/lottery", icon: "sparkles" as const },
+        { name: "Placeholder", href: "#" },
+      ],
+    },
+    { name: "Radar", href: "https://radar.example", icon: "mapPin" as const },
+  ];
+
+  test("keeps groups as groups, in nav order", () => {
+    const entries = barEntries(nav, { external: true });
+    expect(entries.map((e) => e.kind)).toEqual(["link", "group", "link"]);
+  });
+
+  test("a group's children take the group icon as fallback and drop # placeholders", () => {
+    const group = barEntries(nav, { external: true })[1];
+    expect(group.kind).toBe("group");
+    if (group.kind !== "group") return;
+    expect(group.children).toEqual([
+      { name: "Store", href: "/rewards", icon: "gift" },
+      { name: "Draws", href: "/lottery", icon: "sparkles" },
+    ]);
+  });
+
+  test("absolute links are dropped without external", () => {
+    expect(barEntries(nav).map((e) => e.name)).toEqual(["Home", "Services"]);
+  });
+
+  test("a group left with no children is dropped", () => {
+    const empty = [
+      {
+        name: "G",
+        icon: "gift" as const,
+        children: [{ name: "x", href: "#" }],
+      },
+    ];
+    expect(barEntries(empty)).toEqual([]);
   });
 });

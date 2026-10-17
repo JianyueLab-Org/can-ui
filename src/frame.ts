@@ -28,6 +28,8 @@ export interface FrameLink {
   icon: IconName;
 }
 
+const isAbsolute = (href: string) => /^https?:\/\//.test(href);
+
 /**
  * Nav as a flat list of links: items with an href, then each group's
  * children with the group's icon as fallback. `#` placeholders are dropped;
@@ -42,7 +44,51 @@ export function frameLinks(
     .map(({ name, href, icon }) => ({ name, href, icon }));
 }
 
-const isAbsolute = (href: string) => /^https?:\/\//.test(href);
+/** One slot of the content bar: a link, or a group that opens a menu. */
+export type BarEntry =
+  | { kind: "link"; name: string; href: string; icon: IconName }
+  | { kind: "group"; name: string; icon: IconName; children: FrameLink[] };
+
+/**
+ * Nav for the content bar: top-level links stay links, groups stay groups.
+ * Children take the group's icon as fallback. `#` placeholders, empty groups
+ * and (without `external`) absolute links are dropped.
+ */
+export function barEntries(
+  nav: readonly NavItem[],
+  options: { external?: boolean } = {},
+): BarEntry[] {
+  const keep = (href: string | undefined): href is string =>
+    !!href && href !== "#" && (options.external || !isAbsolute(href));
+  const entries: BarEntry[] = [];
+  for (const item of nav) {
+    if (item.children) {
+      const children = item.children
+        .filter((child) => keep(child.href))
+        .map((child) => ({
+          name: child.name,
+          href: child.href,
+          icon: child.icon ?? item.icon,
+        }));
+      if (children.length) {
+        entries.push({
+          kind: "group",
+          name: item.name,
+          icon: item.icon,
+          children,
+        });
+      }
+    } else if (keep(item.href)) {
+      entries.push({
+        kind: "link",
+        name: item.name,
+        href: item.href,
+        icon: item.icon,
+      });
+    }
+  }
+  return entries;
+}
 
 export type NoAccessReason =
   { kind: "rating"; required: number } | { kind: "permission"; name: string };
