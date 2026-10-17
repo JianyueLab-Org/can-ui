@@ -87,14 +87,15 @@ const props = withDefaults(
     pathname: string;
     /** The site's own nav. Bar on content/map, sidebar on tool, rail on rail. */
     nav: NavItem[];
-    /** Pinned links at the foot of the tool sidebar. */
+    /** @deprecated Ignored since 27.5.0. Pinned links at the foot of the tool sidebar. */
     secondary?: NavSecondary;
-    /** Section switcher in the tool sidebar. */
+    /** @deprecated Ignored since 27.5.0. Section switcher in the tool sidebar. */
     workspaces?: Workspace[];
+    /** @deprecated Ignored since 27.5.0. */
     activeWorkspace?: string;
     /** Signed-in member; null when signed out. */
     user?: FrameUser | null;
-    /** Links in the account menu, above sign out. */
+    /** @deprecated Ignored since 27.5.0. Links in the account menu, above sign out. */
     profileItems?: NavChild[];
     /** Signed-out button target. Absent renders no button. */
     signInHref?: string;
@@ -173,9 +174,7 @@ const paletteItems = computed<CommandItem[]>(() =>
     rating: rating.value,
     origins: props.origins,
     navigation: props.nav,
-    workspaces: props.workspaces,
-    secondary: props.secondary,
-    workspaceLabel: t("workspace.label"),
+    workspaceLabel: "",
   }),
 );
 function onSelect(item: CommandItem) {
@@ -380,6 +379,7 @@ function railLinkClass(href: string) {
           <div class="rail-item flex">
             <NetworkMenu
               :locale="locale"
+              :pathname="pathname"
               :current="current"
               :rating="rating"
               :signed-in="signedIn"
@@ -478,6 +478,7 @@ function railLinkClass(href: string) {
               :collapsed="collapsed"
               :user="user"
               :profile-items="profileItems"
+              :locale="locale"
               :after-sign-out="afterSignOut"
               :messages="messages"
               :origins="origins"
@@ -637,6 +638,7 @@ function railLinkClass(href: string) {
             <!-- 1. NetworkMenu -->
             <NetworkMenu
               :locale="locale"
+              :pathname="pathname"
               :current="current"
               :rating="rating"
               :signed-in="signedIn"
@@ -662,6 +664,7 @@ function railLinkClass(href: string) {
               variant="rail"
               :user="user"
               :profile-items="profileItems"
+              :locale="locale"
               :after-sign-out="afterSignOut"
               :messages="messages"
               :origins="origins"
@@ -716,7 +719,7 @@ function railLinkClass(href: string) {
               <Logo
                 alt="Cerulean Aviation Network"
                 :class="[
-                  'hidden w-auto sm:block',
+                  'w-auto max-sm:hidden',
                   layout === 'map' ? 'h-8' : 'h-9',
                 ]"
               />
@@ -724,6 +727,7 @@ function railLinkClass(href: string) {
           </a>
           <NetworkMenu
             :locale="locale"
+            :pathname="pathname"
             :current="current"
             :rating="rating"
             :signed-in="signedIn"
@@ -786,6 +790,7 @@ function railLinkClass(href: string) {
               v-if="user"
               :user="user"
               :profile-items="profileItems"
+              :locale="locale"
               :after-sign-out="afterSignOut"
               :messages="messages"
               :origins="origins"
@@ -825,9 +830,6 @@ function railLinkClass(href: string) {
           v-if="layout === 'tool'"
           :navigation="nav"
           :pathname="pathname"
-          :secondary="secondary"
-          :workspaces="workspaces"
-          :active-workspace="activeWorkspace"
           :workspace-label="t('workspace.label')"
           tone="sunken"
           :messages="messages"
@@ -863,9 +865,6 @@ function railLinkClass(href: string) {
             <FrameSidebar
               :navigation="nav"
               :pathname="pathname"
-              :secondary="secondary"
-              :workspaces="workspaces"
-              :active-workspace="activeWorkspace"
               :workspace-label="t('workspace.label')"
               tone="surface"
               :messages="messages"

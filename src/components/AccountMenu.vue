@@ -17,13 +17,16 @@ import { CHROME_MESSAGES, createTranslator } from "../i18n";
 import type { FrameUser } from "../frame";
 import type { NavChild } from "../nav";
 import { signOut, type AfterSignOut } from "../signOut";
+import { accountLinks } from "../networkLinks";
 import type { SiteOrigins } from "../sites";
 
 const props = withDefaults(
   defineProps<{
     user: FrameUser;
-    /** Links above sign out. */
+    /** @deprecated Ignored since 27.5.0 — the menu's links are the same on every site. */
     profileItems?: NavChild[];
+    /** Active locale code, for the fixed links. */
+    locale?: string;
     afterSignOut?: AfterSignOut;
     variant?: "bar" | "rail";
     collapsed?: boolean;
@@ -33,6 +36,7 @@ const props = withDefaults(
   }>(),
   {
     profileItems: () => [],
+    locale: "en-us",
     afterSignOut: "reload",
     variant: "bar",
     collapsed: false,
@@ -42,6 +46,7 @@ const props = withDefaults(
 );
 
 const t = createTranslator(props.messages, CHROME_MESSAGES);
+const links = computed(() => accountLinks(props.locale, props.origins));
 
 const placement = computed<"top-start" | "bottom-end">(() =>
   props.variant === "rail" ? "top-start" : "bottom-end",
@@ -125,18 +130,18 @@ async function onSignOut() {
           <p class="mt-0.5 font-mono text-xs text-faint">#{{ user.id }}</p>
         </div>
         <div class="pt-1">
-          <slot name="profileMenu">
-            <a
-              v-for="item in profileItems"
-              :key="item.href"
-              :href="item.href"
-              role="menuitem"
-              class="focus-ring tap-row flex items-center gap-2.5 rounded-control px-2.5 py-2 text-sm text-muted transition-colors hover:bg-surface-raised hover:text-ink"
-            >
-              <Icon v-if="item.icon" :name="item.icon" class="size-4" />
-              {{ item.name }}
-            </a>
-          </slot>
+          <a
+            v-for="link in links"
+            :key="link.key"
+            :href="link.href"
+            role="menuitem"
+            class="focus-ring tap-row flex items-center gap-2.5 rounded-control px-2.5 py-2 text-sm text-muted transition-colors hover:bg-surface-raised hover:text-ink"
+          >
+            <Icon :name="link.icon" class="size-4" />
+            {{ link.name }}
+          </a>
+          <!-- Site-specific controls (can-database's NAIP toggle) go after the fixed links. -->
+          <slot name="profileMenu" />
           <button
             type="button"
             role="menuitem"

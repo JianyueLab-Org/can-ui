@@ -119,6 +119,12 @@
       blur(var(--material-blur-thin));
   }
 
+  /* Numbers and identifiers — callsigns, ICAO codes, times, counts. */
+  .num {
+    font-family: var(--font-mono);
+    font-variant-numeric: tabular-nums;
+  }
+
   /* ── Vibrancy ──────────────────────────────────────────────────────────
      Text over a material sits on a background that is *changing* as content
      scrolls beneath it. Flat grey text that reads fine over a white card

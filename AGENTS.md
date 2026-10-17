@@ -72,6 +72,7 @@ src/
   assets/logo/   the identity — 12 official files + 6 generated adaptive ones
   icons.ts       the union of all six sites' icon tables, plus what the chrome needed
   i18n.ts        createTranslator, createSiteI18n, the chrome's own string keys
+  networkLinks.ts the switcher groups and the account links
   nav.ts         NavItem / NavSecondary / Workspace — the shell's data shapes
   sites.ts       the nine sites, their labels, who may see each, originsFromEnv
   sitePages.ts   every site's ⌘K pages
@@ -129,23 +130,19 @@ some vertical drift.
 
 ### Materials: never stack one on another
 
-`.material-thin` / `.material-regular` / `.material-thick` are translucent layers with a
-`backdrop-filter`. Weight encodes hierarchy — heavy separates structural regions, light floats over
-content.
+Since 27.5.0 the material tokens are opaque with no blur; the classes stay for the adoption contract.
 
-**A material must go on the page, and solid surfaces go on the material.** Two blurs of the same
-backdrop compound into mud and the text on top loses its ground. `Popover` follows this: the glass
-is the panel, and its contents are opaque.
+**A material must go on the page, and solid surfaces go on the material.** `Popover` follows this: the
+material is the panel, and its contents are opaque.
 
-Dark materials are _darker_ than the page, not lighter. A translucent white panel over a dark page
-reads as a light leak.
+Dark materials are _darker_ than the page, not lighter.
 
 ### The three accessibility preferences are three different answers
 
 - `prefers-reduced-motion` — no _vestibular_ motion, not no feedback. Springs jump to target
   (`Spring.to` checks it every call, live, not cached at import); slides become cross-fades;
   overshoot is dropped. Opacity and colour changes stay, because they carry the meaning.
-- `prefers-reduced-transparency` — materials become near-solid and the blur is dropped **entirely**.
+- `prefers-reduced-transparency` — materials become near-solid and any blur is dropped **entirely**.
   A weakened blur is the worst of both: still a GPU cost, still text on a moving background.
 - `prefers-contrast: more` — solid backgrounds and a defined border on anything that was separated
   by a tint or a shadow.
@@ -324,6 +321,9 @@ Every site renders `CanFrame` from one `src/components/Frame.vue`. It replaces `
   footer).
 - Five parts, in this order, in every layout: brand and `NetworkMenu`, ⌘K, the `notifications`
   slot, `ThemeLangControls`, `AccountMenu`.
+- `NetworkMenu` groups the network by audience (`src/networkLinks.ts`): Public, Flying, Controlling, Management, Developers. The trigger names the current page's entry.
+- `AccountMenu` shows the same links on every site (`accountLinks`): Pilot panel, Account, then the `profileMenu` slot, then Sign out.
+- `secondary`, `workspaces`, `activeWorkspace` and `profileItems` are accepted and ignored since 27.5.0. `buildWorkspaces` and `WORKSPACE_SITE_KEYS` stay exported until every site has dropped them.
 - The frame renders `<main id="main-content">`. A site does not render its own.
   The skip link targets it; every layout's `<main>` carries `.focus-ring`, so keyboard focus
   draws base.css's 2px `--color-can` outline inset by 2px, and mouse focus draws none.
@@ -364,8 +364,7 @@ Every site renders `CanFrame` from one `src/components/Frame.vue`. It replaces `
 
 27.2.0 removed `SiteHeader`, `AppShell`, `siteHeader.ts` and `headerNetworkSites`.
 
-`buildWorkspaces` in `src/nav.ts` is the section switcher for every tool-layout site. Its two
-off-main-site entries are `WORKSPACE_SITE_KEYS`; the calling site's own entry links by path.
+`buildWorkspaces` in `src/nav.ts` is deprecated; `CanFrame` no longer renders its output.
 
 `.focus-ring` (`src/styles/base.css`) draws the focus outline inside the element. Chrome controls
 inside a clipping or scrolling container carry it.
@@ -486,13 +485,8 @@ print — and they only work **inlined**: an external SVG in an `<img>` cannot i
 `currentColor`, and a CSS `mask-image` would flatten the two-tone mark to one colour. Regenerate
 them from the originals rather than editing them.
 
-> **Open question, deliberately not resolved here.** The mark's blues are `#2C5FA1` and `#47B5FA`
-> (`--color-brand-deep` / `--color-brand-sky`). The UI brand is `--color-can: #4c92c1`. These
-> are genuinely different colours. Either the mark is newer artwork and the ramp is stale, or a
-> logo is allowed to be richer than an interface colour — a logo appears at 32px on a known
-> background, while `--color-can` carries buttons, focus rings and link text at every size on
-> every surface in both themes. That is a brand decision, not a refactor. **Until it is made: UI
-> uses `can`, the mark uses its own two. Do not change one to match the other in passing.**
+> **Brand colour.** The UI brand is the logo's sky blue: `--color-can` is `#47b5fa` in dark and `#1a73b5` in light. `src/tokens.test.ts` checks AA contrast on every page surface.
+> Text on `bg-can` uses `--color-on-can` (`text-on-can`): white in light, #0b0f14 in dark.
 
 **A question of naming.** These components dropped the `Base` prefix (`BaseButton` → `Button`).
 Inside a site's own `components/ui/` the prefix disambiguated a design-system button from a page
