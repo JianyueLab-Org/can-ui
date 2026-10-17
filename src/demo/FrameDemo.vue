@@ -10,15 +10,11 @@ import CanFrame from "../components/CanFrame.vue";
 import NoAccess from "../components/NoAccess.vue";
 import { NOTIFICATION_FETCH_KEY } from "../composables/useNotifications";
 import type { FrameLayout, FrameUser } from "../frame";
-import type { NavChild, NavItem, Workspace } from "../nav";
+import type { NavItem } from "../nav";
 import type { NotificationItem } from "../notifications";
 
 type BellMode = "on" | "empty" | "off";
 const BELL_MODES: BellMode[] = ["on", "empty", "off"];
-
-const profileItems: NavChild[] = [
-  { name: "账号", href: "#account", icon: "userCircle" },
-];
 
 const LAYOUTS: FrameLayout[] = ["content", "tool", "rail", "map"];
 
@@ -197,12 +193,6 @@ const nav: NavItem[] = [
   },
 ];
 
-const workspaces: Workspace[] = [
-  { key: "pilots", name: "机组", href: "#pilots", icon: "paperAirplane" },
-  { key: "controllers", name: "管制", href: "/frame", icon: "signal" },
-  { key: "exams", name: "考试", href: "#exams", icon: "academicCap" },
-];
-
 const messages = {
   skipToContent: "跳到主要内容",
   signIn: "登录",
@@ -254,10 +244,7 @@ function href(next: {
     locale="zh-cn"
     pathname="/frame"
     :nav="nav"
-    :workspaces="workspaces"
-    active-workspace="controllers"
     :user="user"
-    :profile-items="profileItems"
     sign-in-href="#signin"
     after-sign-out="reload"
     :messages="messages"

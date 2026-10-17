@@ -53,21 +53,10 @@
   --color-can-800: #0e3a5c;
   --color-can-900: #0b2c45;
 
-  /* ── The logo's two blues ──────────────────────────────────────────────
-     These are the colours in the mark itself (src/assets/logo), and they are
-     **not** the same as `--color-can` above. The UI brand is #4c92c1;
-     the mark is #2C5FA1 and #47B5FA — a deeper blue and a brighter sky blue.
-
-     They are recorded separately rather than reconciled, because reconciling
-     them is a brand decision and not a refactor. One of two things is true and
-     only the people who own the identity can say which: either the mark is the
-     newer artwork and the UI ramp is stale, or the mark is deliberately richer
-     than an interface colour is allowed to be — a logo is seen at 32px against
-     a known background, while `--color-can` has to carry buttons, focus
-     rings and link text at every size against every surface, in both themes.
-
-     Until that is decided: **use `--color-can` for UI and these two for
-     the mark only.** Do not "fix" one to match the other in passing. */
+  /* ── The logo's blues ─────────────────────────────────────────────────
+     The UI brand is the logo's sky blue: `--color-can` is #47b5fa in dark
+     and #1a73b5 in light. The mark keeps #2c5fa1 and #47b5fa.
+     Use `--color-can` for UI and these two for the mark only. */
   --color-brand-deep: #2c5fa1;
   --color-brand-sky: #47b5fa;
 
@@ -231,7 +220,7 @@
   --material-edge: #1e2832;
 
   /* Elevation in the dark is carried by the surface stepping lighter, not by
-     a shadow nobody can see against #0d1219 — but the shadow still separates
+     a shadow nobody can see against #0b0f14 — but the shadow still separates
      a floating pane from the content directly under it, so it stays, deeper
      and softer. */
   --shadow-card: 0 1px 2px 0 rgb(0 0 0 / 0.4), 0 1px 3px 0 rgb(0 0 0 / 0.3);
