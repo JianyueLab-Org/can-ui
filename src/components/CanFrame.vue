@@ -719,7 +719,7 @@ function railLinkClass(href: string) {
               <Logo
                 alt="Cerulean Aviation Network"
                 :class="[
-                  'hidden w-auto sm:block',
+                  'w-auto max-sm:hidden',
                   layout === 'map' ? 'h-8' : 'h-9',
                 ]"
               />
