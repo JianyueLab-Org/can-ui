@@ -58,12 +58,23 @@ describe("brand", () => {
   });
 
   test("brand text reaches AA on every page surface", () => {
-    for (const surface of ["surface", "background"]) {
+    for (const surface of ["surface", "background", "surface-sunken"]) {
       expect(
         contrast(light("color-can"), light(surface)),
       ).toBeGreaterThanOrEqual(4.5);
       expect(
         contrast(darkValue("color-can"), darkValue(surface)),
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  test("text on the brand fill reaches AA, both themes", () => {
+    for (const fill of ["color-can", "color-can-dark"]) {
+      expect(
+        contrast(light("color-on-can"), light(fill)),
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrast(darkValue("color-on-can"), darkValue(fill)),
       ).toBeGreaterThanOrEqual(4.5);
     }
   });

@@ -132,16 +132,10 @@ some vertical drift.
 
 Since 27.5.0 the material tokens are opaque with no blur; the classes stay for the adoption contract.
 
-Before 27.5.0 `.material-thin` / `.material-regular` / `.material-thick` were translucent layers
-with a `backdrop-filter`. Weight encodes hierarchy — heavy separates structural regions, light floats over
-content.
-
-**A material must go on the page, and solid surfaces go on the material.** Before 27.5.0 two blurs of the same
-backdrop compounded into mud and the text on top lost its ground. `Popover` follows this: the
+**A material must go on the page, and solid surfaces go on the material.** `Popover` follows this: the
 material is the panel, and its contents are opaque.
 
-Dark materials are _darker_ than the page, not lighter. Before 27.5.0 a translucent white panel
-over a dark page read as a light leak.
+Dark materials are _darker_ than the page, not lighter.
 
 ### The three accessibility preferences are three different answers
 
@@ -492,6 +486,7 @@ print — and they only work **inlined**: an external SVG in an `<img>` cannot i
 them from the originals rather than editing them.
 
 > **Brand colour.** The UI brand is the logo's sky blue: `--color-can` is `#47b5fa` in dark and `#1a73b5` in light. `src/tokens.test.ts` checks AA contrast on every page surface.
+> Text on `bg-can` uses `--color-on-can` (`text-on-can`): white in light, #0b0f14 in dark.
 
 **A question of naming.** These components dropped the `Base` prefix (`BaseButton` → `Button`).
 Inside a site's own `components/ui/` the prefix disambiguated a design-system button from a page
