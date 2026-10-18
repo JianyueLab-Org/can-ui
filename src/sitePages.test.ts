@@ -106,3 +106,39 @@ describe("SITE_PAGES.web", () => {
     expect(byKey.get("roster")?.signedIn).toBe(true);
   });
 });
+
+describe("spec nav order", () => {
+  const paths = (key: keyof typeof SITE_PAGES) =>
+    SITE_PAGES[key].map((page) => page.path);
+
+  test("efb lists its five nav items, settings last", () => {
+    expect(paths("efb")).toEqual([
+      "/",
+      "/flightplan",
+      "/route",
+      "/airports",
+      "/settings",
+    ]);
+  });
+
+  test("controller lists reservations before rules", () => {
+    expect(paths("controller")).toEqual([
+      "/",
+      "/atis",
+      "/reservations",
+      "/rules",
+    ]);
+  });
+
+  test("exam lists training after the exam centre", () => {
+    expect(paths("exam")).toEqual(["/", "/training", "/admin"]);
+  });
+
+  test("portal lists points adjustment between lottery and feedback", () => {
+    const keys = SITE_PAGES.portal.map((page) => page.key);
+    const at = keys.indexOf("pointsManage");
+    expect(keys[at - 1]).toBe("lotteryManage");
+    expect(keys[at + 1]).toBe("feedbackManage");
+    expect(SITE_PAGES.portal[at]?.minRating).toBe(RATING_SUP);
+  });
+});
