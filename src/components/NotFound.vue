@@ -61,7 +61,7 @@ const VARIANT_CLASS = {
     <div class="animate-fade-up relative mx-auto max-w-xl text-center">
       <p
         aria-hidden="true"
-        class="text-[7rem] font-bold leading-none tracking-tighter text-can/20 sm:text-[10rem]"
+        class="font-mono text-[7rem] font-bold leading-none tracking-tighter text-can/20 sm:text-[10rem]"
       >
         {{ t("notFound.code") }}
       </p>
