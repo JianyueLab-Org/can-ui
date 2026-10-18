@@ -1,7 +1,7 @@
 <script setup lang="ts">
 /**
  * CanFrame in each layout. Query: `layout`, `signedIn`, `denied`,
- * `bell` (`on` · `empty` · `off`).
+ * `bell` (`on` · `empty` · `off`), `rail` (`1`, map only).
  * Mounted client-only: the layout comes from the URL.
  * The bell reads fixtures through NOTIFICATION_FETCH_KEY: 8 rows, 5 per page.
  */
@@ -22,6 +22,7 @@ const layout = ref<FrameLayout>("content");
 const signedIn = ref(true);
 const denied = ref(false);
 const bell = ref<BellMode>("on");
+const rail = ref(false);
 
 onMounted(() => {
   const params = new URLSearchParams(window.location.search);
@@ -31,6 +32,7 @@ onMounted(() => {
   }
   signedIn.value = params.get("signedIn") !== "0";
   denied.value = params.get("denied") === "1";
+  rail.value = params.get("rail") === "1";
   const mode = params.get("bell");
   if (mode && (BELL_MODES as string[]).includes(mode)) {
     bell.value = mode as BellMode;
@@ -224,6 +226,7 @@ function href(next: {
   signedIn?: boolean;
   denied?: boolean;
   bell?: BellMode;
+  rail?: boolean;
 }): string {
   const params = new URLSearchParams({
     layout: next.layout ?? layout.value,
@@ -231,14 +234,16 @@ function href(next: {
     denied: (next.denied ?? denied.value) ? "1" : "0",
     bell: next.bell ?? bell.value,
   });
+  if (next.rail ?? rail.value) params.set("rail", "1");
   return `/frame?${params.toString()}`;
 }
 </script>
 
 <template>
   <CanFrame
-    :key="`${layout}-${bell}`"
+    :key="`${layout}-${bell}-${rail}`"
     :layout="layout"
+    :rail="rail"
     :notifications="bell !== 'off'"
     current="controller"
     locale="zh-cn"
@@ -254,7 +259,7 @@ function href(next: {
         layout === 'rail'
           ? 'min-h-dvh pb-[calc(var(--tabbar-height)+env(safe-area-inset-bottom))] md:pb-0 md:pl-[var(--rail-current)]'
           : layout === 'map'
-            ? 'h-full overflow-auto bg-surface-sunken'
+            ? 'surface-grid h-full overflow-auto bg-surface-sunken'
             : ''
       "
     >
@@ -286,6 +291,15 @@ function href(next: {
             {{ option }}
           </a>
         </div>
+        <div v-if="layout === 'map'" class="flex flex-wrap gap-2">
+          <a
+            :href="href({ rail: !rail })"
+            :aria-current="rail ? 'true' : undefined"
+            class="btn btn-ghost px-3 py-1.5 text-sm aria-[current]:text-can"
+          >
+            {{ rail ? "地图（无轨）" : "地图 + 轨" }}
+          </a>
+        </div>
         <div class="flex flex-wrap gap-2">
           <a
             :href="href({ signedIn: !signedIn })"
@@ -314,6 +328,20 @@ function href(next: {
         </div>
         <p v-for="n in 30" :key="n" class="text-sm text-faint">
           占位段落 {{ n }}，用于检查滚动与页脚。
+        </p>
+      </div>
+      <!-- A floating panel, placed the way can-efb places its own. -->
+      <div
+        v-if="layout === 'map'"
+        class="card fixed z-20 hidden w-56 p-4 shadow-card md:block"
+        style="
+          top: calc(var(--frame-top) + 12px);
+          left: calc(var(--rail-current) + 12px);
+        "
+      >
+        <p class="text-sm font-semibold text-ink">浮动面板</p>
+        <p class="mt-1 text-xs text-muted">
+          top = --frame-top + 12px，left = --rail-current + 12px。
         </p>
       </div>
     </div>
