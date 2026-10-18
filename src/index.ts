@@ -53,6 +53,7 @@ export { default as Popover } from "./components/Popover.vue";
 export { default as CanFrame } from "./components/CanFrame.vue";
 export { default as AccountMenu } from "./components/AccountMenu.vue";
 export { default as NoAccess } from "./components/NoAccess.vue";
+export { default as NotFound } from "./components/NotFound.vue";
 export { default as SidebarNav } from "./components/SidebarNav.vue";
 export { default as CommandPalette } from "./components/CommandPalette.vue";
 export { default as ThemeLangControls } from "./components/ThemeLangControls.vue";
@@ -133,6 +134,15 @@ export {
   type NotificationUi,
   type RenderNotificationOptions,
 } from "./notificationMessages";
+export {
+  NOT_FOUND_UI,
+  notFoundLinks,
+  notFoundText,
+  type NotFoundLink,
+  type NotFoundLinkKey,
+  type NotFoundLinksOptions,
+  type NotFoundUi,
+} from "./notFound";
 export {
   POLL_INTERVAL_MS,
   BACKOFF_INTERVAL_MS,
