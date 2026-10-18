@@ -318,10 +318,9 @@ const rootClass = computed(() => [
 ]);
 
 const BAR_CLASS: Record<FrameLayout, string> = {
-  content:
-    "mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8",
-  tool: "flex h-16 items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8",
-  map: "flex h-14 items-center gap-2 px-2 sm:px-4",
+  content: "page-gutter flex h-16 items-center gap-2 sm:gap-3",
+  tool: "page-gutter flex h-16 items-center gap-2 sm:gap-3",
+  map: "page-gutter flex h-14 items-center gap-2 sm:gap-3",
   rail: "",
 };
 
@@ -969,7 +968,7 @@ function railLinkClass(href: string) {
             tabindex="-1"
             class="focus-ring flex-1 py-8 focus:outline-none lg:py-10"
           >
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="page-gutter">
               <slot />
             </div>
           </main>

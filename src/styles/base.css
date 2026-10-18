@@ -8,6 +8,23 @@
 @custom-variant dark (&:where(.dark, .dark *));
 
 @layer utilities {
+  /* ── Page gutter ───────────────────────────────────────────────────── */
+  /* The frame's horizontal gutter: 1rem, 1.5rem from sm, 2rem from lg.
+     Pages are full-width; they use this, not a max-width container. */
+  .page-gutter {
+    padding-inline: 1rem;
+  }
+  @media (min-width: 40rem) {
+    .page-gutter {
+      padding-inline: 1.5rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    .page-gutter {
+      padding-inline: 2rem;
+    }
+  }
+
   /* ── Brand ─────────────────────────────────────────────────────────── */
   .bg-can {
     background-color: var(--color-can);

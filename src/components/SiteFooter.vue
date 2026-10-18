@@ -104,9 +104,7 @@ const columns = computed(() =>
 
 <template>
   <footer v-if="compact" class="border-t border-subtle">
-    <div
-      class="mx-auto flex max-w-7xl flex-wrap items-center gap-x-4 gap-y-1 px-4 py-4 sm:px-6 lg:px-8"
-    >
+    <div class="page-gutter flex flex-wrap items-center gap-x-4 gap-y-1 py-4">
       <slot name="services" />
       <a
         v-for="link in community"
@@ -123,7 +121,7 @@ const columns = computed(() =>
   </footer>
 
   <footer v-else class="border-t border-subtle bg-surface-sunken">
-    <div class="mx-auto max-w-7xl px-4 pb-10 pt-16 sm:px-6 lg:px-8 lg:pt-20">
+    <div class="page-gutter pb-10 pt-16 lg:pt-20">
       <div class="grid gap-12 lg:grid-cols-3 lg:gap-8">
         <div class="max-w-sm space-y-6">
           <img

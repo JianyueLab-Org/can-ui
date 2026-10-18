@@ -63,7 +63,7 @@ const messages = {
       390px screen and only actually scroll on a 320px one.
     -->
     <header
-      class="material-thin material-edge-bottom sticky top-0 z-30 flex items-center gap-2 px-4 py-2 sm:gap-4 sm:px-8 sm:py-3"
+      class="material-thin material-edge-bottom page-gutter sticky top-0 z-30 flex items-center gap-2 py-2 sm:gap-4 sm:py-3"
     >
       <a href="/" class="flex shrink-0 items-center gap-2">
         <LogoMark class="size-8 shrink-0" />
@@ -98,11 +98,11 @@ const messages = {
       <ThemeToggle client:load messages={messages} />
     </header>
 
-    <main id="main" class="mx-auto max-w-5xl px-4 py-10 sm:px-8">
+    <main id="main" class="page-gutter py-10">
       <slot />
     </main>
 
-    <footer class="mx-auto max-w-5xl px-4 pb-16 sm:px-8">
+    <footer class="page-gutter pb-16">
       <p class="text-caption text-faint">
         can-ui · Cerulean Aviation Network 设计系统 · 本页即是它的可交互样张
       </p>

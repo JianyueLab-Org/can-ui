@@ -278,7 +278,7 @@ function href(next: {
         </template>
       </NoAccess>
 
-      <div v-else class="mx-auto flex max-w-3xl flex-col gap-6 px-4 py-10">
+      <div v-else class="page-gutter flex flex-col gap-6 py-10">
         <h1 class="text-2xl font-semibold text-ink">CanFrame · {{ layout }}</h1>
         <p class="text-muted">按 ⌘K 或 Ctrl+K 打开快速跳转。</p>
         <div class="flex flex-wrap gap-2">
