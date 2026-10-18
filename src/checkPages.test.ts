@@ -60,14 +60,20 @@ describe("routeMatches", () => {
 
 describe("missingPages", () => {
   test("exam with both routes is complete", () => {
-    expect(missingPages("exam", ["index.astro", "admin/index.astro"])).toEqual(
-      [],
-    );
+    expect(
+      missingPages("exam", [
+        "index.astro",
+        "admin/index.astro",
+        "training/index.astro",
+      ]),
+    ).toEqual([]);
   });
 
   test("exam without /admin is missing questionBank", () => {
     expect(
-      missingPages("exam", ["index.astro"]).map((page) => page.key),
+      missingPages("exam", ["index.astro", "training/index.astro"]).map(
+        (page) => page.key,
+      ),
     ).toEqual(["questionBank"]);
   });
 });
@@ -82,6 +88,7 @@ describe("listPageFiles", () => {
       "docs/[...path].astro",
       "index.astro",
       "pilots/index.astro",
+      "training/index.astro",
     ]);
   });
 });
@@ -91,7 +98,7 @@ describe("runCheckPages", () => {
     const r = recorder();
     expect(runCheckPages(["exam", FIXTURE], "/", r.logger)).toBe(0);
     expect(r.err).toEqual([]);
-    expect(r.out[0]).toContain("2 exam pages");
+    expect(r.out[0]).toContain("3 exam pages");
   });
 
   test("exit 1 and one line per missing page", () => {
