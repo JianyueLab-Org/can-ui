@@ -324,8 +324,9 @@ Since 27.7.0:
 - `layout="map"` takes `rail` (default false): an icon rail under the bar from 768px, the drawer below 768px. The bar shows no site nav links when `rail` is set.
 - `layout="rail"` is deprecated. Use `layout="map"` with `rail`.
 - The map root carries `.frame-map` or `.frame-map-rail`. Both set `--frame-top` (the bar height), `--rail-current` and `--tabbar-height` for fixed-position pages. With `rail`, `--rail-current` is `--map-rail-width` from 768px and 0 below; otherwise 0.
-- `frame.css` adds `--frame-bar-height` (3.5rem) and `--map-rail-width` (3.5rem).
-- Pages are full-width; use the frame gutter, no max-width container. The frame has no max-width cap: content, tool and map bars, the tool `<main>` and `SiteFooter` all use `.page-gutter` (`px-4 sm:px-6 lg:px-8`, in `base.css`). The content `<main>` adds no gutter; a page there puts `.page-gutter` on its own sections.
+- `frame.css` adds `--frame-bar-height` (3.5rem plus the 1px border) and `--map-rail-width` (3.5rem). The map vars are set on the frame root and on `:root` while a map frame is on the page.
+- With `rail`, in-flow content in `<main>` is already offset by the rail. Fixed or absolute content adds `--rail-current`. Never both.
+- Pages are full-width; use the frame gutter, no max-width container. The frame has no max-width cap: content, tool and map bars, the tool `<main>` and `SiteFooter` all use `.page-gutter` (`px-4 sm:px-6 lg:px-8`, in `components.css`, so a utility overrides it). A site that upgrades drops its own `mx-auto max-w-*` page containers and uses `.page-gutter`. The content `<main>` adds no gutter; a page there puts `.page-gutter` on its own sections.
 - `NotFound` is the network's 404 page, rendered inside the frame. The site sets HTTP 404. Strings come from `NOT_FOUND_UI` (four locales), overridable through `messages.notFound.*`. Links: this site's `homeHref`, the radar and the docs via `siteUrl`, minus the current site. Slots: `backdrop`, `actions`.
 - `sitePages.ts`: efb `/settings`, exam `/training`, portal `/super/points`; controller lists reservations before rules.
 

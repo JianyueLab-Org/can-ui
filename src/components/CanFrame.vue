@@ -98,7 +98,10 @@ const props = withDefaults(
      * use `layout="map"` with `rail`) the side rail.
      */
     nav: NavItem[];
-    /** Icon rail for the site's nav. Only with `layout="map"`. */
+    /**
+     * Icon rail for the site's nav. Only with `layout="map"`. Give every
+     * rail link its own icon; a group's children otherwise share the group's.
+     */
     rail?: boolean;
     /** @deprecated Ignored since 27.5.0. Pinned links at the foot of the tool sidebar. */
     secondary?: NavSecondary;
@@ -375,13 +378,22 @@ function mapRailLinkClass(href: string) {
   ];
 }
 
-/** Map rail: a divider before a group and before the item after one. */
-function mapRailDivider(index: number): boolean {
-  if (index === 0) return false;
-  return (
-    props.nav[index]?.children != null || props.nav[index - 1]?.children != null
-  );
-}
+/** Map rail: nav entries with at least one link; a divider before a group
+    and before the entry after one. */
+const mapRailEntries = computed(() =>
+  props.nav
+    .map((item) => ({
+      item,
+      links: frameLinks([item], { external: true }),
+    }))
+    .filter((entry) => entry.links.length > 0)
+    .map((entry, index, all) => ({
+      ...entry,
+      divider:
+        index > 0 &&
+        (entry.item.children != null || all[index - 1]?.item.children != null),
+    })),
+);
 
 function railLinkClass(href: string) {
   return [
@@ -987,14 +999,14 @@ function railLinkClass(href: string) {
             :aria-label="t('siteNavigation')"
             class="flex grow flex-col items-center gap-y-1 overflow-y-auto overscroll-contain px-2 py-2"
           >
-            <template v-for="(item, index) in nav" :key="item.name">
+            <template v-for="entry in mapRailEntries" :key="entry.item.name">
               <span
-                v-if="mapRailDivider(index)"
+                v-if="entry.divider"
                 class="my-1 h-px w-6 shrink-0 bg-[var(--border-subtle)]"
                 aria-hidden="true"
               ></span>
               <a
-                v-for="link in frameLinks([item], { external: true })"
+                v-for="link in entry.links"
                 :key="link.href"
                 :href="link.href"
                 :title="link.name"

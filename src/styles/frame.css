@@ -126,10 +126,15 @@
    =========================================================================== */
 
 :root {
-  --frame-bar-height: 3.5rem;
+  /* h-14 plus the bar's 1px bottom border. */
+  --frame-bar-height: calc(3.5rem + 1px);
   --map-rail-width: 3.5rem;
 }
 
+/* On the frame root for its descendants, and on :root for content rendered
+   outside the frame (a sibling map stage, a teleported overlay). */
+:root:has(.frame-map),
+:root:has(.frame-map-rail),
 .frame-map,
 .frame-map-rail {
   --rail-current: 0px;
@@ -138,6 +143,7 @@
 }
 
 @media (min-width: 768px) {
+  :root:has(.frame-map-rail),
   .frame-map-rail {
     --rail-current: var(--map-rail-width);
   }
