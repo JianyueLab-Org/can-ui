@@ -1,13 +1,14 @@
 <script setup lang="ts">
 /**
  * CanFrame in each layout. Query: `layout`, `signedIn`, `denied`,
- * `bell` (`on` · `empty` · `off`), `rail` (`1`, map only).
+ * `bell` (`on` · `empty` · `off`), `rail` (`1`, map only), `notFound` (`1`).
  * Mounted client-only: the layout comes from the URL.
  * The bell reads fixtures through NOTIFICATION_FETCH_KEY: 8 rows, 5 per page.
  */
 import { computed, onMounted, provide, ref } from "vue";
 import CanFrame from "../components/CanFrame.vue";
 import NoAccess from "../components/NoAccess.vue";
+import NotFound from "../components/NotFound.vue";
 import { NOTIFICATION_FETCH_KEY } from "../composables/useNotifications";
 import type { FrameLayout, FrameUser } from "../frame";
 import type { NavItem } from "../nav";
@@ -23,6 +24,7 @@ const signedIn = ref(true);
 const denied = ref(false);
 const bell = ref<BellMode>("on");
 const rail = ref(false);
+const notFound = ref(false);
 
 onMounted(() => {
   const params = new URLSearchParams(window.location.search);
@@ -33,6 +35,7 @@ onMounted(() => {
   signedIn.value = params.get("signedIn") !== "0";
   denied.value = params.get("denied") === "1";
   rail.value = params.get("rail") === "1";
+  notFound.value = params.get("notFound") === "1";
   const mode = params.get("bell");
   if (mode && (BELL_MODES as string[]).includes(mode)) {
     bell.value = mode as BellMode;
@@ -227,6 +230,7 @@ function href(next: {
   denied?: boolean;
   bell?: BellMode;
   rail?: boolean;
+  notFound?: boolean;
 }): string {
   const params = new URLSearchParams({
     layout: next.layout ?? layout.value,
@@ -235,6 +239,7 @@ function href(next: {
     bell: next.bell ?? bell.value,
   });
   if (next.rail ?? rail.value) params.set("rail", "1");
+  if (next.notFound ?? notFound.value) params.set("notFound", "1");
   return `/frame?${params.toString()}`;
 }
 </script>
@@ -278,6 +283,17 @@ function href(next: {
         </template>
       </NoAccess>
 
+      <NotFound v-else-if="notFound" current="controller" locale="zh-cn">
+        <template #actions>
+          <a
+            :href="href({ notFound: false })"
+            class="btn btn-ghost px-5 py-2.5"
+          >
+            返回样张
+          </a>
+        </template>
+      </NotFound>
+
       <div v-else class="page-gutter flex flex-col gap-6 py-10">
         <h1 class="text-2xl font-semibold text-ink">CanFrame · {{ layout }}</h1>
         <p class="text-muted">按 ⌘K 或 Ctrl+K 打开快速跳转。</p>
@@ -312,6 +328,12 @@ function href(next: {
             class="btn btn-ghost px-3 py-1.5 text-sm"
           >
             {{ denied ? "关闭无权限页" : "显示无权限页" }}
+          </a>
+          <a
+            :href="href({ notFound: true, denied: false })"
+            class="btn btn-ghost px-3 py-1.5 text-sm"
+          >
+            显示 404 页
           </a>
         </div>
         <div class="flex flex-wrap items-center gap-2">
