@@ -68,7 +68,7 @@ src/
   styles/        tokens.css · base.css · components.css · frame.css · motion.css → index.css
   motion/        the spring engine, momentum projection, gesture tracking
   composables/   useOverlay · usePress · usePreferences · useTheme · useNotifications · haptics
-  components/    41 Vue components + ThemeScript.astro + RailScript.astro
+  components/    43 Vue components + ThemeScript.astro + RailScript.astro
   assets/logo/   the identity — 12 official files + 6 generated adaptive ones
   icons.ts       the union of all six sites' icon tables, plus what the chrome needed
   i18n.ts        createTranslator, createSiteI18n, the chrome's own string keys
@@ -82,6 +82,7 @@ src/
   notificationPoller.ts    the bell's requests and polling loop
   popoverPosition.ts       Popover placement, flip and clamp
   palette.ts     ⌘K items and the matcher
+  notFound.ts    NotFound's strings and links
   frame.ts       CanFrame's pure helpers
   rail.ts        the rail's data-rail state
   signOut.ts     the sign-out request
@@ -318,9 +319,19 @@ Every site renders `CanFrame` from one `src/components/Frame.vue`. It replaces `
 
 Since 27.6.0: the content bar opens a nav group (an item with children and no href) as a menu.
 
+Since 27.7.0:
+
+- `layout="map"` takes `rail` (default false): an icon rail under the bar from 768px, the drawer below 768px. The bar shows no site nav links when `rail` is set.
+- `layout="rail"` is deprecated. Use `layout="map"` with `rail`.
+- The map root carries `.frame-map` or `.frame-map-rail`. Both set `--frame-top` (the bar height), `--rail-current` and `--tabbar-height` for fixed-position pages. With `rail`, `--rail-current` is `--map-rail-width` from 768px and 0 below; otherwise 0.
+- `frame.css` adds `--frame-bar-height` (3.5rem) and `--map-rail-width` (3.5rem).
+- Pages are full-width; use the frame gutter, no max-width container. The frame has no max-width cap: content, tool and map bars, the tool `<main>` and `SiteFooter` all use `.page-gutter` (`px-4 sm:px-6 lg:px-8`, in `base.css`). The content `<main>` adds no gutter; a page there puts `.page-gutter` on its own sections.
+- `NotFound` is the network's 404 page, rendered inside the frame. The site sets HTTP 404. Strings come from `NOT_FOUND_UI` (four locales), overridable through `messages.notFound.*`. Links: this site's `homeHref`, the radar and the docs via `siteUrl`, minus the current site. Slots: `backdrop`, `actions`.
+- `sitePages.ts`: efb `/settings`, exam `/training`, portal `/super/points`; controller lists reservations before rules.
+
 - `layout`: `content` (top bar, own nav, full `SiteFooter`), `tool` (top bar, sidebar below it,
-  compact footer), `rail` (side rail, bottom tabs under 768px), `map` (56px bar, full-bleed, no
-  footer).
+  compact footer), `map` (56px bar, full-bleed, no footer, optional icon rail with `rail`), and
+  the deprecated `rail` (side rail, bottom tabs under 768px).
 - Five parts, in this order, in every layout: brand and `NetworkMenu`, ⌘K, the `notifications`
   slot, `ThemeLangControls`, `AccountMenu`.
 - `NetworkMenu` groups the network by audience (`src/networkLinks.ts`): Public, Flying, Controlling, Management, Developers. The trigger names the current page's entry.
@@ -455,7 +466,7 @@ links point at other sites' dev origins instead of production.
 
 ### Still not here
 
-**`AppRail`** is `CanFrame layout="rail"` now.
+**`AppRail`** is `CanFrame layout="map"` with `rail` now (`layout="rail"` is deprecated).
 
 **Toasts.** Feedback comes in four kinds and this system covers three; there is no transient
 "completion" surface yet. `AlertBox` occupies the space in the meantime.
@@ -528,7 +539,7 @@ needed: `astro check` diagnoses `.astro` and `.ts` and _silently ignores `.vue`_
 `bun test` covers the pure modules: `src/motion/spring.ts`, `src/sites.ts`, `src/sitePages.ts`,
 `src/nav.ts`, `src/i18n.ts`, `src/palette.ts`, `src/frame.ts`,
 `src/rail.ts`, `src/signOut.ts`, `src/checkPages.ts`, `src/popoverPosition.ts`,
-`src/notifications.ts`, `src/notificationMessages.ts`, `src/notificationPoller.ts` and
+`src/notifications.ts`, `src/notificationMessages.ts`, `src/notificationPoller.ts`, `src/notFound.ts` and
 `src/composables/useNotifications.ts`. Each can be wrong with nothing on screen looking wrong.
 Components have no test stack; they are covered by the type gate, the build and the gallery.
 
