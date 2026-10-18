@@ -68,6 +68,18 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
       keywords: ["charts", "atis"],
       signedIn: true,
     },
+    {
+      key: "settings",
+      path: "/settings",
+      icon: "cog6Tooth",
+      title: {
+        "zh-cn": "设置",
+        "zh-tw": "設定",
+        "en-us": "Settings",
+        "ja-jp": "設定",
+      },
+      signedIn: true,
+    },
   ],
   radar: [
     {
@@ -109,18 +121,6 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
       signedIn: true,
     },
     {
-      key: "rules",
-      path: "/rules",
-      icon: "documentText",
-      title: {
-        "zh-cn": "管制规则",
-        "zh-tw": "管制規則",
-        "en-us": "ATC Rules",
-        "ja-jp": "管制規則",
-      },
-      signedIn: true,
-    },
-    {
       key: "reservations",
       path: "/reservations",
       icon: "calendarDays",
@@ -131,6 +131,18 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
         "ja-jp": "管制予約",
       },
       keywords: ["booking"],
+      signedIn: true,
+    },
+    {
+      key: "rules",
+      path: "/rules",
+      icon: "documentText",
+      title: {
+        "zh-cn": "管制规则",
+        "zh-tw": "管制規則",
+        "en-us": "ATC Rules",
+        "ja-jp": "管制規則",
+      },
       signedIn: true,
     },
   ],
@@ -146,6 +158,18 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
         "ja-jp": "試験センター",
       },
       keywords: ["exam", "test"],
+    },
+    {
+      key: "training",
+      path: "/training",
+      icon: "bookOpen",
+      title: {
+        "zh-cn": "培训资料",
+        "zh-tw": "培訓資料",
+        "en-us": "Training materials",
+        "ja-jp": "訓練資料",
+      },
+      keywords: ["syllabus"],
     },
     {
       key: "questionBank",
@@ -238,6 +262,19 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
         "zh-tw": "抽獎管理",
         "en-us": "Lottery",
         "ja-jp": "抽選管理",
+      },
+      minRating: RATING_SUP,
+      signedIn: true,
+    },
+    {
+      key: "pointsManage",
+      path: "/super/points",
+      icon: "adjustments",
+      title: {
+        "zh-cn": "积分调整",
+        "zh-tw": "積分調整",
+        "en-us": "Points adjustment",
+        "ja-jp": "ポイント調整",
       },
       minRating: RATING_SUP,
       signedIn: true,

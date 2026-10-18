@@ -6,11 +6,15 @@
  *
  * - `content` — sticky top bar with the site's own nav, the page, `SiteFooter`.
  * - `tool` — top bar, the site's sidebar below it, compact footer.
- * - `rail` — collapsible side rail; under 768px bottom tabs, ending in ⌘K and
+ * - `map` — 56px top bar over full-bleed content, no footer. With `rail`,
+ *   the site's nav is an icon rail below the bar from 768px and the drawer
+ *   under it; the bar carries no site links. Fixed-position panels clear the
+ *   frame with `--frame-top` and `--rail-current` (`frame.css`).
+ * - `rail` — deprecated since 27.7.0; use `layout="map"` with `rail`.
+ *   Collapsible side rail; under 768px bottom tabs, ending in ⌘K and
  *   a "Me" tab whose sheet holds the other frame parts. State is
  *   `<html data-rail>`; put `RailScript.astro` in `<head>`. The rail does not
  *   offset the page; the site uses `--rail-current`.
- * - `map` — 56px top bar over full-bleed content, no footer.
  *
  * Every layout carries five parts in this order: brand and `NetworkMenu`, the
  * ⌘K trigger, the `notifications` slot, `ThemeLangControls`, `AccountMenu`.
@@ -80,6 +84,7 @@ import { siteLabel, type SiteKey, type SiteOrigins } from "../sites";
 
 const props = withDefaults(
   defineProps<{
+    /** `content`, `tool` or `map`. `rail` is deprecated since 27.7.0; use `layout="map"` with `rail`. */
     layout: FrameLayout;
     /** The site rendering this. */
     current: SiteKey;
@@ -87,8 +92,17 @@ const props = withDefaults(
     locale: string;
     /** Current path — `Astro.url.pathname`. */
     pathname: string;
-    /** The site's own nav. Bar on content/map, sidebar on tool, rail on rail. */
+    /**
+     * The site's own nav. Bar on content and map, icon rail on map with
+     * `rail`, sidebar on tool. On `layout="rail"` (deprecated since 27.7.0;
+     * use `layout="map"` with `rail`) the side rail.
+     */
     nav: NavItem[];
+    /**
+     * Icon rail for the site's nav. Only with `layout="map"`. Give every
+     * rail link its own icon; a group's children otherwise share the group's.
+     */
+    rail?: boolean;
     /** @deprecated Ignored since 27.5.0. Pinned links at the foot of the tool sidebar. */
     secondary?: NavSecondary;
     /** @deprecated Ignored since 27.5.0. Section switcher in the tool sidebar. */
@@ -127,6 +141,7 @@ const props = withDefaults(
     messages: () => ({}),
     origins: undefined,
     notifications: false,
+    rail: false,
   },
 );
 
@@ -138,6 +153,8 @@ const t = createTranslator(props.messages, {
 const signedIn = computed(() => props.user != null);
 const rating = computed(() => props.user?.rating);
 const siteName = computed(() => siteLabel(props.locale, props.current).name);
+/** Map layout with the icon rail. */
+const mapRail = computed(() => props.layout === "map" && props.rail);
 
 /** Bar and drawer links. Absolute links stay. */
 const links = computed(() => frameLinks(props.nav, { external: true }));
@@ -248,6 +265,8 @@ async function showMeMenu() {
 const isRailWidth = useMediaQuery("(min-width: 768px)");
 watch(isRailWidth, (wide) => {
   if (wide) meOpen.value = false;
+  // Map with rail: the rail replaces the drawer from 768px.
+  if (wide && mapRail.value) drawerOpen.value = false;
 });
 
 function onGlobalKeydown(event: KeyboardEvent) {
@@ -291,12 +310,20 @@ const ROOT_CLASS: Record<FrameLayout, string> = {
   map: "flex h-dvh flex-col overflow-hidden bg-surface",
   rail: "",
 };
+/** `frame.css` sets `--frame-top` and the rail offsets on these. */
+const rootClass = computed(() => [
+  ROOT_CLASS[props.layout],
+  props.layout === "map"
+    ? mapRail.value
+      ? "frame-map-rail"
+      : "frame-map"
+    : "",
+]);
 
 const BAR_CLASS: Record<FrameLayout, string> = {
-  content:
-    "mx-auto flex h-16 max-w-7xl items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8",
-  tool: "flex h-16 items-center gap-2 px-4 sm:gap-3 sm:px-6 lg:px-8",
-  map: "flex h-14 items-center gap-2 px-2 sm:px-4",
+  content: "page-gutter flex h-16 items-center gap-2 sm:gap-3",
+  tool: "page-gutter flex h-16 items-center gap-2 sm:gap-3",
+  map: "page-gutter flex h-14 items-center gap-2 sm:gap-3",
   rail: "",
 };
 
@@ -342,6 +369,32 @@ function drawerLinkClass(href: string) {
   ];
 }
 
+function mapRailLinkClass(href: string) {
+  return [
+    "focus-ring relative flex size-10 shrink-0 items-center justify-center rounded-control transition-colors",
+    isCurrentPath(href, props.pathname)
+      ? "bg-surface-raised text-can before:absolute before:-left-2 before:inset-y-2 before:w-0.5 before:rounded-full before:bg-can"
+      : "text-muted hover:bg-surface-raised hover:text-ink",
+  ];
+}
+
+/** Map rail: nav entries with at least one link; a divider before a group
+    and before the entry after one. */
+const mapRailEntries = computed(() =>
+  props.nav
+    .map((item) => ({
+      item,
+      links: frameLinks([item], { external: true }),
+    }))
+    .filter((entry) => entry.links.length > 0)
+    .map((entry, index, all) => ({
+      ...entry,
+      divider:
+        index > 0 &&
+        (entry.item.children != null || all[index - 1]?.item.children != null),
+    })),
+);
+
 function railLinkClass(href: string) {
   return [
     "focus-ring rail-item flex items-center gap-2.5 rounded-control px-2.5 py-2 text-sm font-medium transition-colors",
@@ -353,7 +406,7 @@ function railLinkClass(href: string) {
 </script>
 
 <template>
-  <div :class="ROOT_CLASS[layout]">
+  <div :class="rootClass">
     <a
       href="#main-content"
       class="btn btn-primary sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-[60]"
@@ -705,7 +758,10 @@ function railLinkClass(href: string) {
           <button
             v-if="hasDrawer"
             type="button"
-            class="focus-ring -ml-1 inline-flex size-10 shrink-0 items-center justify-center rounded-control text-muted transition-colors hover:bg-surface-sunken hover:text-ink lg:hidden"
+            :class="[
+              'focus-ring -ml-1 inline-flex size-10 shrink-0 items-center justify-center rounded-control text-muted transition-colors hover:bg-surface-sunken hover:text-ink',
+              mapRail ? 'md:hidden' : 'lg:hidden',
+            ]"
             :aria-label="layout === 'tool' ? t('openSidebar') : t('openMenu')"
             :aria-expanded="drawerOpen"
             @click="drawerOpen = true"
@@ -740,7 +796,7 @@ function railLinkClass(href: string) {
           />
 
           <nav
-            v-if="layout !== 'tool' && links.length"
+            v-if="layout !== 'tool' && !mapRail && links.length"
             :aria-label="t('siteNavigation')"
             :class="[
               'hidden lg:ml-2 lg:flex lg:gap-1',
@@ -924,7 +980,7 @@ function railLinkClass(href: string) {
             tabindex="-1"
             class="focus-ring flex-1 py-8 focus:outline-none lg:py-10"
           >
-            <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
+            <div class="page-gutter">
               <slot />
             </div>
           </main>
@@ -936,14 +992,47 @@ function railLinkClass(href: string) {
         </div>
       </template>
 
-      <main
-        v-else-if="layout === 'map'"
-        id="main-content"
-        tabindex="-1"
-        class="focus-ring relative min-h-0 flex-1 focus:outline-none"
-      >
-        <slot />
-      </main>
+      <template v-else-if="layout === 'map'">
+        <!-- Map with rail: the site's nav as icons, from 768px. -->
+        <div v-if="mapRail" class="map-rail bg-surface">
+          <nav
+            :aria-label="t('siteNavigation')"
+            class="flex grow flex-col items-center gap-y-1 overflow-y-auto overscroll-contain px-2 py-2"
+          >
+            <template v-for="entry in mapRailEntries" :key="entry.item.name">
+              <span
+                v-if="entry.divider"
+                class="my-1 h-px w-6 shrink-0 bg-[var(--border-subtle)]"
+                aria-hidden="true"
+              ></span>
+              <a
+                v-for="link in entry.links"
+                :key="link.href"
+                :href="link.href"
+                :title="link.name"
+                :aria-label="link.name"
+                :aria-current="
+                  isCurrentPath(link.href, pathname) ? 'page' : undefined
+                "
+                :class="mapRailLinkClass(link.href)"
+              >
+                <Icon :name="link.icon" class="size-5" />
+              </a>
+            </template>
+          </nav>
+        </div>
+
+        <main
+          id="main-content"
+          tabindex="-1"
+          :class="[
+            'focus-ring relative min-h-0 flex-1 focus:outline-none',
+            mapRail ? 'md:pl-[var(--map-rail-width)]' : '',
+          ]"
+        >
+          <slot />
+        </main>
+      </template>
 
       <template v-else>
         <main

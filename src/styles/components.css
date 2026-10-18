@@ -10,6 +10,24 @@
    =========================================================================== */
 
 @layer components {
+  /* ── Page gutter ───────────────────────────────────────────────────── */
+  /* The frame's horizontal gutter: 1rem, 1.5rem from sm, 2rem from lg.
+     Pages are full-width; they use this, not a max-width container.
+     In the components layer, so a utility such as px-0 overrides it. */
+  .page-gutter {
+    padding-inline: 1rem;
+  }
+  @media (min-width: 40rem) {
+    .page-gutter {
+      padding-inline: 1.5rem;
+    }
+  }
+  @media (min-width: 64rem) {
+    .page-gutter {
+      padding-inline: 2rem;
+    }
+  }
+
   /* ── Button ────────────────────────────────────────────────────────────
      The press treatment is the important part. Feedback fires on
      *pointer-down*, not on click: the moment a control waits for touch-up to

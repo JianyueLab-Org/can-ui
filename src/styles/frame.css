@@ -115,3 +115,54 @@
     display: none;
   }
 }
+
+/* ===========================================================================
+   CanFrame layout="map" — the bar height, and the icon rail with `rail`.
+
+   Fixed-position content (can-efb's floating panels) clears the frame with
+   --frame-top, --rail-current and --tabbar-height. On map these are the bar
+   height, the icon rail width from 768px (0 below 768px or without the
+   rail), and 0. data-rail and RailScript do not apply.
+   =========================================================================== */
+
+:root {
+  /* h-14 plus the bar's 1px bottom border. */
+  --frame-bar-height: calc(3.5rem + 1px);
+  --map-rail-width: 3.5rem;
+}
+
+/* On the frame root for its descendants, and on :root for content rendered
+   outside the frame (a sibling map stage, a teleported overlay). */
+:root:has(.frame-map),
+:root:has(.frame-map-rail),
+.frame-map,
+.frame-map-rail {
+  --rail-current: 0px;
+  --tabbar-height: 0px;
+  --frame-top: var(--frame-bar-height);
+}
+
+@media (min-width: 768px) {
+  :root:has(.frame-map-rail),
+  .frame-map-rail {
+    --rail-current: var(--map-rail-width);
+  }
+}
+
+/* Hidden on phones, where the drawer carries the nav. */
+.map-rail {
+  display: none;
+}
+@media (min-width: 768px) {
+  .map-rail {
+    position: fixed;
+    top: var(--frame-bar-height);
+    bottom: 0;
+    left: 0;
+    z-index: 30;
+    display: flex;
+    flex-direction: column;
+    width: var(--map-rail-width);
+    border-right: 1px solid var(--border-subtle);
+  }
+}
