@@ -344,6 +344,20 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
       minRating: RATING_ADMIN,
       signedIn: true,
     },
+    {
+      key: "audit",
+      path: "/super/audit",
+      icon: "clipboardCheck",
+      title: {
+        "zh-cn": "操作日志",
+        "zh-tw": "操作日誌",
+        "en-us": "Audit log",
+        "ja-jp": "操作ログ",
+      },
+      keywords: ["audit", "log"],
+      minRating: RATING_ADMIN,
+      signedIn: true,
+    },
   ],
   web: [
     {
