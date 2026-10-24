@@ -41,7 +41,11 @@ const GROUPS: ReadonlyArray<{
   },
   {
     key: "flying",
-    entries: [{ site: "web", pilotPanel: true }, { site: "efb" }],
+    entries: [
+      { site: "web", pilotPanel: true },
+      { site: "efb" },
+      { site: "va" },
+    ],
   },
   { key: "controlling", entries: [{ site: "controller" }, { site: "exam" }] },
   { key: "management", entries: [{ site: "portal" }, { site: "database" }] },

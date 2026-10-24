@@ -131,6 +131,7 @@ test("a plain member sees everything except the gated two", () => {
   expect(keys).toContain("web");
   expect(keys).toContain("efb");
   expect(keys).toContain("exam");
+  expect(keys).toContain("va");
   expect(keys).not.toContain("portal");
   expect(keys).not.toContain("database");
 });

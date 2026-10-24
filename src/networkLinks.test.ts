@@ -21,7 +21,7 @@ describe("networkGroups", () => {
     });
     expect(keysOf(groups)).toEqual([
       ["public", ["web", "radar", "docs"]],
-      ["flying", ["web:pilots", "efb"]],
+      ["flying", ["web:pilots", "efb", "va"]],
       ["controlling", ["controller", "exam"]],
       ["management", ["portal", "database"]],
       ["developers", ["dev"]],

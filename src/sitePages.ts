@@ -95,6 +95,21 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
       keywords: ["map", "traffic"],
     },
   ],
+  va: [
+    {
+      key: "home",
+      path: "/",
+      icon: "home",
+      title: {
+        "zh-cn": "我的航司",
+        "zh-tw": "我的航司",
+        "en-us": "My airlines",
+        "ja-jp": "マイ航空会社",
+      },
+      keywords: ["va", "airline"],
+      signedIn: true,
+    },
+  ],
   controller: [
     {
       key: "panel",
