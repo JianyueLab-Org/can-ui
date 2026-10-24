@@ -74,7 +74,7 @@ src/
   i18n.ts        createTranslator, createSiteI18n, the chrome's own string keys
   networkLinks.ts the switcher groups and the account links
   nav.ts         NavItem / NavSecondary / Workspace — the shell's data shapes
-  sites.ts       the nine sites, their labels, who may see each, originsFromEnv
+  sites.ts       the ten sites, their labels, who may see each, originsFromEnv
   sitePages.ts   every site's ⌘K pages
   ratings.ts     RATING_INSTRUCTOR · RATING_SUP · RATING_ADMIN · RATING_SHORT
   notifications.ts         kinds, params, paths, row link, icon, badge, relative time
@@ -329,6 +329,12 @@ Since 27.7.0:
 - Pages are full-width; use the frame gutter, no max-width container. The frame has no max-width cap: content, tool and map bars, the tool `<main>` and `SiteFooter` all use `.page-gutter` (`px-4 sm:px-6 lg:px-8`, in `components.css`, so a utility overrides it). A site that upgrades drops its own `mx-auto max-w-*` page containers and uses `.page-gutter`. The content `<main>` adds no gutter; a page there puts `.page-gutter` on its own sections.
 - `NotFound` is the network's 404 page, rendered inside the frame. The site sets HTTP 404. Strings come from `NOT_FOUND_UI` (four locales), overridable through `messages.notFound.*`. Links: this site's `homeHref`, the radar and the docs via `siteUrl`, minus the current site. Slots: `backdrop`, `actions`.
 - `sitePages.ts`: efb `/settings`, exam `/training`, portal `/super/points`; controller lists reservations before rules.
+
+Since 27.8.0:
+
+- `SiteKey` `va`: Virtual Airlines, `https://va.ceruleanavi.net`, section `flight`, signed-in members. Override `PUBLIC_CAN_VA_ORIGIN`.
+- `NetworkMenu` lists `va` under Flying, after the flight bag.
+- `sitePages.ts`: va `/`.
 
 - `layout`: `content` (top bar, own nav, full `SiteFooter`), `tool` (top bar, sidebar below it,
   compact footer), `map` (56px bar, full-bleed, no footer, optional icon rail with `rail`), and
