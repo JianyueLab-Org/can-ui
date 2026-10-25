@@ -336,6 +336,11 @@ Since 27.8.0:
 - `NetworkMenu` lists `va` under Flying, after the flight bag.
 - `sitePages.ts`: va `/`.
 
+Since 27.9.0:
+
+- `sitePages.ts`: va `/airlines`, `/apply`, `/notifications`; portal `/super/airlines` (SUP).
+- `bump-consumers.yml` opens bump PRs in can-va.
+
 - `layout`: `content` (top bar, own nav, full `SiteFooter`), `tool` (top bar, sidebar below it,
   compact footer), `map` (56px bar, full-bleed, no footer, optional icon rail with `rail`), and
   the deprecated `rail` (side rail, bottom tabs under 768px).
@@ -520,7 +525,7 @@ Every site pins the exact version.
 
 Publishing a release runs `.github/workflows/bump-consumers.yml`. It waits until the version is on
 GitHub Packages, then opens `chore: bump can-ui to <version>` (branch `chore/can-ui-<version>`) in
-each of the eight site repos, with the exact pin and an updated `bun.lock`. It uses
+each of the nine site repos, with the exact pin and an updated `bun.lock`. It uses
 `CAN_UI_BUMP_TOKEN`, a classic PAT with `repo` and `read:packages` held in this repo only; a
 fine-grained PAT cannot cover both `JianyueLab` and `JianyueLab-Org`. Sites add nothing for
 bumps: no config, no secret. The site list is the workflow's matrix; a new consumer is
