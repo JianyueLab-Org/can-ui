@@ -55,7 +55,10 @@ const tone = computed(() => TONES[props.variant]);
 
 <template>
   <div
-    :class="['flex gap-3 rounded-card px-4 py-3', tone.wrap]"
+    :class="[
+      'flex gap-3 rounded-card px-4 py-3 ring-1 ring-inset ring-current/15',
+      tone.wrap,
+    ]"
     :role="variant === 'danger' ? 'alert' : 'status'"
   >
     <Icon :name="tone.icon" class="mt-0.5 size-5 shrink-0" />

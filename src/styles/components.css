@@ -102,6 +102,10 @@
   .btn-soft {
     background-color: var(--color-info-bg);
     color: var(--color-info-fg);
+    /* The light tint is within a few percent of the page; the hairline keeps
+       the control's edge where the fill alone does not. */
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, var(--color-can) 22%, transparent);
   }
   .btn-soft:hover:not(:disabled) {
     background-color: color-mix(in srgb, var(--color-can) 18%, transparent);
@@ -212,6 +216,10 @@
     box-shadow: 0 0 0 3px
       color-mix(in srgb, var(--color-danger) 22%, transparent);
   }
+  .input:disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
 
   /* ── Badge ─────────────────────────────────────────────────────────── */
   .badge {
@@ -224,6 +232,11 @@
     font-weight: 600;
     line-height: 1.125rem;
     white-space: nowrap;
+    /* Light status fills sit within a few percent of the page and card
+       surfaces; a hairline in the badge's own ink keeps the pill legible as
+       a shape in both themes. Inset, so the box does not grow. */
+    box-shadow: inset 0 0 0 1px
+      color-mix(in srgb, currentColor 18%, transparent);
   }
   .badge-success {
     background-color: var(--color-success-bg);

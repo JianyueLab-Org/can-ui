@@ -29,6 +29,20 @@ const padClass = computed(() => {
   }
 });
 
+// Header and footer share the body's horizontal inset, so their content lines
+// up with the body's left edge at every padding. `none` keeps the default
+// inset: the body is full-bleed, but a header still needs a gutter.
+const edgeClass = computed(() => {
+  switch (props.padding) {
+    case "sm":
+      return "px-4";
+    case "lg":
+      return "px-8";
+    default:
+      return "px-6";
+  }
+});
+
 const hasHeader = computed(() => !!slots.header || !!props.title);
 
 const rootClass = computed(() => [
@@ -47,7 +61,10 @@ const rootClass = computed(() => [
   <component :is="as" :class="rootClass">
     <div
       v-if="hasHeader"
-      class="flex flex-wrap items-center justify-between gap-3 border-b border-subtle px-6 py-4"
+      :class="[
+        'flex flex-wrap items-center justify-between gap-3 border-b border-subtle py-4',
+        edgeClass,
+      ]"
     >
       <slot name="header">
         <div class="min-w-0">
@@ -66,7 +83,7 @@ const rootClass = computed(() => [
     </div>
     <div
       v-if="slots.footer"
-      class="border-t border-subtle bg-surface-sunken px-6 py-4"
+      :class="['border-t border-subtle bg-surface-sunken py-4', edgeClass]"
     >
       <slot name="footer" />
     </div>
