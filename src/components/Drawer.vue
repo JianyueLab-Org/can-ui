@@ -274,14 +274,14 @@ function dismiss() {
         </div>
 
         <div
-          class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 py-4 pb-safe"
+          class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-4 pb-safe-4 pt-4"
         >
           <slot />
         </div>
 
         <div
           v-if="$slots.footer"
-          class="shrink-0 border-t border-subtle px-4 py-3 pb-safe"
+          class="shrink-0 border-t border-subtle px-4 pb-safe-3 pt-3"
         >
           <slot name="footer" />
         </div>

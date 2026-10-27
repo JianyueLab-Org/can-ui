@@ -321,9 +321,9 @@ const rootClass = computed(() => [
 ]);
 
 const BAR_CLASS: Record<FrameLayout, string> = {
-  content: "page-gutter flex h-16 items-center gap-2 sm:gap-3",
-  tool: "page-gutter flex h-16 items-center gap-2 sm:gap-3",
-  map: "page-gutter flex h-14 items-center gap-2 sm:gap-3",
+  content: "page-gutter flex h-16 items-center gap-1 sm:gap-3",
+  tool: "page-gutter flex h-16 items-center gap-1 sm:gap-3",
+  map: "page-gutter flex h-14 items-center gap-1 sm:gap-3",
   rail: "",
 };
 
@@ -373,8 +373,8 @@ function mapRailLinkClass(href: string) {
   return [
     "focus-ring relative flex size-10 shrink-0 items-center justify-center rounded-control transition-colors",
     isCurrentPath(href, props.pathname)
-      ? "bg-surface-raised text-can before:absolute before:-left-2 before:inset-y-2 before:w-0.5 before:rounded-full before:bg-can"
-      : "text-muted hover:bg-surface-raised hover:text-ink",
+      ? "bg-surface-sunken text-can before:absolute before:-left-2 before:inset-y-2 before:w-0.5 before:rounded-full before:bg-can"
+      : "text-muted hover:bg-surface-sunken hover:text-ink",
   ];
 }
 
@@ -619,7 +619,7 @@ function railLinkClass(href: string) {
         <div
           ref="meSheet"
           tabindex="-1"
-          class="animate-panel-in absolute inset-x-0 bottom-0 flex max-h-[80dvh] flex-col gap-4 overflow-y-auto overscroll-contain rounded-t-[var(--radius-sheet)] border-t border-subtle bg-surface-overlay px-4 pb-safe pt-3 shadow-sheet"
+          class="animate-panel-in absolute inset-x-0 bottom-0 flex max-h-[80dvh] flex-col gap-4 overflow-y-auto overscroll-contain rounded-t-[var(--radius-sheet)] border-t border-subtle bg-surface-overlay px-4 pb-safe-3 pt-3 shadow-sheet"
         >
           <div class="flex items-center justify-between">
             <span class="text-sm font-semibold text-ink">{{ siteName }}</span>
@@ -838,7 +838,7 @@ function railLinkClass(href: string) {
             </template>
           </nav>
 
-          <div class="ml-auto flex shrink-0 items-center gap-1 sm:gap-2">
+          <div class="ml-auto flex shrink-0 items-center gap-0.5 sm:gap-2">
             <slot name="actions" />
 
             <!-- 2. ⌘K -->

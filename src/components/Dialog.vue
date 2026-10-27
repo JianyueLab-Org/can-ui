@@ -42,6 +42,11 @@ const props = withDefaults(
      * owns the dictionary and passes it in. See `src/i18n.ts`.
      */
     messages?: Record<string, unknown>;
+    /**
+     * Accessible name of the × control. Overrides `messages.close` for one
+     * dialog; unset, the chrome dictionary decides.
+     */
+    closeLabel?: string;
   }>(),
   { size: "md", dismissible: true, messages: () => ({}) },
 );
@@ -156,7 +161,7 @@ watch(isOpen, (open) => {
             v-if="dismissible"
             type="button"
             class="btn btn-ghost -mr-1.5 -mt-1 size-8 p-0"
-            :aria-label="t('close')"
+            :aria-label="closeLabel ?? t('close')"
             @click="dismiss"
           >
             <Icon name="xMark" class="size-4" />
@@ -179,7 +184,7 @@ watch(isOpen, (open) => {
 
         <div
           v-if="$slots.footer"
-          class="flex flex-wrap items-center justify-end gap-3 border-t border-subtle bg-surface-sunken px-5 py-4 pb-safe"
+          class="flex flex-wrap items-center justify-end gap-3 border-t border-subtle bg-surface-sunken px-5 pb-safe-4 pt-4 dark:bg-surface-raised"
         >
           <slot name="footer" />
         </div>

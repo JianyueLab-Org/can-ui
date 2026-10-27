@@ -384,15 +384,15 @@ function dismiss() {
              last row would otherwise sit under the home indicator, where it
              is visible but not tappable. -->
         <div
-          class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5 pb-5"
-          :class="$slots.footer ? '' : 'pb-safe'"
+          class="min-h-0 flex-1 overflow-y-auto overscroll-contain px-5"
+          :class="$slots.footer ? 'pb-5' : 'pb-safe-5'"
         >
           <slot />
         </div>
 
         <div
           v-if="$slots.footer"
-          class="shrink-0 border-t border-subtle bg-surface-sunken px-5 py-4 pb-safe"
+          class="shrink-0 border-t border-subtle bg-surface-sunken px-5 pb-safe-4 pt-4 dark:bg-surface-raised"
         >
           <slot name="footer" />
         </div>
