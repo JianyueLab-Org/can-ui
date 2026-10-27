@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { computed } from "vue";
+import { computed, onMounted, ref } from "vue";
 import Segmented from "../components/Segmented.vue";
 import Badge from "../components/Badge.vue";
 import Icon from "../components/Icon.vue";
@@ -22,29 +22,37 @@ const selected = computed({
   get: () => mode.value,
   set: (next: ThemeMode) => setMode(next),
 });
+
+// The server has no stored choice and no `.dark` class to read, so the mode
+// and rendered-theme readouts appear after hydration. The row keeps its
+// height meanwhile.
+const mounted = ref(false);
+onMounted(() => (mounted.value = true));
 </script>
 
 <template>
   <div class="space-y-6">
-    <div class="flex flex-wrap items-center gap-4">
-      <Segmented
-        v-model="selected"
-        label="外观"
-        :segments="[
-          { value: 'light', label: NAMES.light },
-          { value: 'dark', label: NAMES.dark },
-          { value: 'system', label: NAMES.system },
-        ]"
-      />
-      <div class="flex items-center gap-2">
-        <Badge variant="info" size="sm">
-          <Icon :name="THEME_ICONS[mode]" class="size-3" />
-          {{ NAMES[mode] }}
-        </Badge>
-        <Badge :variant="isDark ? 'neutral' : 'warning'" size="sm">
-          实际渲染：{{ isDark ? "深色" : "浅色" }}
-        </Badge>
-      </div>
+    <div class="flex min-h-11 flex-wrap items-center gap-4">
+      <template v-if="mounted">
+        <Segmented
+          v-model="selected"
+          label="外观"
+          :segments="[
+            { value: 'light', label: NAMES.light },
+            { value: 'dark', label: NAMES.dark },
+            { value: 'system', label: NAMES.system },
+          ]"
+        />
+        <div class="flex items-center gap-2">
+          <Badge variant="info" size="sm">
+            <Icon :name="THEME_ICONS[mode]" class="size-3" />
+            {{ NAMES[mode] }}
+          </Badge>
+          <Badge :variant="isDark ? 'neutral' : 'warning'" size="sm">
+            实际渲染：{{ isDark ? "深色" : "浅色" }}
+          </Badge>
+        </div>
+      </template>
     </div>
 
     <ListGroup
