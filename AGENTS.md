@@ -29,7 +29,8 @@ had yet edited one.
 
 **Component props are unchanged too.** `Button`, `Card`, `Badge`, `Input`, `Select`, `Toggle`,
 `DataTable`, `StatCard`, `PageHeader`, `EmptyState`, `Skeleton`, `Spinner`, `AlertBox` and
-`Icon` take exactly what `Base*` took in can-web. `Dialog` gains `v-model:open`.
+`Icon` take exactly what `Base*` took in can-web. `Dialog` gains `v-model:open` and an optional
+`closeLabel` (the × control's accessible name; unset, `messages.close` decides).
 
 That is deliberate and it is the whole migration strategy: a design system that renames things is
 a design system nobody adopts, because adopting it becomes a rewrite of every page rather than a
@@ -233,7 +234,17 @@ scrollbar, and the component scrolls the selected segment into view — so the s
 part that is off-screen.
 
 **Bottom-anchored chrome clears the home indicator** with `pb-safe`, and that includes a sheet's
-_body_ when it has no footer, or the last row is visible but not tappable.
+_body_ when it has no footer, or the last row is visible but not tappable. `pb-safe` replaces the
+bottom padding with the inset, which is 0 off a phone. A padded footer uses `pb-safe-N` (e.g.
+`pt-4 pb-safe-4`): the larger of the inset and spacing step N.
+
+### Custom utilities are `@utility`
+
+`base.css` declares its utilities (`bg-surface-*`, `border-subtle`, `border-strong`,
+`divide-subtle`, the materials, `pb-safe`) with `@utility`. Tailwind v4 generates variants only
+for registered utilities: a plain class inside `@layer utilities` has no `hover:`, `sm:` or
+`dark:` form, and those call sites compile to nothing. `bg-can`, `text-can` and `border-can` come
+from `@theme`.
 
 ### `@source` in index.css is not optional
 

@@ -117,7 +117,7 @@ async function onSignOut() {
           <Icon
             name="chevronDown"
             :class="[
-              'size-4 text-faint transition-transform duration-200',
+              'hidden size-4 text-faint transition-transform duration-200 sm:block',
               open ? 'rotate-180' : '',
             ]"
           />
@@ -135,7 +135,7 @@ async function onSignOut() {
             :key="link.key"
             :href="link.href"
             role="menuitem"
-            class="focus-ring tap-row flex items-center gap-2.5 rounded-control px-2.5 py-2 text-sm text-muted transition-colors hover:bg-surface-raised hover:text-ink"
+            class="focus-ring tap-row flex items-center gap-2.5 rounded-control px-2.5 py-2 text-sm text-muted transition-colors hover:bg-surface-sunken hover:text-ink"
           >
             <Icon :name="link.icon" class="size-4" />
             {{ link.name }}
@@ -146,7 +146,7 @@ async function onSignOut() {
             type="button"
             role="menuitem"
             :aria-disabled="signingOut"
-            class="focus-ring tap-row flex w-full items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-surface-raised hover:text-danger aria-disabled:opacity-50"
+            class="focus-ring tap-row flex w-full items-center gap-2.5 rounded-control px-2.5 py-2 text-left text-sm text-muted transition-colors hover:bg-surface-sunken hover:text-danger aria-disabled:opacity-50"
             @click="onSignOut"
           >
             <Icon name="arrowRightOnRectangle" class="size-4" />

@@ -58,7 +58,7 @@ const accentClass = computed(
       <Icon :name="icon" class="size-4.5 sm:size-5" />
     </span>
     <div class="min-w-0 flex-1">
-      <!-- Wraps on a phone, where two tiles sit side by side and a label like
+      <!-- Label and hint wrap on a phone, where two tiles sit side by side and
            "最长飞行" would otherwise truncate to nothing. -->
       <p class="text-sm font-medium leading-snug text-muted sm:truncate">
         {{ label }}
@@ -68,7 +68,9 @@ const accentClass = computed(
       >
         {{ value }}
       </p>
-      <p v-if="hint" class="mt-0.5 truncate text-xs text-faint">{{ hint }}</p>
+      <p v-if="hint" class="mt-0.5 text-xs text-faint sm:truncate">
+        {{ hint }}
+      </p>
     </div>
     <Icon v-if="href" name="arrowTopRight" class="size-4 shrink-0 text-faint" />
   </component>

@@ -51,9 +51,9 @@ const active = computed(() =>
         role="menuitem"
         :aria-current="isCurrentPath(item.href, pathname) ? 'page' : undefined"
         :class="[
-          'focus-ring flex items-center gap-3 rounded-control px-2.5 py-2 text-sm font-medium transition-colors hover:bg-surface-raised',
+          'focus-ring flex items-center gap-3 rounded-control px-2.5 py-2 text-sm font-medium transition-colors hover:bg-surface-sunken',
           isCurrentPath(item.href, pathname)
-            ? 'bg-surface-raised text-can'
+            ? 'bg-surface-sunken text-can'
             : 'text-ink',
         ]"
       >

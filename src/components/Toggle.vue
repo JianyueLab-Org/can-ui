@@ -73,7 +73,11 @@ const trackClass = computed(() => [
       <span :id="labelId" class="block text-sm font-medium text-ink">
         {{ label }}
       </span>
-      <span v-if="description" class="mt-0.5 block text-sm text-muted">
+      <span
+        v-if="description"
+        :id="`${labelId}-description`"
+        class="mt-0.5 block text-sm text-muted"
+      >
         {{ description }}
       </span>
     </span>
@@ -82,6 +86,7 @@ const trackClass = computed(() => [
       role="switch"
       :aria-checked="modelValue"
       :aria-labelledby="label ? labelId : undefined"
+      :aria-describedby="description ? `${labelId}-description` : undefined"
       :disabled="disabled"
       :class="trackClass"
       @click="toggle"

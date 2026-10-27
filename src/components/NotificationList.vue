@@ -100,7 +100,7 @@ function onItemAuxClick(event: MouseEvent, item: NotificationItem) {
       <button
         ref="markAllButton"
         type="button"
-        class="focus-ring ml-auto rounded-control px-2 py-1 text-xs font-medium text-can transition-colors hover:bg-surface-raised disabled:opacity-40"
+        class="focus-ring ml-auto rounded-control px-2 py-1 text-xs font-medium text-can transition-colors enabled:hover:bg-surface-sunken disabled:opacity-50"
         :disabled="!canMarkAll"
         @click="markAll"
       >
@@ -154,7 +154,7 @@ function onItemAuxClick(event: MouseEvent, item: NotificationItem) {
         <component
           :is="hrefFor(item) ? 'a' : 'button'"
           v-bind="rowAttrs(item)"
-          class="focus-ring tap-row flex w-full items-start gap-3 rounded-control px-2.5 py-2 text-left transition-colors hover:bg-surface-raised"
+          class="focus-ring tap-row flex w-full items-start gap-3 rounded-control px-2.5 py-2 text-left transition-colors hover:bg-surface-sunken"
           @click="onItemClick(item)"
           @auxclick="onItemAuxClick($event, item)"
         >
@@ -193,7 +193,7 @@ function onItemAuxClick(event: MouseEvent, item: NotificationItem) {
       v-if="next"
       ref="moreButton"
       type="button"
-      class="focus-ring tap-row mt-1 w-full rounded-control px-2.5 py-2 text-center text-sm font-medium text-can transition-colors hover:bg-surface-raised disabled:opacity-50"
+      class="focus-ring tap-row mt-1 w-full rounded-control px-2.5 py-2 text-center text-sm font-medium text-can transition-colors enabled:hover:bg-surface-sunken disabled:opacity-50"
       :disabled="loading"
       @click="loadMore"
     >

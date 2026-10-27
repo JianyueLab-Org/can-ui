@@ -143,22 +143,18 @@ const lockups = [
           <div class="h-20 bg-can"></div>
           <div class="p-4">
             <p class="font-mono text-xs text-ink">--color-can</p>
-            <p class="text-caption text-muted">#4C92C1 · 界面用</p>
+            <p class="text-caption text-muted">
+              #1A73B5 浅色 / #47B5FA 深色 · 界面用
+            </p>
           </div>
         </div>
       </div>
-      <div
-        class="mt-4 rounded-card bg-warning-bg px-4 py-3 text-sm text-warning-fg"
-      >
-        <p class="font-semibold">这三支蓝不是一回事，而且这是个待决问题。</p>
+      <div class="mt-4 rounded-card bg-info-bg px-4 py-3 text-sm text-info-fg">
+        <p class="font-semibold">界面用 can，标识用那两支。</p>
         <p class="mt-1 opacity-90">
-          标识用 #2C5FA1 / #47B5FA，界面品牌色是
-          #4C92C1。到底是标识是新稿、界面色阶该跟上，
-          还是标识本就允许比界面色更浓（logo 只在已知背景上以 32px 出现，而
-          <code>--color-can</code> 要在两种主题、所有尺寸下扛按钮、焦点环和链接文字）——
-          这是品牌决定，不是重构。在有结论之前：<strong
-            >界面用 can，标识用那两支</strong
-          >， 不要顺手把其中一个改成另一个。
+          界面品牌色就是标识的天蓝：深色主题 #47B5FA，浅色主题取同一色阶更深的
+          #1A73B5，在白底上达到 AA。标识的 #2C5FA1 / #47B5FA 只用于图形本身；
+          按钮、焦点环和链接文字一律用 <code>--color-can</code>。
         </p>
       </div>
     </section>

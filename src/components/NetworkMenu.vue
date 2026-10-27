@@ -85,7 +85,7 @@ const groups = computed(() => {
     <template #trigger="{ toggle, open }">
       <button
         type="button"
-        class="focus-ring flex items-center gap-1.5 rounded-control px-2.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-raised"
+        class="focus-ring flex items-center gap-1.5 rounded-control px-2.5 py-2 text-sm font-medium text-ink transition-colors hover:bg-surface-sunken"
         :aria-expanded="open"
         aria-haspopup="menu"
         @click="toggle"
@@ -121,8 +121,8 @@ const groups = computed(() => {
           :href="entry.href"
           role="menuitem"
           :aria-current="entry.current ? 'page' : undefined"
-          class="focus-ring flex items-start gap-3 rounded-control px-2.5 py-2 transition-colors hover:bg-surface-raised"
-          :class="entry.current ? 'bg-surface-raised' : ''"
+          class="focus-ring flex items-start gap-3 rounded-control px-2.5 py-2 transition-colors hover:bg-surface-sunken"
+          :class="entry.current ? 'bg-surface-sunken' : ''"
         >
           <Icon :name="entry.icon" class="mt-0.5 size-5 shrink-0 text-can" />
           <span class="min-w-0">

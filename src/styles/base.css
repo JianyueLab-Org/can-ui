@@ -7,224 +7,220 @@
    consumer gets the same variant without repeating it. */
 @custom-variant dark (&:where(.dark, .dark *));
 
-@layer utilities {
-  /* ── Brand ─────────────────────────────────────────────────────────── */
-  .bg-can {
-    background-color: var(--color-can);
-  }
-  .bg-can-dark {
-    background-color: var(--color-can-dark);
-  }
-  .text-can {
-    color: var(--color-can);
-  }
-  .text-can-dark {
-    color: var(--color-can-dark);
-  }
-  .border-can {
-    border-color: var(--color-can);
-  }
-  .border-can-dark {
-    border-color: var(--color-can-dark);
-  }
+/* Declared with `@utility`, not as classes inside `@layer utilities`.
+   Tailwind v4 generates variants (`hover:`, `sm:`, `dark:`) only for
+   registered utilities; a plain class in the layer has none, so
+   `hover:bg-surface-sunken` or `sm:border-subtle` compiled to nothing.
 
-  /* ── Surfaces & borders ────────────────────────────────────────────────
-     These auto-swap with the theme, so no `dark:` pair is needed at the call
-     site. Prefer `text-muted` over `text-gray-600 dark:text-gray-400`. */
-  .bg-surface {
-    background-color: var(--surface);
-  }
-  .bg-surface-raised {
-    background-color: var(--surface-raised);
-  }
-  .bg-surface-sunken {
-    background-color: var(--surface-sunken);
-  }
-  .bg-surface-overlay {
-    background-color: var(--surface-overlay);
-  }
-  .border-subtle {
+   `bg-can`, `text-can`, `border-can` and their `-dark` pairs need no
+   declaration here: `--color-can` and `--color-can-dark` are in `@theme`, so
+   Tailwind generates them with every variant and opacity modifier. */
+
+/* ── Surfaces & borders ──────────────────────────────────────────────────
+   These auto-swap with the theme, so no `dark:` pair is needed at the call
+   site. Prefer `text-muted` over `text-gray-600 dark:text-gray-400`. */
+@utility bg-surface {
+  background-color: var(--surface);
+}
+@utility bg-surface-raised {
+  background-color: var(--surface-raised);
+}
+@utility bg-surface-sunken {
+  background-color: var(--surface-sunken);
+}
+@utility bg-surface-overlay {
+  background-color: var(--surface-overlay);
+}
+@utility border-subtle {
+  border-color: var(--border-subtle);
+}
+@utility border-strong {
+  border-color: var(--border-strong);
+}
+
+/* Pairs with Tailwind's `divide-y`, and has to match the elements Tailwind
+   actually puts the border on.
+
+   Tailwind v4 compiles `divide-y` to `:where(.divide-y > :not(:last-child))`
+   — every child but the LAST. The v3 shape was `> :not([hidden]) ~
+   :not([hidden])` — every child but the FIRST. The two sets miss each other
+   at both ends: the first child gets a border with no colour and falls back
+   to `currentcolor`, drawing a bright line in the text colour. Both shapes
+   are kept so this survives Tailwind moving either way. */
+@utility divide-subtle {
+  & > :not(:last-child),
+  & > :not([hidden]) ~ :not([hidden]) {
     border-color: var(--border-subtle);
   }
-  .border-strong {
-    border-color: var(--border-strong);
-  }
+}
 
-  /* Pairs with Tailwind's `divide-y`, and has to match the elements Tailwind
-     actually puts the border on.
+/* ── Materials ───────────────────────────────────────────────────────────
+   Translucent layers for chrome: nav bars, toolbars, sheets, popovers.
+   Content scrolls *underneath* them — that is the whole idea, and it is why
+   a material is not simply a semi-transparent background. An opaque bar
+   consumes a fixed strip of the screen forever; a material gives it back.
 
-     Tailwind v4 compiles `divide-y` to `:where(.divide-y > :not(:last-child))`
-     — every child but the LAST. The v3 shape was `> :not([hidden]) ~
-     :not([hidden])` — every child but the FIRST. The two sets miss each other
-     at both ends: the first child gets a border with no colour and falls back
-     to `currentcolor`, drawing a bright line in the text colour. Both shapes
-     are kept so this survives Tailwind moving either way. */
-  .divide-subtle > :not(:last-child),
-  .divide-subtle > :not([hidden]) ~ :not([hidden]) {
-    border-color: var(--border-subtle);
-  }
+   Weight is hierarchy. Pick by what the surface is doing:
+     .material-thin     floating chrome over content — toolbars, chips
+     .material-regular  the default for a popover or a menu
+     .material-thick    structural separation — sheets, sidebars, modals
 
-  /* ── Materials ─────────────────────────────────────────────────────────
-     Translucent layers for chrome: nav bars, toolbars, sheets, popovers.
-     Content scrolls *underneath* them — that is the whole idea, and it is why
-     a material is not simply a semi-transparent background. An opaque bar
-     consumes a fixed strip of the screen forever; a material gives it back.
+   Never put one material on another. The blurs compound and the text on top
+   loses its ground. Material on the page; solid surfaces on the material. */
+@utility material-thin {
+  background-color: var(--material-thin);
+  backdrop-filter: saturate(var(--material-saturate))
+    blur(var(--material-blur-thin));
+  -webkit-backdrop-filter: saturate(var(--material-saturate))
+    blur(var(--material-blur-thin));
+}
+@utility material-regular {
+  background-color: var(--material-regular);
+  backdrop-filter: saturate(var(--material-saturate))
+    blur(var(--material-blur-regular));
+  -webkit-backdrop-filter: saturate(var(--material-saturate))
+    blur(var(--material-blur-regular));
+}
+@utility material-thick {
+  background-color: var(--material-thick);
+  backdrop-filter: saturate(var(--material-saturate))
+    blur(var(--material-blur-thick));
+  -webkit-backdrop-filter: saturate(var(--material-saturate))
+    blur(var(--material-blur-thick));
+}
 
-     Weight is hierarchy. Pick by what the surface is doing:
-       .material-thin     floating chrome over content — toolbars, chips
-       .material-regular  the default for a popover or a menu
-       .material-thick    structural separation — sheets, sidebars, modals
+/* The bright hairline that reads as light catching the material's edge.
+   Directional — put it on the edge facing the light, which for our purposes
+   is always the top. */
+@utility material-edge-top {
+  border-top: 1px solid var(--material-edge);
+}
+@utility material-edge-bottom {
+  border-bottom: 1px solid var(--material-edge);
+}
 
-     Never put one material on another. The blurs compound and the text on top
-     loses its ground. Material on the page; solid surfaces on the material. */
-  .material-thin {
-    background-color: var(--material-thin);
-    backdrop-filter: saturate(var(--material-saturate))
-      blur(var(--material-blur-thin));
-    -webkit-backdrop-filter: saturate(var(--material-saturate))
-      blur(var(--material-blur-thin));
-  }
-  .material-regular {
-    background-color: var(--material-regular);
-    backdrop-filter: saturate(var(--material-saturate))
-      blur(var(--material-blur-regular));
-    -webkit-backdrop-filter: saturate(var(--material-saturate))
-      blur(var(--material-blur-regular));
-  }
-  .material-thick {
-    background-color: var(--material-thick);
-    backdrop-filter: saturate(var(--material-saturate))
-      blur(var(--material-blur-thick));
-    -webkit-backdrop-filter: saturate(var(--material-saturate))
-      blur(var(--material-blur-thick));
-  }
+/* Legacy alias for can-web's blurred chrome. Same intent as .material-thin;
+   kept so a migrating site's `bg-chrome` call sites keep working. */
+@utility bg-chrome {
+  background-color: var(--chrome);
+  backdrop-filter: saturate(var(--material-saturate))
+    blur(var(--material-blur-thin));
+  -webkit-backdrop-filter: saturate(var(--material-saturate))
+    blur(var(--material-blur-thin));
+}
 
-  /* The bright hairline that reads as light catching the material's edge.
-     Directional — put it on the edge facing the light, which for our purposes
-     is always the top. */
-  .material-edge-top {
-    border-top: 1px solid var(--material-edge);
-  }
-  .material-edge-bottom {
-    border-bottom: 1px solid var(--material-edge);
-  }
+/* Numbers and identifiers — callsigns, ICAO codes, times, counts. */
+@utility num {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+}
 
-  /* Legacy alias for can-web's blurred chrome. Same intent as .material-thin;
-     kept so a migrating site's `bg-chrome` call sites keep working. */
-  .bg-chrome {
-    background-color: var(--chrome);
-    backdrop-filter: saturate(var(--material-saturate))
-      blur(var(--material-blur-thin));
-    -webkit-backdrop-filter: saturate(var(--material-saturate))
-      blur(var(--material-blur-thin));
-  }
+/* ── Vibrancy ────────────────────────────────────────────────────────────
+   Text over a material sits on a background that is *changing* as content
+   scrolls beneath it. Flat grey text that reads fine over a white card
+   disappears over a photo. The fix is not more grey: it is more contrast,
+   slightly more weight, and a hair more tracking so the letters hold their
+   own shape.
 
-  /* Numbers and identifiers — callsigns, ICAO codes, times, counts. */
-  .num {
-    font-family: var(--font-mono);
-    font-variant-numeric: tabular-nums;
-  }
+   Colour belongs on a solid layer, never on the translucent foreground —
+   a tinted label over glass changes hue with whatever passes behind it. */
+@utility vibrant {
+  color: var(--color-ink);
+  font-weight: 500;
+  letter-spacing: 0.004em;
+}
+@utility vibrant-secondary {
+  color: var(--color-muted);
+  font-weight: 500;
+  letter-spacing: 0.004em;
+}
 
-  /* ── Vibrancy ──────────────────────────────────────────────────────────
-     Text over a material sits on a background that is *changing* as content
-     scrolls beneath it. Flat grey text that reads fine over a white card
-     disappears over a photo. The fix is not more grey: it is more contrast,
-     slightly more weight, and a hair more tracking so the letters hold their
-     own shape.
+/* ── Scroll edge ─────────────────────────────────────────────────────────
+   Where floating chrome overlaps scrolling content, a 1px divider is the
+   wrong answer — it draws a line across the page whether or not anything is
+   under it. Fade the content out into the chrome instead, and only where
+   they actually overlap.
 
-     Colour belongs on a solid layer, never on the translucent foreground —
-     a tinted label over glass changes hue with whatever passes behind it. */
-  .vibrant {
-    color: var(--color-ink);
-    font-weight: 500;
-    letter-spacing: 0.004em;
-  }
-  .vibrant-secondary {
-    color: var(--color-muted);
-    font-weight: 500;
-    letter-spacing: 0.004em;
-  }
+   Applied to the *scroll container*, not the bar. */
+@utility scroll-edge-top {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--scroll-edge-size, 1.25rem)
+  );
+}
+@utility scroll-edge-y {
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    #000 var(--scroll-edge-size, 1.25rem),
+    #000 calc(100% - var(--scroll-edge-size, 1.25rem)),
+    transparent 100%
+  );
+}
 
-  /* ── Scroll edge ───────────────────────────────────────────────────────
-     Where floating chrome overlaps scrolling content, a 1px divider is the
-     wrong answer — it draws a line across the page whether or not anything is
-     under it. Fade the content out into the chrome instead, and only where
-     they actually overlap.
+/* ── Odds and ends ─────────────────────────────────────────────────────── */
 
-     Applied to the *scroll container*, not the bar. */
-  .scroll-edge-top {
-    mask-image: linear-gradient(
-      to bottom,
-      transparent 0,
-      #000 var(--scroll-edge-size, 1.25rem)
-    );
-  }
-  .scroll-edge-y {
-    mask-image: linear-gradient(
-      to bottom,
-      transparent 0,
-      #000 var(--scroll-edge-size, 1.25rem),
-      #000 calc(100% - var(--scroll-edge-size, 1.25rem)),
-      transparent 100%
-    );
-  }
+/* Faint dotted backdrop for hero / empty canvases. */
+@utility surface-grid {
+  background-image: radial-gradient(var(--border-strong) 1px, transparent 1px);
+  background-size: 22px 22px;
+}
 
-  /* ── Odds and ends ─────────────────────────────────────────────────── */
+/* Numeric columns line up when digits are tabular. Use it on anything that
+   ticks — a clock, a counter, a frequency — or the whole row shifts every
+   time a 1 becomes a 7. */
+@utility tnum {
+  font-variant-numeric: tabular-nums;
+}
 
-  /* Faint dotted backdrop for hero / empty canvases. */
-  .surface-grid {
-    background-image: radial-gradient(
-      var(--border-strong) 1px,
-      transparent 1px
-    );
-    background-size: 22px 22px;
-  }
+/* Bottom-anchored chrome has to clear the home indicator, and a sheet
+   dragged to full height has to clear the notch.
 
-  /* Numeric columns line up when digits are tabular. Use it on anything that
-     ticks — a clock, a counter, a frequency — or the whole row shifts every
-     time a 1 becomes a 7. */
-  .tnum {
-    font-variant-numeric: tabular-nums;
-  }
+   `pb-safe` replaces the element's bottom padding with the inset, which is
+   0 off a phone. `pb-safe-4` keeps a floor: the larger of the inset and the
+   spacing step, so a padded footer stays padded on a desktop. */
+@utility pb-safe {
+  padding-bottom: max(env(safe-area-inset-bottom), 0px);
+}
+@utility pb-safe-* {
+  padding-bottom: max(
+    env(safe-area-inset-bottom),
+    calc(var(--spacing) * --value(integer))
+  );
+}
+@utility pt-safe {
+  padding-top: max(env(safe-area-inset-top), 0px);
+}
 
-  /* Bottom-anchored chrome has to clear the home indicator, and a sheet
-     dragged to full height has to clear the notch. */
-  .pb-safe {
-    padding-bottom: max(env(safe-area-inset-bottom), 0px);
-  }
-  .pt-safe {
-    padding-top: max(env(safe-area-inset-top), 0px);
-  }
+/* Hints the compositor before a gesture starts. Put it on an element that
+   is *about* to move, and take it off when it stops — a permanent
+   will-change is a permanent layer. */
+@utility will-move {
+  will-change: transform;
+}
 
-  /* Hints the compositor before a gesture starts. Put it on an element that
-     is *about* to move, and take it off when it stops — a permanent
-     will-change is a permanent layer. */
-  .will-move {
-    will-change: transform;
-  }
+/* ── Touch targets ───────────────────────────────────────────────────────
+   Two utilities, and which one to use is not a style preference — it
+   depends on whether the control's *visual* size is load-bearing.
 
-  /* ── Touch targets ─────────────────────────────────────────────────────
-     Two utilities, and which one to use is not a style preference — it
-     depends on whether the control's *visual* size is load-bearing.
+   `.tap-target` grows the hit rectangle without moving a pixel, using a
+   pseudo-element outside the flow. For a control whose size is the design:
+   a 24px switch track, an icon button in a tight cluster, a dismiss × that
+   must not shove the text beside it. **Only for controls with clear space
+   around them** — two adjacent ones would overlap and the later in DOM
+   order would silently swallow taps meant for the earlier.
 
-     `.tap-target` grows the hit rectangle without moving a pixel, using a
-     pseudo-element outside the flow. For a control whose size is the design:
-     a 24px switch track, an icon button in a tight cluster, a dismiss × that
-     must not shove the text beside it. **Only for controls with clear space
-     around them** — two adjacent ones would overlap and the later in DOM
-     order would silently swallow taps meant for the earlier.
+   `.tap-row` raises the element itself to a comfortable height. For rows in
+   a list — menu items, nav links, options — where neighbours are flush and
+   an expanded hit area would land on the wrong one. Growing is correct
+   there anyway: a list on a phone should be a list of comfortable rows.
 
-     `.tap-row` raises the element itself to a comfortable height. For rows in
-     a list — menu items, nav links, options — where neighbours are flush and
-     an expanded hit area would land on the wrong one. Growing is correct
-     there anyway: a list on a phone should be a list of comfortable rows.
-
-     Both are inert with a mouse. A 44px menu row on a desktop is wasted
-     vertical space, and a hit area that reaches 10px past a button is a hit
-     area that catches clicks aimed at the thing beside it. */
-  .tap-target {
-    position: relative;
-  }
+   Both are inert with a mouse. A 44px menu row on a desktop is wasted
+   vertical space, and a hit area that reaches 10px past a button is a hit
+   area that catches clicks aimed at the thing beside it. */
+@utility tap-target {
+  position: relative;
 }
 
 /* ===========================================================================
