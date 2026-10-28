@@ -115,7 +115,6 @@ const sound = ref(true);
         row-key="callsign"
         :loading="loading"
         :loading-rows="4"
-        loading-label="正在载入航班"
         empty="当前没有航班"
       >
         <template #header-actions>
