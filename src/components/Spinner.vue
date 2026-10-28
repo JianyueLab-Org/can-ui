@@ -13,15 +13,36 @@
  * sketch.
  */
 import { computed } from "vue";
+import { createTranslator, loadingChrome } from "../i18n";
 
 const props = withDefaults(
   defineProps<{
     size?: "sm" | "md" | "lg";
+    /** Visible text beside the spinner; also its accessible name. */
     label?: string;
     /** Render as a centred block with generous padding. */
     centered?: boolean;
+    /**
+     * Locale of the accessible name when neither `label` nor
+     * `messages.loading` is set. Unset, zh-cn. See `src/i18n.ts`.
+     */
+    locale?: string;
+    /** Dictionary for the accessible name; reads `loading`. */
+    messages?: Record<string, unknown>;
   }>(),
-  { size: "md", centered: false },
+  {
+    size: "md",
+    label: undefined,
+    centered: false,
+    locale: undefined,
+    messages: () => ({}),
+  },
+);
+
+const accessibleName = computed(
+  () =>
+    props.label ||
+    createTranslator(props.messages, loadingChrome(props.locale))("loading"),
 );
 
 const sizeClass = computed(
@@ -37,7 +58,7 @@ const sizeClass = computed(
         : 'inline-flex items-center gap-2'
     "
     role="status"
-    :aria-label="label || 'Loading'"
+    :aria-label="accessibleName"
   >
     <svg
       :class="[sizeClass, 'animate-spin text-can']"

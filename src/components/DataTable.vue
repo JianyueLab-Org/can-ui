@@ -15,7 +15,9 @@
  * columns would be re-measured, which is precisely the jump the skeleton is
  * there to prevent.
  */
+import { computed } from "vue";
 import EmptyState from "./EmptyState.vue";
+import { createTranslator, loadingChrome } from "../i18n";
 
 interface Column {
   key: string;
@@ -24,7 +26,7 @@ interface Column {
   class?: string;
 }
 
-withDefaults(
+const props = withDefaults(
   defineProps<{
     columns: Column[];
     rows: T[];
@@ -35,15 +37,36 @@ withDefaults(
      * you know it, so the table does not visibly grow or shrink as data lands.
      */
     loadingRows?: number;
-    /** Announced while loading; falls back to "Loading". */
+    /**
+     * Announced while loading. Overrides `messages.loading` for one table;
+     * unset, `LOADING_UI[locale]` decides.
+     */
     loadingLabel?: string;
+    /** Locale of the loading announcement. Unset, zh-cn. */
+    locale?: string;
+    /** Dictionary for the loading announcement; reads `loading`. */
+    messages?: Record<string, unknown>;
     empty?: string;
     /** Secondary line under the empty title. */
     emptyDescription?: string;
     /** Tighter row padding for dense admin tables. */
     dense?: boolean;
   }>(),
-  { loading: false, loadingRows: 5, empty: "No data", dense: false },
+  {
+    loading: false,
+    loadingRows: 5,
+    loadingLabel: undefined,
+    locale: undefined,
+    messages: () => ({}),
+    empty: "No data",
+    dense: false,
+  },
+);
+
+const loadingText = computed(
+  () =>
+    props.loadingLabel ||
+    createTranslator(props.messages, loadingChrome(props.locale))("loading"),
 );
 
 function alignClass(align?: string): string {
@@ -72,7 +95,7 @@ function cellValue(row: T, key: string): unknown {
     <!-- The placeholder rows below are aria-hidden, so this is what a screen
          reader hears while they are on screen. -->
     <p v-if="loading" role="status" class="sr-only">
-      {{ loadingLabel || "Loading" }}
+      {{ loadingText }}
     </p>
 
     <div class="overflow-x-auto">

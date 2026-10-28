@@ -128,7 +128,9 @@ function onKeydown(event: KeyboardEvent) {
         tabindex="-1"
         class="animate-panel-in relative w-full max-w-lg overflow-hidden rounded-[var(--radius-sheet)] border border-subtle bg-surface-overlay shadow-sheet"
       >
-        <div class="flex items-center gap-3 border-b border-subtle px-4">
+        <div
+          class="field-focus flex items-center gap-3 border-b border-subtle px-4"
+        >
           <Icon name="magnifyingGlass" class="size-5 shrink-0 text-faint" />
           <input
             ref="input"
@@ -139,7 +141,7 @@ function onKeydown(event: KeyboardEvent) {
             aria-controls="can-ui-palette-results"
             :placeholder="t('search.placeholder')"
             :aria-label="t('search.label')"
-            class="h-12 min-w-0 flex-1 bg-transparent text-base text-ink outline-none placeholder:text-faint sm:text-sm"
+            class="h-12 min-w-0 flex-1 bg-transparent text-base text-ink placeholder:text-faint sm:text-sm"
             @keydown="onKeydown"
           />
           <button

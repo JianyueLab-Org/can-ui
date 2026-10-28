@@ -247,6 +247,8 @@ export {
   resolveLocale,
   cookieDomainFor,
   CHROME_MESSAGES,
+  LOADING_UI,
+  loadingChrome,
   LANGUAGES,
   LOCALES,
   DEFAULT_LOCALE,

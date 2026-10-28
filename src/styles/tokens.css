@@ -88,10 +88,12 @@
   --radius-inset: 0.125rem; /* inset grouped lists */
 
   /* ── Text hierarchy ────────────────────────────────────────────────────
-     Three steps, both themes, no `dark:` pair needed at the call site. */
+     Three steps, both themes, no `dark:` pair needed at the call site.
+     `faint` reaches AA (4.5:1) on every page surface; `muted` moved with it
+     so the two tiers stay apart. Ratios: AGENTS.md, "Text tiers". */
   --color-ink: #1a232d;
-  --color-muted: #4f5b67;
-  --color-faint: #7d8894;
+  --color-muted: #4b5762;
+  --color-faint: #66707c;
 
   /* ── Semantic status ───────────────────────────────────────────────────
      Declared in @theme so the text-, bg- and ring- utilities are generated.
@@ -197,8 +199,8 @@
   --border-strong: #2c3a48;
 
   --color-ink: #dce4ec;
-  --color-muted: #8a97a4;
-  --color-faint: #5f6c79;
+  --color-muted: #98a3af;
+  --color-faint: #778695;
 
   --color-success: #5fd38d;
   --color-success-bg: color-mix(in srgb, #10b981 16%, transparent);
