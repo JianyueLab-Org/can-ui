@@ -31,9 +31,10 @@ had yet edited one.
 `DataTable`, `StatCard`, `PageHeader`, `EmptyState`, `Skeleton`, `Spinner`, `AlertBox` and
 `Icon` take exactly what `Base*` took in can-web. `Dialog` gains `v-model:open` and an optional
 `closeLabel` (the × control's accessible name; unset, `messages.close` decides). `Skeleton` and
-`Spinner` gain optional `locale` and `messages`; `Skeleton` also gains `label`. Their accessible
-name is `label`, then `messages.loading`, then `LOADING_UI[locale]` (`src/i18n.ts`, four
-locales; unset locale reads zh-cn).
+`Spinner` gain optional `locale` and `messages`; `Skeleton` also gains `label`. `DataTable`
+gains `locale` and `messages` beside its `loadingLabel`. Their accessible name is the label prop,
+then `messages.loading`, then `LOADING_UI[locale]` (`src/i18n.ts`, four locales; unset locale
+reads zh-cn).
 
 That is deliberate and it is the whole migration strategy: a design system that renames things is
 a design system nobody adopts, because adopting it becomes a rewrite of every page rather than a
@@ -412,6 +413,10 @@ Since 27.7.0:
 `.focus-ring` (`src/styles/base.css`) draws the focus outline inside the element. Chrome controls
 inside a clipping or scrolling container carry it.
 
+`.field-focus` (`src/styles/base.css`) goes on a bar holding a bare text input, such as ⌘K's
+search row. While the input has `:focus-visible` the bar draws a 2px `--color-can` line along its
+bottom edge and the input draws no outline.
+
 ### Notifications
 
 - `CanFrame` `notifications` (default `false`) renders `NotificationBell` in part 3 when `user` is
@@ -543,7 +548,7 @@ Every site pins the exact version.
 
 Publishing a release runs `.github/workflows/bump-consumers.yml`. It waits until the version is on
 GitHub Packages, then opens `chore: bump can-ui to <version>` (branch `chore/can-ui-<version>`) in
-each of the eight site repos, with the exact pin and an updated `bun.lock`. It uses
+each of the nine site repos (can-docs included), with the exact pin and an updated `bun.lock`. It uses
 `CAN_UI_BUMP_TOKEN`, a classic PAT with `repo` and `read:packages` held in this repo only; a
 fine-grained PAT cannot cover both `JianyueLab` and `JianyueLab-Org`. Sites add nothing for
 bumps: no config, no secret. The site list is the workflow's matrix; a new consumer is
