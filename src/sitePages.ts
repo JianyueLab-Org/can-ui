@@ -527,6 +527,19 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
       signedIn: true,
     },
     {
+      key: "polls",
+      path: "/polls",
+      icon: "clipboardCheck",
+      title: {
+        "zh-cn": "投票",
+        "zh-tw": "投票",
+        "en-us": "Polls",
+        "ja-jp": "投票",
+      },
+      keywords: ["poll", "vote"],
+      signedIn: true,
+    },
+    {
       key: "feedback",
       path: "/feedback",
       icon: "megaphone",
