@@ -95,6 +95,37 @@ describe("text", () => {
       contrast(darkValue("color-muted"), darkValue("surface")),
     ).toBeGreaterThanOrEqual(4.5);
   });
+
+  const surfaces = [
+    "background",
+    "surface",
+    "surface-raised",
+    "surface-sunken",
+    "surface-overlay",
+    "chrome",
+  ];
+
+  test("faint reaches AA on every page surface, both themes", () => {
+    for (const surface of surfaces) {
+      expect(
+        contrast(light("color-faint"), light(surface)),
+      ).toBeGreaterThanOrEqual(4.5);
+      expect(
+        contrast(darkValue("color-faint"), darkValue(surface)),
+      ).toBeGreaterThanOrEqual(4.5);
+    }
+  });
+
+  test("faint stays a tier below muted, both themes", () => {
+    for (const [tone, surface] of [
+      [light, light("surface")],
+      [darkValue, darkValue("surface")],
+    ] as const) {
+      const muted = contrast(tone("color-muted"), surface);
+      const faint = contrast(tone("color-faint"), surface);
+      expect(muted / faint).toBeGreaterThanOrEqual(1.4);
+    }
+  });
 });
 
 describe("shape", () => {

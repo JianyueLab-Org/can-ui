@@ -8,21 +8,46 @@
  * and the correction reads as the page breaking rather than loading. Compose
  * two for a stats-then-table page.
  */
-withDefaults(
+import { computed } from "vue";
+import { createTranslator, loadingChrome } from "../i18n";
+
+const props = withDefaults(
   defineProps<{
     variant?: "text" | "cards" | "stats" | "table";
     /** Lines, cards, tiles or rows, depending on the variant. */
     count?: number;
     /** Draw a page-header placeholder above the block. */
     header?: boolean;
+    /**
+     * Locale of the announced label when neither `label` nor
+     * `messages.loading` is set. Unset, zh-cn. See `src/i18n.ts`.
+     */
+    locale?: string;
+    /** Dictionary for the label; reads `loading`. */
+    messages?: Record<string, unknown>;
+    /** Screen-reader label. Overrides `messages.loading` for one instance. */
+    label?: string;
   }>(),
-  { variant: "text", count: 3, header: false },
+  {
+    variant: "text",
+    count: 3,
+    header: false,
+    locale: undefined,
+    messages: () => ({}),
+    label: undefined,
+  },
+);
+
+const loadingLabel = computed(
+  () =>
+    props.label ??
+    createTranslator(props.messages, loadingChrome(props.locale))("loading"),
 );
 </script>
 
 <template>
   <div role="status" aria-busy="true" aria-live="polite">
-    <span class="sr-only">Loading</span>
+    <span class="sr-only">{{ loadingLabel }}</span>
 
     <div v-if="header" class="mb-8">
       <div class="skeleton h-8 w-56"></div>

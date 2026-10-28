@@ -196,6 +196,23 @@ export function resolveLocale(cookieValue?: string | null): Locale {
     : DEFAULT_LOCALE;
 }
 
+/**
+ * The accessible name `Skeleton` and `Spinner` announce, in the four locales.
+ * A site may override it through `messages.loading`, or per instance with
+ * `label`.
+ */
+export const LOADING_UI: Readonly<Record<Locale, string>> = {
+  "zh-cn": "加载中",
+  "zh-tw": "載入中",
+  "en-us": "Loading",
+  "ja-jp": "読み込み中",
+};
+
+/** The fallback dictionary a loading component hands `createTranslator`. */
+export function loadingChrome(locale?: string | null): { loading: string } {
+  return { loading: LOADING_UI[resolveLocale(locale)] };
+}
+
 /** The part of Astro's `cookies` that `getLocale` reads. */
 export interface CookieReader {
   get(name: string): { value: string } | undefined;

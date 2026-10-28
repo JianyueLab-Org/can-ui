@@ -1,5 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { cookieDomainFor, createSiteI18n, resolveLocale } from "./i18n";
+import {
+  LOADING_UI,
+  LOCALES,
+  cookieDomainFor,
+  createSiteI18n,
+  createTranslator,
+  loadingChrome,
+  resolveLocale,
+} from "./i18n";
 
 /**
  * The cookie's domain is what makes a language choice follow a member across
@@ -105,5 +113,24 @@ describe("createSiteI18n", () => {
   test("getMessages for zh-cn, and for an absent namespace", () => {
     expect(i18n.getMessages("zh-cn", "frame")).toEqual(dicts["zh-cn"].frame);
     expect(i18n.getMessages("en-us", "missing")).toEqual({});
+  });
+});
+
+describe("loading label", () => {
+  test("every locale has one", () => {
+    for (const locale of LOCALES) {
+      expect(LOADING_UI[locale].length).toBeGreaterThan(0);
+    }
+  });
+
+  test("unset or unknown locale reads zh-cn", () => {
+    expect(loadingChrome()).toEqual({ loading: LOADING_UI["zh-cn"] });
+    expect(loadingChrome("de-de")).toEqual({ loading: LOADING_UI["zh-cn"] });
+    expect(loadingChrome("ja-jp")).toEqual({ loading: LOADING_UI["ja-jp"] });
+  });
+
+  test("messages.loading overrides the table", () => {
+    const t = createTranslator({ loading: "稍候" }, loadingChrome("en-us"));
+    expect(t("loading")).toBe("稍候");
   });
 });

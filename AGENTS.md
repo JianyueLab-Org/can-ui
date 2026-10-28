@@ -30,7 +30,10 @@ had yet edited one.
 **Component props are unchanged too.** `Button`, `Card`, `Badge`, `Input`, `Select`, `Toggle`,
 `DataTable`, `StatCard`, `PageHeader`, `EmptyState`, `Skeleton`, `Spinner`, `AlertBox` and
 `Icon` take exactly what `Base*` took in can-web. `Dialog` gains `v-model:open` and an optional
-`closeLabel` (the × control's accessible name; unset, `messages.close` decides).
+`closeLabel` (the × control's accessible name; unset, `messages.close` decides). `Skeleton` and
+`Spinner` gain optional `locale` and `messages`; `Skeleton` also gains `label`. Their accessible
+name is `label`, then `messages.loading`, then `LOADING_UI[locale]` (`src/i18n.ts`, four
+locales; unset locale reads zh-cn).
 
 That is deliberate and it is the whole migration strategy: a design system that renames things is
 a design system nobody adopts, because adopting it becomes a rewrite of every page rather than a
@@ -138,6 +141,21 @@ Since 27.5.0 the material tokens are opaque with no blur; the classes stay for t
 material is the panel, and its contents are opaque.
 
 Dark materials are _darker_ than the page, not lighter.
+
+### Text tiers
+
+`ink`, `muted` and `faint` (`src/styles/tokens.css`). `faint` reaches AA (4.5:1) on every page
+surface. `muted` is at least 1.4× `faint` on `surface`. `src/tokens.test.ts` checks both.
+
+| Theme | Token   | Value     | base / surface | raised | sunken | overlay | chrome |
+| ----- | ------- | --------- | -------------- | ------ | ------ | ------- | ------ |
+| light | `muted` | `#4b5762` | 6.83 / 7.40    | 7.40   | 6.70   | 7.40    | 7.40   |
+| light | `faint` | `#66707c` | 4.64 / 5.03    | 5.03   | 4.56   | 5.03    | 5.03   |
+| dark  | `muted` | `#98a3af` | 7.50 / 7.50    | 6.97   | 7.69   | 6.63    | 7.22   |
+| dark  | `faint` | `#778695` | 5.15 / 5.15    | 4.79   | 5.28   | 4.56    | 4.96   |
+
+"base" is `--background`. Before 27.8.0 `faint` was `#7d8894` / `#5f6c79` (3.6:1) and `muted`
+`#4f5b67` / `#8a97a4`.
 
 ### The three accessibility preferences are three different answers
 
@@ -565,3 +583,6 @@ seconds of clicking.
 
 Keep it working. A gallery that has drifted from the components is worse than none, because it
 becomes the thing people trust instead of reading the source.
+
+`public/logo.png` is the gallery's copy of the sites' `/logo.png`, the `SiteFooter` default. It is
+not in `files` and does not ship.
