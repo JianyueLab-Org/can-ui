@@ -267,6 +267,19 @@ export const SITE_PAGES: Readonly<Record<SiteKey, readonly NetworkPage[]>> = {
       signedIn: true,
     },
     {
+      key: "pollsManage",
+      path: "/super/polls",
+      icon: "chartBar",
+      title: {
+        "zh-cn": "投票管理",
+        "zh-tw": "投票管理",
+        "en-us": "Polls",
+        "ja-jp": "投票管理",
+      },
+      minRating: RATING_SUP,
+      signedIn: true,
+    },
+    {
       key: "pointsManage",
       path: "/super/points",
       icon: "adjustments",

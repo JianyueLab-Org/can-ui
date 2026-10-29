@@ -134,10 +134,19 @@ describe("spec nav order", () => {
     expect(paths("exam")).toEqual(["/", "/training", "/admin"]);
   });
 
-  test("portal lists points adjustment between lottery and feedback", () => {
+  test("portal lists poll management between lottery and points", () => {
+    const keys = SITE_PAGES.portal.map((page) => page.key);
+    const at = keys.indexOf("pollsManage");
+    expect(keys[at - 1]).toBe("lotteryManage");
+    expect(keys[at + 1]).toBe("pointsManage");
+    expect(SITE_PAGES.portal[at]?.path).toBe("/super/polls");
+    expect(SITE_PAGES.portal[at]?.minRating).toBe(RATING_SUP);
+  });
+
+  test("portal lists points adjustment between polls and feedback", () => {
     const keys = SITE_PAGES.portal.map((page) => page.key);
     const at = keys.indexOf("pointsManage");
-    expect(keys[at - 1]).toBe("lotteryManage");
+    expect(keys[at - 1]).toBe("pollsManage");
     expect(keys[at + 1]).toBe("feedbackManage");
     expect(SITE_PAGES.portal[at]?.minRating).toBe(RATING_SUP);
   });
