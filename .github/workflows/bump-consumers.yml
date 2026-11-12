@@ -86,6 +86,7 @@ jobs:
           - JianyueLab-Org/can-portal
           - JianyueLab-Org/can-database
           - JianyueLab-Org/can-docs
+          - JianyueLab-Org/can-va
     env:
       VERSION: ${{ needs.wait.outputs.version }}
       REPO: ${{ matrix.repo }}

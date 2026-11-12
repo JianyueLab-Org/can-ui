@@ -79,7 +79,7 @@ src/
   i18n.ts        createTranslator, createSiteI18n, the chrome's own string keys
   networkLinks.ts the switcher groups and the account links
   nav.ts         NavItem / NavSecondary / Workspace — the shell's data shapes
-  sites.ts       the nine sites, their labels, who may see each, originsFromEnv
+  sites.ts       the ten sites, their labels, who may see each, originsFromEnv
   sitePages.ts   every site's ⌘K pages
   ratings.ts     RATING_INSTRUCTOR · RATING_SUP · RATING_ADMIN · RATING_SHORT
   notifications.ts         kinds, params, paths, row link, icon, badge, relative time
@@ -546,9 +546,16 @@ component; imported from `can-ui` the package name already does that job.
 `YY` counts from 1; `0` is reserved for pre-release. `ZZ` is the patch. Tags are `v27.1.0`.
 Every site pins the exact version.
 
+Deploy VA pages and portal airline administration before publishing a can-ui
+release containing their registry entries.
+Update consumer package pins and lockfiles together after publication.
+The can-web dependency update enables VA login callbacks.
+Existing consumers retain their published dependency until that release.
+Local tarball dependencies are not used.
+
 Publishing a release runs `.github/workflows/bump-consumers.yml`. It waits until the version is on
 GitHub Packages, then opens `chore: bump can-ui to <version>` (branch `chore/can-ui-<version>`) in
-each of the nine site repos (can-docs included), with the exact pin and an updated `bun.lock`. It uses
+each of the ten site repos (can-docs and can-va included), with the exact pin and an updated `bun.lock`. It uses
 `CAN_UI_BUMP_TOKEN`, a classic PAT with `repo` and `read:packages` held in this repo only; a
 fine-grained PAT cannot cover both `JianyueLab` and `JianyueLab-Org`. Sites add nothing for
 bumps: no config, no secret. The site list is the workflow's matrix; a new consumer is

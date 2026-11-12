@@ -63,7 +63,8 @@ export type SiteKey =
   | "radar"
   | "dev"
   | "docs"
-  | "database";
+  | "database"
+  | "va";
 
 /**
  * Which column of the footer an entry belongs to.
@@ -115,7 +116,7 @@ export interface NetworkPage {
 }
 
 /**
- * The nine sites.
+ * The ten sites.
  *
  * Origins are hardcoded, exactly as they were in every copy this replaces:
  * they are hostnames rather than secrets, and this module is imported by
@@ -142,6 +143,14 @@ export const NETWORK_SITES: readonly NetworkSite[] = [
     section: "flight",
     pages: SITE_PAGES.radar,
     publicSite: true,
+  },
+  {
+    key: "va",
+    origin: "https://va.ceruleanavi.net",
+    path: "/",
+    icon: "paperAirplane",
+    section: "flight",
+    pages: SITE_PAGES.va,
   },
   {
     key: "controller",
@@ -370,6 +379,7 @@ const ZH_CN: LabelTable = {
   web: { name: "主站", tagline: "面板、名册与活动" },
   efb: { name: "电子飞行包", tagline: "飞行计划与气象" },
   radar: { name: "在线雷达", tagline: "实时在线流量" },
+  va: { name: "虚拟航司", tagline: "航空公司与机组" },
   controller: { name: "管制员中心", tagline: "ATIS 与席位预约" },
   exam: { name: "考试中心", tagline: "理论考试与培训" },
   portal: { name: "教员与管理门户", tagline: "花名册与晋升" },
@@ -382,6 +392,7 @@ const ZH_TW: LabelTable = {
   web: { name: "主站", tagline: "面板、名冊與活動" },
   efb: { name: "電子飛行包", tagline: "飛行計畫與氣象" },
   radar: { name: "線上雷達", tagline: "即時線上流量" },
+  va: { name: "虛擬航司", tagline: "航空公司與機組" },
   controller: { name: "管制員中心", tagline: "ATIS 與席位預約" },
   exam: { name: "考試中心", tagline: "理論考試與培訓" },
   portal: { name: "教員與管理入口", tagline: "花名冊與晉升" },
@@ -394,6 +405,7 @@ const EN_US: LabelTable = {
   web: { name: "Main Site", tagline: "Panel, roster and events" },
   efb: { name: "Flight Bag", tagline: "Flight plans and weather" },
   radar: { name: "Live Radar", tagline: "Traffic online now" },
+  va: { name: "Virtual Airlines", tagline: "Airlines and crews" },
   controller: { name: "Controller Centre", tagline: "ATIS and bookings" },
   exam: { name: "Exam Centre", tagline: "Theory exams and training" },
   portal: { name: "Staff Portal", tagline: "Roster and promotions" },
@@ -406,6 +418,7 @@ const JA_JP: LabelTable = {
   web: { name: "メインサイト", tagline: "パネル・名簿・イベント" },
   efb: { name: "電子フライトバッグ", tagline: "飛行計画と気象" },
   radar: { name: "オンラインレーダー", tagline: "リアルタイム交通" },
+  va: { name: "バーチャル航空", tagline: "航空会社と乗員" },
   controller: { name: "管制官センター", tagline: "ATIS と席予約" },
   exam: { name: "試験センター", tagline: "学科試験と訓練" },
   portal: { name: "教官・管理ポータル", tagline: "名簿と昇格" },

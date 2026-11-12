@@ -73,6 +73,14 @@ describe("SITE_PAGES", () => {
     );
     expect(approval?.minRating).toBe(RATING_SUP);
   });
+
+  test("airline administration requires a supervisor session", () => {
+    const manage = SITE_BY_KEY.portal.pages.find(
+      (p) => p.path === "/super/airlines",
+    );
+    expect(manage?.minRating).toBe(RATING_SUP);
+    expect(manage?.signedIn).toBe(true);
+  });
 });
 
 describe("SITE_PAGES.web", () => {
