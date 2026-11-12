@@ -178,6 +178,10 @@ add no translations. `messages.notifications.*` overrides the bell's own strings
 ## Versions
 
 `vXX.YY.ZZ`: year (rolling over in September), minor from 1, patch. Sites pin the exact version.
+Publishing runs on a published release or a manual run of `.github/workflows/publish.yml`.
+The selected ref must be a tag whose version, after removing the leading `v`, exactly matches
+`package.json`'s `version`. Manual runs must select that matching tag, not `main` or another branch.
+The tag check runs before dependency installation, lint, build and publish. Prereleases remain eligible.
 A published release opens a bump PR in every site repo (`.github/workflows/bump-consumers.yml`,
 secret `CAN_UI_BUMP_TOKEN`). Sites add nothing for bumps.
 
