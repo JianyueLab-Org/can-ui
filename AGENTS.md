@@ -548,11 +548,36 @@ Every site pins the exact version.
 
 Publishing a release runs `.github/workflows/bump-consumers.yml`. It waits until the version is on
 GitHub Packages, then opens `chore: bump can-ui to <version>` (branch `chore/can-ui-<version>`) in
-each of the nine site repos (can-docs included), with the exact pin and an updated `bun.lock`. It uses
-`CAN_UI_BUMP_TOKEN`, a classic PAT with `repo` and `read:packages` held in this repo only; a
-fine-grained PAT cannot cover both `JianyueLab` and `JianyueLab-Org`. Sites add nothing for
-bumps: no config, no secret. The site list is the workflow's matrix; a new consumer is
-added there.
+each of the nine site repos (can-docs included), with the exact pin and an updated `bun.lock`.
+The workflow uses its automatic `GITHUB_TOKEN` with `packages: read` for the registry wait and
+lockfile update. The can-ui package must grant Actions read access to `JianyueLab-Org/can-ui`.
+The update uses Bun **1.4.2** and `bun install --lockfile-only --ignore-scripts`; it installs no
+dependencies and runs no lifecycle scripts.
+
+### Consumer bump App configuration
+
+Configure these Actions values on `JianyueLab-Org/can-ui` before enabling consumer bumps:
+
+- Repository variable `CAN_UI_BUMP_APP_ID`: the GitHub App's numeric ID.
+- Repository secret `CAN_UI_BUMP_APP_PRIVATE_KEY`: that App's PEM private key.
+
+The App needs repository **Contents: Read and write** and **Pull requests: Read and write**.
+**Metadata: Read-only** is automatic. It needs no Packages, Workflows or organization permissions.
+The App must allow installation on both organizations. Install it with selected-repository access:
+
+- `JianyueLab`: `can-web`.
+- `JianyueLab-Org`: `can-dev`, `can-exam`, `can-radar`, `can-efb`, `can-controller`,
+  `can-portal`, `can-database`, `can-docs`.
+
+Each matrix job mints an installation token scoped to its one target repository and explicitly
+requests only Contents write and Pull requests write. Checkout does not persist credentials.
+Only checkout, the existing-PR lookup and branch/PR creation receive the App token; package
+resolution receives only the read-only workflow token. The App action revokes its token after
+the job. Target repositories need no bump secrets or workflows.
+
+The workflow's matrix is the consumer list; add a new consumer there and to its organization's
+selected App repositories. Missing App configuration or installations blocks bump jobs; the
+workflow has no PAT fallback. This code change does not provision the App or its credentials.
 
 ## Commands
 

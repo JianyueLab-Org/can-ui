@@ -178,8 +178,18 @@ add no translations. `messages.notifications.*` overrides the bell's own strings
 ## Versions
 
 `vXX.YY.ZZ`: year (rolling over in September), minor from 1, patch. Sites pin the exact version.
-A published release opens a bump PR in every site repo (`.github/workflows/bump-consumers.yml`,
-secret `CAN_UI_BUMP_TOKEN`). Sites add nothing for bumps.
+A published release runs `.github/workflows/bump-consumers.yml` to open a bump PR in each matrix
+site repo. Registry reads use the workflow's automatic `GITHUB_TOKEN` with `packages: read`.
+Lockfile updates use Bun 1.4.2 with `--lockfile-only --ignore-scripts`.
+
+Cross-repository writes use a GitHub App installed on the selected consumers in both `JianyueLab`
+and `JianyueLab-Org`, with Contents write and Pull requests write permissions. Each job's App token
+is restricted to one consumer and is never passed to package installation.
+Configure repository variable `CAN_UI_BUMP_APP_ID` and secret `CAN_UI_BUMP_APP_PRIVATE_KEY` on
+`JianyueLab-Org/can-ui`; grant that repository Actions read access to the can-ui package.
+See [consumer bump App configuration](AGENTS.md#consumer-bump-app-configuration) for the exact
+installation list. Missing external App configuration blocks bumps; it is not provisioned by the
+workflow. Sites need no bump secrets or workflows.
 
 ## The design language, in five lines
 
