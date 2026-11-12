@@ -214,3 +214,10 @@ bun test         # the pure modules: sites, pages, palette, frame, i18n, rail, s
 ```
 
 The gate is `bun run lint` then `bun run build`.
+
+## Publishing
+
+Publishing runs on a published release or a manual run of `.github/workflows/publish.yml`.
+The selected ref must be a tag whose version, after removing the leading `v`, exactly matches
+`package.json`'s `version`. Manual runs must select that matching tag, not `main` or another branch.
+The tag check runs before dependency installation, lint, build and publish. Prereleases remain eligible.
