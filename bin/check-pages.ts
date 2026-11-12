@@ -3,6 +3,7 @@
  * can-ui-check-pages <site> [pagesDir]
  *
  * A site's package.json: "check:pages": "can-ui-check-pages web"
+ * Test files (*.test.*) are rejected inside the route tree.
  * See src/checkPages.ts.
  */
 import { runCheckPages } from "../src/checkPages";

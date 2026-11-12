@@ -1,5 +1,14 @@
 import { describe, expect, test } from "bun:test";
-import { join } from "node:path";
+import {
+  cpSync,
+  existsSync,
+  mkdirSync,
+  mkdtempSync,
+  rmSync,
+  rmdirSync,
+  writeFileSync,
+} from "node:fs";
+import { dirname, join } from "node:path";
 import {
   listPageFiles,
   missingPages,
@@ -122,5 +131,84 @@ describe("runCheckPages", () => {
     expect(
       runCheckPages(["radar", "pages"], join(FIXTURE, ".."), r.logger),
     ).toBe(0);
+  });
+});
+
+describe("can-ui-check-pages CLI", () => {
+  const cli = join(import.meta.dir, "../bin/check-pages.ts");
+  const scratch = join(import.meta.dir, "../.temp");
+
+  async function checkFixture(
+    extraFiles: readonly string[],
+    pagesDir = "src/pages",
+  ) {
+    const ownedScratch = !existsSync(scratch);
+    mkdirSync(scratch, { recursive: true });
+    const root = mkdtempSync(join(scratch, "check-pages-"));
+    try {
+      cpSync(FIXTURE, join(root, pagesDir), { recursive: true });
+      for (const file of extraFiles) {
+        const path = join(root, file);
+        mkdirSync(dirname(path), { recursive: true });
+        writeFileSync(
+          path,
+          'throw new Error("Test code is not an endpoint");\n',
+        );
+      }
+      const child = Bun.spawn(
+        [
+          process.execPath,
+          cli,
+          "exam",
+          ...(pagesDir === "src/pages" ? [] : [pagesDir]),
+        ],
+        { cwd: root, stdout: "pipe", stderr: "pipe" },
+      );
+      const [exitCode, stdout, stderr] = await Promise.all([
+        child.exited,
+        new Response(child.stdout).text(),
+        new Response(child.stderr).text(),
+      ]);
+      return { exitCode, stdout, stderr };
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+      if (ownedScratch) rmdirSync(scratch);
+    }
+  }
+
+  test("rejects test modules and test pages anywhere in the route tree", async () => {
+    for (const file of [
+      "auth.test.ts",
+      "api/nested/[id].test.ts",
+      "nested/page.test.astro",
+      "nested/page.test.mdx",
+      "nested/page.test.html",
+    ]) {
+      const result = await checkFixture([`src/pages/${file}`]);
+      expect(result.exitCode).toBe(1);
+      expect(result.stderr).toContain(file);
+      expect(result.stderr).toContain("outside src/pages");
+      expect(result.stdout).toBe("");
+    }
+  });
+
+  test("accepts tests outside pages without suppressing normal route checks", async () => {
+    const result = await checkFixture([
+      "test/api/auth.test.ts",
+      "src/lib/page.test.ts",
+    ]);
+    expect(result.exitCode).toBe(0);
+    expect(result.stderr).toBe("");
+    expect(result.stdout).toContain("3 exam pages");
+  });
+
+  test("checks the caller's explicit pages directory", async () => {
+    const result = await checkFixture(
+      ["custom/pages/api/profile.test.js"],
+      "custom/pages",
+    );
+    expect(result.exitCode).toBe(1);
+    expect(result.stderr).toContain("api/profile.test.js");
+    expect(result.stderr).toContain("outside custom/pages");
   });
 });

@@ -1,6 +1,6 @@
 /**
- * `check:pages` — every `pages` entry for a site must name a route that the
- * site's `src/pages` serves.
+ * `check:pages` — registered pages must have routes, and test files must stay
+ * outside the site's `src/pages` route tree.
  *
  * Bun only (server side); not in the barrel. Import from
  * `@jianyuelab-org/can-ui/check-pages`, or run `can-ui-check-pages`.
@@ -60,13 +60,19 @@ export function missingPages(
 
 /** Page files under `dir`, relative, `/`-separated, sorted. */
 export function listPageFiles(dir: string): string[] {
+  return listFiles(dir).filter((file) =>
+    PAGE_EXTENSIONS.some((ext) => file.endsWith(ext)),
+  );
+}
+
+function listFiles(dir: string): string[] {
   const out: string[] = [];
   const walk = (relative: string) => {
     const entries = readdirSync(join(dir, relative), { withFileTypes: true });
     for (const entry of entries) {
       const child = relative ? `${relative}/${entry.name}` : entry.name;
       if (entry.isDirectory()) walk(child);
-      else if (PAGE_EXTENSIONS.some((ext) => entry.name.endsWith(ext))) {
+      else {
         out.push(child);
       }
     }
@@ -82,7 +88,7 @@ export interface CheckLogger {
 
 /**
  * `can-ui-check-pages <site> [pagesDir]`. Returns the exit code:
- * 0 every page found, 1 pages missing, 2 bad arguments or unreadable directory.
+ * 0 every page found and no tests, 1 missing pages or test files, 2 bad input.
  */
 export function runCheckPages(
   args: readonly string[],
@@ -100,14 +106,18 @@ export function runCheckPages(
 
   let files: string[];
   try {
-    files = listPageFiles(resolve(cwd, dir));
+    files = listFiles(resolve(cwd, dir));
   } catch (error) {
     logger.error(`check:pages: cannot read ${dir}: ${String(error)}`);
     return 2;
   }
 
   const missing = missingPages(key, files);
-  if (missing.length === 0) {
+  const tests = files.filter((file) => /\.test\.[^/]+$/.test(file));
+  for (const file of tests) {
+    logger.error(`check:pages: ${file} is a test file; move it outside ${dir}`);
+  }
+  if (missing.length === 0 && tests.length === 0) {
     logger.log(
       `check:pages: ${SITE_BY_KEY[key].pages.length} ${key} pages found in ${dir}`,
     );
