@@ -341,6 +341,13 @@ Two fixes went in on the way, both real bugs rather than tidying:
   the member has explicitly toggled is left alone rather than being re-opened under them.
 - **`useOverlay`'s scroll lock is reference-counted.** A sheet opened from inside a dialog used to
   restore `overflow` when _it_ closed, letting the page scroll behind the dialog still open.
+- `useOverlay` routes Escape and Tab through one document listener. The most recently opened
+  eligible overlay handles each key. Closed, disconnected and disposed overlays are skipped.
+  Reopening puts a surface at the top. Escape skips `dismissible: false`; Tab skips `trapFocus: false`.
+  Closing a background surface keeps focus in the foreground surface. Focus returns to a connected
+  opener only when it stays inside any retained foreground overlay.
+  Focus return runs after rendering, including disposal of teleported children, and preserves a
+  subsequent explicit focus move.
 
 ### `CanFrame` — the network frame
 
@@ -403,6 +410,8 @@ Since 27.7.0:
   `reachableSites`, `railTabs`. `frameEntry.test.ts` checks the graph.
 - `NoAccess` renders inside the frame. The site sets HTTP 403. It lists reachable sites from
   `visibleSites`; slot `next-steps` holds site guidance.
+- `check:pages` also rejects `*.test.*` files anywhere in the supplied pages tree, including
+  TypeScript endpoint tests. Tests live outside `src/pages`.
 - Each site runs `check:pages` (`bin/check-pages.ts`) in CI. It fails when a `sitePages.ts` entry
   has no route in that site's `src/pages`. Catch-all routes do not count. can-docs has no check.
 
@@ -586,7 +595,7 @@ bun install
 bun run dev            # gallery on :4327 — the interactive demo
 bun run lint           # format:check + astro check + vue-tsc + bun test
 bun run build          # what CI builds
-bun test               # the pure modules — see below
+bun test               # pure modules and isolated Vue DOM overlay regressions
 bun run format         # prettier --write .
 ./bin/check-pages.ts <site> [pagesDir]   # what a site's check:pages runs
 ```
@@ -601,7 +610,9 @@ needed: `astro check` diagnoses `.astro` and `.ts` and _silently ignores `.vue`_
 `src/rail.ts`, `src/signOut.ts`, `src/checkPages.ts`, `src/popoverPosition.ts`,
 `src/notifications.ts`, `src/notificationMessages.ts`, `src/notificationPoller.ts`, `src/notFound.ts` and
 `src/composables/useNotifications.ts`. Each can be wrong with nothing on screen looking wrong.
-Components have no test stack; they are covered by the type gate, the build and the gallery.
+`useOverlay` regressions mount Vue components in Happy DOM subprocesses. Their globals and Vue's
+document cache do not leak into other tests. Browser checks still cover layout and native focus.
+Components are also covered by the type gate, the build and the gallery.
 
 ## The gallery is part of the work
 

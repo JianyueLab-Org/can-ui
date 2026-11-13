@@ -1,4 +1,4 @@
-import { nextTick, onScopeDispose, ref, watch, type Ref } from "vue";
+import { onScopeDispose, ref, watch, type Ref } from "vue";
 import { watchViewportInsets } from "./useViewport";
 
 /**
@@ -134,6 +134,58 @@ export interface UseOverlayOptions {
   dismissible?: boolean | (() => boolean);
 }
 
+interface KeyboardOverlay {
+  panel: Ref<HTMLElement | null>;
+  accepts: (key: string) => boolean;
+  onKeydown: (event: KeyboardEvent) => void;
+}
+
+interface KeyboardStack {
+  overlays: KeyboardOverlay[];
+  onKeydown: (event: KeyboardEvent) => void;
+}
+
+const keyboardStacks = new WeakMap<Document, KeyboardStack>();
+
+function registerKeyboardOverlay(doc: Document, overlay: KeyboardOverlay) {
+  let stack = keyboardStacks.get(doc);
+  if (!stack) {
+    const overlays: KeyboardOverlay[] = [];
+    const onKeydown = (event: KeyboardEvent) => {
+      // Select once: closing the winner must not send this same key to the
+      // overlay below it, even when its reactive close runs synchronously.
+      for (let index = overlays.length - 1; index >= 0; index -= 1) {
+        const candidate = overlays[index]!;
+        if (!candidate.accepts(event.key)) continue;
+        candidate.onKeydown(event);
+        return;
+      }
+    };
+    stack = { overlays, onKeydown };
+    keyboardStacks.set(doc, stack);
+    doc.addEventListener("keydown", onKeydown, true);
+  }
+  const active = stack;
+  active.overlays.push(overlay);
+  return () => {
+    const index = active.overlays.indexOf(overlay);
+    if (index !== -1) active.overlays.splice(index, 1);
+    if (active.overlays.length) return;
+    doc.removeEventListener("keydown", active.onKeydown, true);
+    keyboardStacks.delete(doc);
+  };
+}
+
+function foregroundOverlay(doc: Document): KeyboardOverlay | undefined {
+  const overlays = keyboardStacks.get(doc)?.overlays;
+  if (!overlays) return;
+  for (let index = overlays.length - 1; index >= 0; index -= 1) {
+    const overlay = overlays[index]!;
+    const panel = overlay.panel.value;
+    if (panel?.isConnected) return overlay;
+  }
+}
+
 export function useOverlay(
   isOpen: Ref<boolean>,
   options: UseOverlayOptions = {},
@@ -145,8 +197,11 @@ export function useOverlay(
     initialFocus,
   } = options;
   const container = ref<HTMLElement | null>(null);
+  const focusUpdate = ref(0);
   let previouslyFocused: HTMLElement | null = null;
   let wired = false;
+  let removeKeyboard: (() => void) | undefined;
+  let pendingFocusReturn: (() => void) | undefined;
 
   const canDismiss = () =>
     typeof dismissible === "function" ? dismissible() : dismissible;
@@ -162,10 +217,7 @@ export function useOverlay(
     if (!isOpen.value) return;
 
     if (event.key === "Escape" && canDismiss()) {
-      // Capture listeners on `document` run in registration order, so the
-      // outer overlay's listener runs first, and stopPropagation does not
-      // stop another listener on the same node. It only keeps the key from
-      // reaching handlers further down the tree.
+      // The document coordinator has already selected the top eligible overlay.
       event.stopPropagation();
       isOpen.value = false;
       return;
@@ -198,46 +250,107 @@ export function useOverlay(
     }
   }
 
+  const keyboard: KeyboardOverlay = {
+    panel: container,
+    accepts: (key) =>
+      wired &&
+      isOpen.value &&
+      !!container.value?.isConnected &&
+      (key === "Escape" ? canDismiss() : key === "Tab" && trapFocus),
+    onKeydown,
+  };
+
   watch(
     isOpen,
-    async (open) => {
+    (open) => {
       if (typeof document === "undefined") return;
 
       if (open) {
         if (wired) return;
         wired = true;
+        pendingFocusReturn = undefined;
+        focusUpdate.value += 1;
         // Idempotent. Installed here because every overlay in the system goes
         // through useOverlay, and an overlay is the only thing that cares
         // whether the on-screen keyboard is up.
         watchViewportInsets();
         previouslyFocused = document.activeElement as HTMLElement | null;
         if (lockScroll) lockBody();
-        document.addEventListener("keydown", onKeydown, true);
-        await nextTick();
-        const target = initialFocus?.value ?? focusables()[0];
-        target?.focus();
+        removeKeyboard = registerKeyboardOverlay(document, keyboard);
       } else {
         // Guard on `wired` so the immediate run of a closed overlay does not
         // unbalance the lock counter or steal focus from the page.
         if (!wired) return;
+        const closingPanel = container.value;
+        const focused = document.activeElement;
+        const foreground = foregroundOverlay(document);
+        const foregroundPanel = foreground?.panel.value;
+        const ownsFocus =
+          foreground === keyboard || !!closingPanel?.contains(focused);
+        const foregroundOwnedFocus = !!foregroundPanel?.contains(focused);
+        const target = previouslyFocused;
         wired = false;
         if (lockScroll) unlockBody();
-        document.removeEventListener("keydown", onKeydown, true);
-        // Return the caret to whatever opened the overlay.
-        previouslyFocused?.focus?.();
+        removeKeyboard?.();
+        removeKeyboard = undefined;
+        pendingFocusReturn = () => {
+          // Wait for slot teardown: a teleported child can leave with its
+          // logical parent without ever being inside the parent's DOM panel.
+          const ownsRemovedFocus =
+            foregroundOwnedFocus && !foregroundPanel?.isConnected;
+          const current = document.activeElement;
+          if (
+            current !== focused &&
+            current !== document.body &&
+            current !== document.documentElement
+          ) {
+            return;
+          }
+          const retained = foregroundOverlay(document);
+          if (
+            (ownsFocus || ownsRemovedFocus) &&
+            target?.isConnected &&
+            !closingPanel?.contains(target) &&
+            (!retained || retained.panel.value?.contains(target))
+          ) {
+            target.focus();
+          }
+        };
         previouslyFocused = null;
+        focusUpdate.value += 1;
       }
     },
-    { immediate: true },
+    { immediate: true, flush: "sync" },
+  );
+
+  // Move focus after Vue renders (including template refs and child disposal),
+  // not via nextTick from the sync watcher, before render is even queued.
+  watch(
+    [focusUpdate, container],
+    ([, panel]) => {
+      if (typeof document === "undefined") return;
+      if (!isOpen.value) {
+        const restore = pendingFocusReturn;
+        pendingFocusReturn = undefined;
+        restore?.();
+        return;
+      }
+      if (!wired) return;
+      if (!panel?.isConnected) return;
+      if (keyboardStacks.get(document)?.overlays.at(-1) !== keyboard) return;
+      const target = initialFocus?.value ?? focusables()[0];
+      target?.focus();
+    },
+    { flush: "post" },
   );
 
   onScopeDispose(() => {
+    pendingFocusReturn = undefined;
     if (!wired) return;
     wired = false;
     if (lockScroll) unlockBody();
-    if (typeof document !== "undefined") {
-      document.removeEventListener("keydown", onKeydown, true);
-    }
+    removeKeyboard?.();
+    removeKeyboard = undefined;
   });
 
   return container;
