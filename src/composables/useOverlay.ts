@@ -135,6 +135,7 @@ export interface UseOverlayOptions {
 }
 
 interface KeyboardOverlay {
+  panel: Ref<HTMLElement | null>;
   accepts: (key: string) => boolean;
   onKeydown: (event: KeyboardEvent) => void;
 }
@@ -175,6 +176,16 @@ function registerKeyboardOverlay(doc: Document, overlay: KeyboardOverlay) {
   };
 }
 
+function foregroundOverlay(doc: Document): KeyboardOverlay | undefined {
+  const overlays = keyboardStacks.get(doc)?.overlays;
+  if (!overlays) return;
+  for (let index = overlays.length - 1; index >= 0; index -= 1) {
+    const overlay = overlays[index]!;
+    const panel = overlay.panel.value;
+    if (panel?.isConnected) return overlay;
+  }
+}
+
 export function useOverlay(
   isOpen: Ref<boolean>,
   options: UseOverlayOptions = {},
@@ -186,10 +197,11 @@ export function useOverlay(
     initialFocus,
   } = options;
   const container = ref<HTMLElement | null>(null);
-  const activation = ref(0);
+  const focusUpdate = ref(0);
   let previouslyFocused: HTMLElement | null = null;
   let wired = false;
   let removeKeyboard: (() => void) | undefined;
+  let pendingFocusReturn: (() => void) | undefined;
 
   const canDismiss = () =>
     typeof dismissible === "function" ? dismissible() : dismissible;
@@ -239,6 +251,7 @@ export function useOverlay(
   }
 
   const keyboard: KeyboardOverlay = {
+    panel: container,
     accepts: (key) =>
       wired &&
       isOpen.value &&
@@ -255,7 +268,8 @@ export function useOverlay(
       if (open) {
         if (wired) return;
         wired = true;
-        activation.value += 1;
+        pendingFocusReturn = undefined;
+        focusUpdate.value += 1;
         // Idempotent. Installed here because every overlay in the system goes
         // through useOverlay, and an overlay is the only thing that cares
         // whether the on-screen keyboard is up.
@@ -267,25 +281,61 @@ export function useOverlay(
         // Guard on `wired` so the immediate run of a closed overlay does not
         // unbalance the lock counter or steal focus from the page.
         if (!wired) return;
+        const closingPanel = container.value;
+        const focused = document.activeElement;
+        const foreground = foregroundOverlay(document);
+        const foregroundPanel = foreground?.panel.value;
+        const ownsFocus =
+          foreground === keyboard || !!closingPanel?.contains(focused);
+        const foregroundOwnedFocus = !!foregroundPanel?.contains(focused);
+        const target = previouslyFocused;
         wired = false;
         if (lockScroll) unlockBody();
         removeKeyboard?.();
         removeKeyboard = undefined;
-        // Return the caret to whatever opened the overlay.
-        previouslyFocused?.focus?.();
+        pendingFocusReturn = () => {
+          // Wait for slot teardown: a teleported child can leave with its
+          // logical parent without ever being inside the parent's DOM panel.
+          const ownsRemovedFocus =
+            foregroundOwnedFocus && !foregroundPanel?.isConnected;
+          const current = document.activeElement;
+          if (
+            current !== focused &&
+            current !== document.body &&
+            current !== document.documentElement
+          ) {
+            return;
+          }
+          const retained = foregroundOverlay(document);
+          if (
+            (ownsFocus || ownsRemovedFocus) &&
+            target?.isConnected &&
+            !closingPanel?.contains(target) &&
+            (!retained || retained.panel.value?.contains(target))
+          ) {
+            target.focus();
+          }
+        };
         previouslyFocused = null;
+        focusUpdate.value += 1;
       }
     },
     { immediate: true, flush: "sync" },
   );
 
-  // Activation is synchronous, before Vue queues the panel's render. Move
-  // focus after that render (including template refs), not via nextTick from
-  // the sync watcher, which can run before the render has even been queued.
+  // Move focus after Vue renders (including template refs and child disposal),
+  // not via nextTick from the sync watcher, before render is even queued.
   watch(
-    [activation, container],
+    [focusUpdate, container],
     ([, panel]) => {
-      if (!isOpen.value || typeof document === "undefined" || !wired) return;
+      if (typeof document === "undefined") return;
+      if (!isOpen.value) {
+        const restore = pendingFocusReturn;
+        pendingFocusReturn = undefined;
+        restore?.();
+        return;
+      }
+      if (!wired) return;
       if (!panel?.isConnected) return;
       if (keyboardStacks.get(document)?.overlays.at(-1) !== keyboard) return;
       const target = initialFocus?.value ?? focusables()[0];
@@ -295,6 +345,7 @@ export function useOverlay(
   );
 
   onScopeDispose(() => {
+    pendingFocusReturn = undefined;
     if (!wired) return;
     wired = false;
     if (lockScroll) unlockBody();

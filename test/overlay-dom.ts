@@ -1,4 +1,5 @@
 import assert from "node:assert/strict";
+import { readFile } from "node:fs/promises";
 import { Window } from "happy-dom";
 import type { App, Ref } from "vue";
 import type { UseOverlayOptions } from "../src/composables/useOverlay";
@@ -189,14 +190,161 @@ if (scenario === "server rendering does not register browser overlays") {
           true,
         );
         await settle();
+        const retainedFocus = top.last();
+        retainedFocus.focus();
         await key();
         assert.equal(top.open.value, true);
         assert.equal(middle.open.value, false);
         assert.equal(outer.open.value, true);
+        assertFocus(retainedFocus);
+        assert.equal(document.documentElement.style.overflow, "hidden");
         eligible.value = true;
         await key();
         assert.equal(top.open.value, false);
         assert.equal(outer.open.value, true);
+        break;
+      }
+      case "programmatic lower closure preserves foreground focus": {
+        const outer = mountOverlay("outer", {}, document.body, true);
+        await settle();
+        const top = mountOverlay("top", {}, document.body, true);
+        await settle();
+        const retainedFocus = top.last();
+        retainedFocus.focus();
+        outer.open.value = false;
+        await settle();
+        assert.equal(top.open.value, true);
+        assertFocus(retainedFocus);
+        assert.equal(document.documentElement.style.overflow, "hidden");
+        top.open.value = false;
+        await settle();
+        assert.equal(document.documentElement.style.overflow, "");
+        break;
+      }
+      case "programmatic top closure returns focus inside retained overlay": {
+        const outer = mountOverlay("outer", {}, document.body, true);
+        await settle();
+        const opener = outer.last();
+        opener.focus();
+        const top = mountOverlay("top", {}, document.body, true);
+        await settle();
+        assertFocus(top.first());
+        top.open.value = false;
+        await settle();
+        assertFocus(opener);
+        assert.equal(document.documentElement.style.overflow, "hidden");
+        outer.open.value = false;
+        await settle();
+        assertFocus(trigger);
+        assert.equal(document.documentElement.style.overflow, "");
+        break;
+      }
+      case "top closure cannot return focus outside a retained overlay": {
+        const outer = mountOverlay("outer", {}, document.body, true);
+        await settle();
+        trigger.focus();
+        const top = mountOverlay("top", {}, document.body, true);
+        await settle();
+        const retainedFocus = outer.last();
+        retainedFocus.focus();
+        top.open.value = false;
+        await settle();
+        assertFocus(retainedFocus);
+        assert.equal(outer.open.value, true);
+        assert.equal(document.documentElement.style.overflow, "hidden");
+        break;
+      }
+      case "programmatic closure preserves focus moved before render": {
+        const overlay = mountOverlay("closing", {}, document.body, true);
+        await settle();
+        const destination = document.createElement("button");
+        document.body.append(destination);
+        overlay.open.value = false;
+        destination.focus();
+        await settle();
+        assertFocus(destination);
+        assert.equal(document.documentElement.style.overflow, "");
+        break;
+      }
+      case "closing a parent restores focus after its teleported child disposes": {
+        // SFC imports must run after DOM globals and their loader are installed.
+        const { parse, compileScript } = await import("@vue/compiler-sfc");
+        Bun.plugin({
+          name: "overlay-vue-components",
+          setup(build) {
+            build.onLoad({ filter: /\.vue$/ }, async ({ path }) => {
+              const { descriptor } = parse(await readFile(path, "utf8"), {
+                filename: path,
+              });
+              return {
+                contents: compileScript(descriptor, {
+                  id: path,
+                  inlineTemplate: true,
+                }).content,
+                loader: "ts",
+              };
+            });
+          },
+        });
+        const { default: Dialog } =
+          await import("../src/components/Dialog.vue");
+        const outerOpen = ref(false);
+        const innerOpen = ref(false);
+        const host = document.createElement("div");
+        document.body.append(host);
+        const app = createApp({
+          setup() {
+            return () =>
+              h(
+                Dialog,
+                { open: outerOpen.value, title: "Parent" },
+                {
+                  default: () => [
+                    h("button", { id: "child-opener" }, "Open child"),
+                    h(
+                      Dialog,
+                      { open: innerOpen.value, title: "Child" },
+                      {
+                        default: () =>
+                          h("button", { id: "child-action" }, "Child action"),
+                      },
+                    ),
+                  ],
+                },
+              );
+          },
+        });
+        mounted.push(app);
+        app.mount(host);
+        outerOpen.value = true;
+        await settle();
+        document.querySelector<HTMLElement>("#child-opener")!.focus();
+        innerOpen.value = true;
+        await settle();
+        const dialogs = document.querySelectorAll('[role="dialog"]');
+        assert.equal(dialogs.length, 2);
+        assert.equal(dialogs[0]!.contains(dialogs[1]!), false);
+        document.querySelector<HTMLElement>("#child-action")!.focus();
+        outerOpen.value = false;
+        await settle();
+        assert.equal(document.querySelectorAll('[role="dialog"]').length, 0);
+        assertFocus(trigger);
+        assert.equal(document.documentElement.style.overflow, "");
+        break;
+      }
+      case "closing a parent returns focus past its disconnected descendants": {
+        const outer = mountOverlay("outer", {}, document.body, true);
+        await settle();
+        const inner = mountOverlay("inner", {}, outer.panel(), true);
+        await settle();
+        assertFocus(inner.first());
+        outer.open.value = false;
+        await settle();
+        assert.equal(inner.host.isConnected, false);
+        assertFocus(trigger);
+        inner.unmount();
+        assertFocus(trigger);
+        assert.equal(document.documentElement.style.overflow, "");
         break;
       }
       case "unmounting and disconnected panels leave no keyboard owner": {
@@ -214,6 +362,7 @@ if (scenario === "server rendering does not register browser overlays") {
         assert.equal(disconnected.open.value, true);
         disconnected.unmount();
         outer.unmount();
+        assertFocus(trigger);
         const replacement = mountOverlay(
           "replacement",
           {},

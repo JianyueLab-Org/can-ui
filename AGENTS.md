@@ -344,6 +344,10 @@ Two fixes went in on the way, both real bugs rather than tidying:
 - `useOverlay` routes Escape and Tab through one document listener. The most recently opened
   eligible overlay handles each key. Closed, disconnected and disposed overlays are skipped.
   Reopening puts a surface at the top. Escape skips `dismissible: false`; Tab skips `trapFocus: false`.
+  Closing a background surface keeps focus in the foreground surface. Focus returns to a connected
+  opener only when it stays inside any retained foreground overlay.
+  Focus return runs after rendering, including disposal of teleported children, and preserves a
+  subsequent explicit focus move.
 
 ### `CanFrame` — the network frame
 
